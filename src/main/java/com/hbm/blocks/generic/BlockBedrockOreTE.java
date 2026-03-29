@@ -1,13 +1,16 @@
 package com.hbm.blocks.generic;
 
+import com.hbm.api.fluidmk2.IFillableItem;
 import com.hbm.blocks.ILookOverlay;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.interfaces.AutoRegister;
 import com.hbm.inventory.fluid.FluidStack;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
+import com.hbm.items.ItemEnums;
 import com.hbm.items.ModItems;
 import com.hbm.main.MainRegistry;
+import com.hbm.util.EnumUtil;
 import com.hbm.util.I18nUtil;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -20,10 +23,13 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Pre;
 import org.jetbrains.annotations.NotNull;
+import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +43,43 @@ public class BlockBedrockOreTE extends BlockContainer implements ILookOverlay {
 
 		ModBlocks.ALL_BLOCKS.add(this);
 	}
+
+	//This shit was AI Generated (and modified by me) because idk what am doing will be removed when i properly learn how to do it (or maybe never change)
+	@Override
+	public boolean onBlockActivated(World world, BlockPos pos, IBlockState state,
+									EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+
+		ItemStack stack = player.getHeldItem(hand);
+		if(stack.isEmpty()) return false;
+		if(!player.capabilities.isCreativeMode) return false;
+		if(world.isRemote) return true;
+
+		TileEntity te = world.getTileEntity(pos);
+		if(te instanceof TileEntityBedrockOre ore) {
+
+			if(stack.getItem() == ModItems.drillbit) {
+				ItemEnums.EnumDrillType type = EnumUtil.grabEnumSafely(ItemEnums.EnumDrillType.class, stack.getItemDamage());
+				ore.tier = type.tier;
+			}
+
+			else if(stack.getItem() instanceof IFillableItem item) {
+				FluidType type = item.getFirstFluidType(stack);
+				if(type != null) {
+					ore.acidRequirement = new FluidStack(type, item.getFill(stack));
+				}
+			}
+
+			else {
+				ore.resource = stack.copy();
+				ore.shape = world.rand.nextInt(10);
+			}
+
+			ore.markDirty();
+			world.notifyBlockUpdate(pos, state, state, 3);
+		}
+		return true;
+	}
+
 
 	@Override
 	public boolean canEntitySpawn(@NotNull IBlockState state, @NotNull Entity entityIn) {
@@ -149,5 +192,8 @@ public class BlockBedrockOreTE extends BlockContainer implements ILookOverlay {
 			}
 			world.markBlockRangeForRenderUpdate(pos, pos);
 		}
+
+
+
 	}
 }
