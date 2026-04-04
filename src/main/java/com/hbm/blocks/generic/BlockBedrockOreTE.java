@@ -58,7 +58,7 @@ public class BlockBedrockOreTE extends BlockContainer implements ILookOverlay {
 		if(te instanceof TileEntityBedrockOre ore) {
 
 			if(stack.getItem() == ModItems.drillbit) {
-				ItemEnums.EnumDrillType type = EnumUtil.grabEnumSafely(ItemEnums.EnumDrillType.class, stack.getItemDamage());
+				ItemEnums.EnumDrillType type = EnumUtil.grabEnumSafely(ItemEnums.EnumDrillType.values(), stack.getItemDamage());
 				ore.tier = type.tier;
 			}
 
