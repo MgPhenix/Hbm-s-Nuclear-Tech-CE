@@ -14,6 +14,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.tileentity.TileEntity;
@@ -108,7 +109,7 @@ final class RebarFillRenderer {
             if (mesh.vertexCount <= 0) continue;
 
             mesh.updateDynamicLightmap(world);
-            buffer.appendRawVertexData(mesh.vertexData, INTS_PER_VERTEX, NTMBufferBuilder.NTMFastVertexFormat.POSITION_TEX_LMAP_COLOR);
+            buffer.appendRawVertexData(mesh.vertexData, INTS_PER_VERTEX, DefaultVertexFormats.POSITION_TEX_LMAP_COLOR);
         }
         NTMImmediate.INSTANCE.draw();
 

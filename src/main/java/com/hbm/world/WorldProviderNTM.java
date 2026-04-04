@@ -50,8 +50,7 @@ public class WorldProviderNTM extends WorldProviderSurface {
     @SideOnly(Side.CLIENT)
     public float getSunBrightness(float partialTicks) {
         float dust = MainRegistry.proxy.getImpactDust(world);
-        float sunBrightness = super.getSunBrightness(partialTicks);
-        return (sunBrightness * 0.8F + 0.2F) * (1.0F - dust);
+        return super.getSunBrightness(partialTicks) * (1.0F - dust);
     }
 
     @Override

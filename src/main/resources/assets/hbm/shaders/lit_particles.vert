@@ -27,7 +27,7 @@ void main(){
 	vec2 tex = vec2(texData.x + texData.z * right, texData.y + texData.w * top);
 			
 	pass_tex = tex;
-	pass_lightmap = lightmap;
+	pass_lightmap = lightmap * (255.0 / 256.0) + (8.0 / 256.0);
 	pass_color = color;
 	
 	vec4 position = invPlayerRot * vec4(pos*scale, 1);

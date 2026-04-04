@@ -2,13 +2,13 @@ package com.hbm.mixin;
 
 import com.hbm.lib.internal.UnsafeHolder;
 import com.hbm.render.util.NTMBufferBuilder;
+import com.hbm.util.OptifineHooks;
+import com.hbm.util.ShaderHelper;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -20,7 +20,7 @@ import static com.hbm.lib.internal.UnsafeHolder.U;
 import static net.minecraft.client.renderer.vertex.DefaultVertexFormats.*;
 
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder implements NTMBufferBuilder {
+public abstract class MixinBufferBuilderOptifine implements NTMBufferBuilder {
 
     @Shadow
     private ByteBuffer byteBuffer;
@@ -44,6 +44,12 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
     private VertexFormat vertexFormat;
     @Shadow
     private boolean isDrawing;
+    @Dynamic
+    @Shadow(remap = false)
+    private TextureAtlasSprite[] quadSprites;
+    @Dynamic
+    @Shadow(remap = false)
+    private TextureAtlasSprite quadSprite;
 
     @Shadow
     public abstract void begin(int glMode, VertexFormat format);
@@ -123,10 +129,18 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
     }
 
     @Override
+    @SuppressWarnings("UnreachableCode")
     public void appendRawVertexData(int[] data, int intsPerVertex, VertexFormat requiredFormat) {
         if (data == null || data.length == 0) return;
         if (intsPerVertex <= 0 || data.length % intsPerVertex != 0) {
             throw new IllegalArgumentException("Invalid raw vertex payload length " + data.length + " for stride " + intsPerVertex);
+        }
+
+        BufferBuilder self = (BufferBuilder) (Object) this;
+        boolean shadersActive = ShaderHelper.areShadersActive();
+
+        if (shadersActive) {
+            OptifineHooks.beginAddVertexData(self, data);
         }
 
         ensureDrawing(requiredFormat);
@@ -138,6 +152,10 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
         U.copyMemory(data, UnsafeHolder.IA_BASE, null, hbm$intAddress(dstIntIndex), (long) data.length << 2);
         rawIntBuffer.position(dstIntIndex + data.length);
         vertexCount += data.length / intsPerVertex;
+
+        if (shadersActive) {
+            OptifineHooks.endAddVertexData(self);
+        }
     }
 
     @Override
@@ -475,6 +493,12 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
      */
     @Overwrite
     public BufferBuilder tex(double u, double v) {
+        if (quadSprite != null && quadSprites != null) {
+            u = OptifineHooks.toSingleU(quadSprite, (float) u);
+            v = OptifineHooks.toSingleV(quadSprite, (float) v);
+            quadSprites[vertexCount / 4] = quadSprite;
+        }
+
         long address = hbm$elementAddress();
 
         switch (vertexFormatElement.getType().ordinal()) {
@@ -574,7 +598,7 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
 
     /**
      * @author movblock
-     * @reason Apply color multipliers against little-endian packed colors in place.
+     * @reason Apply color multipliers against native-endian packed colors in place.
      */
     @Overwrite
     public void putColorMultiplier(float red, float green, float blue, int vertexIndex) {
@@ -584,7 +608,6 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
 
         if (!noColor) {
             color = U.getInt(address);
-
             int r = (int) ((float) (color & 255) * red);
             int g = (int) ((float) (color >> 8 & 255) * green);
             int b = (int) ((float) (color >> 16 & 255) * blue);
@@ -600,7 +623,7 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
      */
     @Overwrite
     public void putColorRGBA(int index, int red, int green, int blue) {
-        hbm$putColorRGBA(index, red, green, blue, 255);
+        putColorRGBA(index, red, green, blue, 255);
     }
 
     /**
@@ -654,12 +677,24 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
      * @reason Bulk-copy raw vertex payloads straight into the native backing buffer.
      */
     @Overwrite
+    @SuppressWarnings("UnreachableCode")
     public void addVertexData(int[] vertexData) {
+        BufferBuilder self = (BufferBuilder) (Object) this;
+        boolean shadersActive = ShaderHelper.areShadersActive();
+
+        if (shadersActive) {
+            OptifineHooks.beginAddVertexData(self, vertexData);
+        }
+
         growBuffer(vertexData.length * Integer.BYTES + vertexFormat.getSize());
         int dstIntIndex = hbm$bufferSizeInts();
         U.copyMemory(vertexData, UnsafeHolder.IA_BASE, null, hbm$intAddress(dstIntIndex), (long) vertexData.length << 2);
         rawIntBuffer.position(dstIntIndex + vertexData.length);
         vertexCount += vertexData.length / vertexFormat.getIntegerSize();
+
+        if (shadersActive) {
+            OptifineHooks.endAddVertexData(self);
+        }
     }
 
     /**
@@ -668,6 +703,10 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
      */
     @Overwrite
     public BufferBuilder pos(double x, double y, double z) {
+        if (vertexCount == 0 && ShaderHelper.areShadersActive()) {
+            OptifineHooks.beginAddVertex((BufferBuilder) (Object) this);
+        }
+
         long address = hbm$elementAddress();
 
         switch (vertexFormatElement.getType().ordinal()) {
@@ -754,8 +793,12 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
         return (BufferBuilder) (Object) this;
     }
 
-    @Unique
-    private void hbm$putColorRGBA(int index, int red, int green, int blue, int alpha) {
+    /**
+     * @author movblock
+     * @reason Pack native-endian RGBA directly into the native backing buffer.
+     */
+    @Overwrite(remap = false)
+    public void putColorRGBA(int index, int red, int green, int blue, int alpha) {
         int packedColor = (alpha << 24) | (blue << 16) | (green << 8) | red;
         U.putInt(hbm$intAddress(index), packedColor);
     }

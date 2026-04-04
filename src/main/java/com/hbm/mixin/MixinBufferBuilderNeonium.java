@@ -14,18 +14,24 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 import static com.hbm.lib.internal.UnsafeHolder.U;
 import static net.minecraft.client.renderer.vertex.DefaultVertexFormats.*;
 
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder implements NTMBufferBuilder {
+public abstract class MixinBufferBuilderNeonium implements NTMBufferBuilder {
 
     @Shadow
     private ByteBuffer byteBuffer;
     @Shadow
     private IntBuffer rawIntBuffer;
+    @Shadow
+    private ShortBuffer rawShortBuffer;
+    @Shadow
+    private FloatBuffer rawFloatBuffer;
     @Shadow
     private int vertexCount;
     @Shadow
@@ -52,31 +58,36 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
     protected abstract void growBuffer(int increaseAmount);
 
     @Unique
-    private long hbm$byteBufferAddress;
+    private ByteBuffer hbm$viewSource;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void hbm$init(int bufferSizeIn, CallbackInfo ci) {
-        hbm$refreshByteBufferAddress();
+        hbm$syncViews();
     }
 
     @Inject(method = "growBuffer", at = @At("RETURN"))
     private void hbm$afterGrowBuffer(int increaseAmount, CallbackInfo ci) {
-        hbm$refreshByteBufferAddress();
+        hbm$syncViews();
     }
 
     @Unique
-    private void hbm$refreshByteBufferAddress() {
-        hbm$byteBufferAddress = NTMBufferBuilder.address(byteBuffer);
+    private void hbm$syncViews() {
+        if (hbm$viewSource != byteBuffer) {
+            rawIntBuffer = byteBuffer.asIntBuffer();
+            rawShortBuffer = byteBuffer.asShortBuffer();
+            rawFloatBuffer = byteBuffer.asFloatBuffer().asReadOnlyBuffer();
+            hbm$viewSource = byteBuffer;
+        }
     }
 
     @Unique
     private long hbm$intAddress(int intIndex) {
-        return hbm$byteBufferAddress + ((long) intIndex << 2);
+        return NTMBufferBuilder.address(byteBuffer) + ((long) intIndex << 2);
     }
 
     @Unique
     private long hbm$elementAddress() {
-        return hbm$byteBufferAddress + (long) vertexCount * vertexFormat.getSize()
+        return NTMBufferBuilder.address(byteBuffer) + (long) vertexCount * vertexFormat.getSize()
                 + vertexFormat.getOffset(vertexFormatIndex);
     }
 
@@ -104,6 +115,7 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
     @Override
     public void beginFast(int drawMode, VertexFormat format, int expectedVertices) {
         begin(drawMode, format);
+        hbm$syncViews();
         rawIntBuffer.clear();
         reserveVertices(expectedVertices);
     }
@@ -129,9 +141,11 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
             throw new IllegalArgumentException("Invalid raw vertex payload length " + data.length + " for stride " + intsPerVertex);
         }
 
+        hbm$syncViews();
         ensureDrawing(requiredFormat);
         if (!hasRemainingInts(data.length)) {
             growBuffer(data.length * Integer.BYTES);
+            hbm$syncViews();
         }
 
         int dstIntIndex = hbm$bufferSizeInts();
@@ -441,7 +455,7 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
 
     @Unique
     private boolean hasRemainingInts(int additionalInts) {
-        return hbm$bufferSizeInts() + additionalInts <= rawIntBuffer.capacity();
+        return hbm$bufferSizeInts() + additionalInts <= (byteBuffer.capacity() >> 2);
     }
 
     @Unique
@@ -655,7 +669,9 @@ public abstract class MixinBufferBuilder implements NTMBufferBuilder {
      */
     @Overwrite
     public void addVertexData(int[] vertexData) {
+        hbm$syncViews();
         growBuffer(vertexData.length * Integer.BYTES + vertexFormat.getSize());
+        hbm$syncViews();
         int dstIntIndex = hbm$bufferSizeInts();
         U.copyMemory(vertexData, UnsafeHolder.IA_BASE, null, hbm$intAddress(dstIntIndex), (long) vertexData.length << 2);
         rawIntBuffer.position(dstIntIndex + vertexData.length);

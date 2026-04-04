@@ -476,10 +476,10 @@ public class ModEventHandlerClient {
         Clock.update();
         HbmShaderManager2.createInvMVP();
         GlStateManager.enableDepth();
-        List<Entity> list = Minecraft.getMinecraft().world.loadedEntityList;
+        Minecraft mc = Minecraft.getMinecraft();
+        List<Entity> list = mc.world.loadedEntityList;
         ClientProxy.renderingConstant = true;
-
-        Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
+        Entity entity = mc.getRenderViewEntity();
         float partialTicks = Minecraft.getMinecraft().getRenderPartialTicks();
         double d3 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * (double) partialTicks;
         double d4 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * (double) partialTicks;
@@ -491,7 +491,7 @@ public class ModEventHandlerClient {
                 double d2 = e.lastTickPosZ + (e.posZ - e.lastTickPosZ) * (double) partialTicks;
                 float f = e.prevRotationYaw + (e.rotationYaw - e.prevRotationYaw) * partialTicks;
 
-                Render<Entity> r = Minecraft.getMinecraft().getRenderManager().getEntityRenderObject(e);
+                Render<Entity> r = mc.getRenderManager().getEntityRenderObject(e);
                 r.doRender(e, d0 - d3, d1 - d4, d2 - d5, f, partialTicks);
             }
         }

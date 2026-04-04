@@ -477,7 +477,10 @@ public class TileEntityRBMKConsole extends TileEntityMachineBase implements ICon
                 data_table.put("requiredFlux", irradiationChannel.duration);
             }
             if(te instanceof TileEntityRBMKCooler coolingChannel){
-                data_table.put("cryogel", coolingChannel.getAllTanks()[0].getFill());
+                data_table.put("coolant", coolingChannel.getAllTanks()[0].getFill());
+                data_table.put("coolantMax", coolingChannel.getAllTanks()[0].getMaxFill());
+                data_table.put("hotcoolant", coolingChannel.getAllTanks()[1].getFill());
+                data_table.put("hotcoolantMax", coolingChannel.getAllTanks()[1].getMaxFill());
             }
             if (te instanceof TileEntityRBMKHeater heaterChannel) {
                 data_table.put("coolant", heaterChannel.feed.getFill());

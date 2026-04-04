@@ -318,8 +318,8 @@ public class EntityNukeTorex extends Entity implements IConstantRenderer {
 		public double prevColorB;
 		public double renderSortDistanceSq;
 		public TorexType type;
-		private float startingScale = 3F;
-		private float growingScale = 5F;
+		public float startingScale = 3F;
+		public float growingScale = 5F;
 		private double computedMotionX;
 		private double computedMotionY;
 		private double computedMotionZ;

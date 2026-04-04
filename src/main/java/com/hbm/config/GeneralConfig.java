@@ -102,7 +102,6 @@ public class GeneralConfig {
 	}
 	public static int bedrockRate = 50;
 	public static boolean enableThreadedAtmospheres = true;
-	public static boolean enableHardcoreDarkness = false;
 
 	public static boolean enableLBSM = false;
 	public static boolean enableLBSMFullSchrab = true;
@@ -236,7 +235,6 @@ public class GeneralConfig {
 		enableGuideBook = config.get(CommonConfig.CATEGORY_GENERAL, "1.38_enableGuideBook", true, "If enabled, gives players the guide book when joining the world for the first time").getBoolean(true);
         decoToIngotRate = CommonConfig.createConfigInt(config, CommonConfig.CATEGORY_GENERAL, "1.39_decoToIngotConversionRate", "Chance of successful turning a deco block into an ingot. Default is 25%", 25);
 		enableThreadedAtmospheres = CommonConfig.createConfigBool(config, CommonConfig.CATEGORY_GENERAL, "1.40_threadedAtmospheres", "If enabled, will run atmosphere blobbing in a separate thread for performance", true);
-		enableHardcoreDarkness = CommonConfig.createConfigBool(config, CommonConfig.CATEGORY_GENERAL, "1.41_hardcoreDarkness", "If enabled, sets night-time minimum fog to zero, to complement hardcore darkness mods", false);
 		enableKeybindOverlap = config.get(CommonConfig.CATEGORY_GENERAL, "1.42_enableKeybindOverlap", true, "If enabled, will handle keybinds that would otherwise be ignored due to overlapping.").getBoolean(true);
 		enableFluidContainersV2 = CommonConfig.createConfigBool(config, CommonConfig.CATEGORY_GENERAL, "1.99_CE_enableFluidContainersV2", "If enabled, 3 new enhanced version of base fluid barrels that supports partial fill and drain are added.", false);
 		leadSafeForgeContainerWhitelist = loadLeadSafeForgeContainerWhitelist(config);

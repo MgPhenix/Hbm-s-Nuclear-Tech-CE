@@ -55,7 +55,7 @@ public class TileEntitySawmill extends TileEntityMachineBase implements ITickabl
     private int syncHeat = 0;
 
     public TileEntitySawmill() {
-        super(3, false, true);
+        super(3, false, false);
         inventory = new ItemStackHandler(3){
             @Override
             public int getSlotLimit(int slot) {

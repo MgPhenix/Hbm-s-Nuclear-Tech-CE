@@ -47,7 +47,7 @@ public class TileEntityDroneCrate extends TileEntityMachineBase implements IGUIP
     public boolean itemType = true;
 
     public TileEntityDroneCrate() {
-        super(19, false, true);
+        super(19, false, false);
         this.tank = new FluidTankNTM(Fluids.NONE, 64_000);
     }
 

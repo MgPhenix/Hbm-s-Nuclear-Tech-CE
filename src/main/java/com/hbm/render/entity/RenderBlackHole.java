@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.GlStateManager.SourceFactor;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
 import org.lwjgl.opengl.GL11;
@@ -73,6 +74,10 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 		GlStateManager.enableLighting();
 
 		GlStateManager.popMatrix();
+	}
+
+	@Override
+	public void doRenderShadowAndFire(Entity entityIn, double x, double y, double z, float yaw, float partialTicks) {
 	}
 
 	protected ResourceLocation discTex(){

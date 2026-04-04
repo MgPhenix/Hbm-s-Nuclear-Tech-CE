@@ -1,74 +1,40 @@
 package com.hbm.util;
 
+import com.hbm.core.HbmCorePlugin;
+import com.hbm.interfaces.SuppressCheckedExceptions;
+import com.hbm.lib.internal.MethodHandleHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 
 @SideOnly(Side.CLIENT)
+@SuppressCheckedExceptions
 public class ShaderHelper {
 
-    private static Boolean optifinePresent = null;
-    private static Class<?> shadersClass = null;
-    private static Field shaderPackLoadedField = null;
-    private static Method isShadowPassMethod = null;
-    private static Field isShadowPassField = null;
+    private static final MethodHandle SHADER_PACK_LOADED;
+    private static final MethodHandle IS_SHADOW_PASS;
 
-    private static void init() {
-        if (optifinePresent != null) return;
-
-        try {
-            shadersClass = Class.forName("net.optifine.shaders.Shaders");
-            optifinePresent = true;
-
-            try {
-                shaderPackLoadedField = shadersClass.getDeclaredField("shaderPackLoaded");
-                shaderPackLoadedField.setAccessible(true);
-            } catch (NoSuchFieldException ignored) {}
-
-            try {
-                isShadowPassMethod = shadersClass.getDeclaredMethod("isShadowPass");
-                isShadowPassMethod.setAccessible(true);
-            } catch (NoSuchMethodException e) {
-                try {
-                    isShadowPassField = shadersClass.getDeclaredField("isShadowPass");
-                    isShadowPassField.setAccessible(true);
-                } catch (NoSuchFieldException ignored) {}
-            }
-        } catch (ClassNotFoundException e) {
-            optifinePresent = false;
+    static {
+        if (HbmCorePlugin.isOptifinePresent()) {
+            Class<?> shadersClass = Class.forName("net.optifine.shaders.Shaders");
+            SHADER_PACK_LOADED = MethodHandleHelper.findStaticGetter(shadersClass, "shaderPackLoaded", boolean.class);
+            IS_SHADOW_PASS = MethodHandleHelper.findStatic(shadersClass, "isShadowPass",
+                    MethodType.methodType(boolean.class));
+        } else {
+            SHADER_PACK_LOADED = null;
+            IS_SHADOW_PASS = null;
         }
-    }
-
-    public static boolean isOptifinePresent() {
-        init();
-        return optifinePresent;
     }
 
     public static boolean areShadersActive() {
-        init();
-        if (!optifinePresent || shaderPackLoadedField == null) return false;
-
-        try {
-            return shaderPackLoadedField.getBoolean(null);
-        } catch (Exception e) {
-            return false;
-        }
+        if (SHADER_PACK_LOADED == null) return false;
+        return (boolean) SHADER_PACK_LOADED.invokeExact();
     }
 
     public static boolean isShadowPass() {
-        init();
-        if (!optifinePresent) return false;
-
-        try {
-            if (isShadowPassMethod != null) {
-                return (Boolean) isShadowPassMethod.invoke(null);
-            }
-            if (isShadowPassField != null) {
-                return isShadowPassField.getBoolean(null);
-            }
-        } catch (Exception ignored) {}
-        return false;
+        if (IS_SHADOW_PASS == null) return false;
+        return (boolean) IS_SHADOW_PASS.invokeExact();
     }
 }

@@ -1,5 +1,6 @@
 package com.hbm.render.util;
 
+import com.hbm.core.HbmCorePlugin;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -16,21 +17,9 @@ public final class NTMImmediate {
 
     private final BufferBuilder buffer;
     private final WorldVertexBufferUploader genericUploader = new WorldVertexBufferUploader();
-    private final SpecializedUploader[] uploaders = new SpecializedUploader[NTMBufferBuilder.NTMFastVertexFormat.values().length];
 
     private NTMImmediate() {
         this.buffer = Tessellator.getInstance().getBuffer();
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.BLOCK.ordinal()] = NTMImmediate::drawBlock;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.ITEM.ordinal()] = NTMImmediate::drawItem;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION.ordinal()] = NTMImmediate::drawPosition;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION_COLOR.ordinal()] = NTMImmediate::drawPositionColor;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION_TEX.ordinal()] = NTMImmediate::drawPositionTex;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION_NORMAL.ordinal()] = NTMImmediate::drawPositionNormal;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION_TEX_COLOR.ordinal()] = NTMImmediate::drawPositionTexColor;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION_TEX_NORMAL.ordinal()] = NTMImmediate::drawPositionTexNormal;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION_TEX_LMAP_COLOR.ordinal()] = NTMImmediate::drawPositionTexLmapColor;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.POSITION_TEX_COLOR_NORMAL.ordinal()] = NTMImmediate::drawPositionTexColorNormal;
-        uploaders[NTMBufferBuilder.NTMFastVertexFormat.PARTICLE_POSITION_TEX_COLOR_LMAP.ordinal()] = NTMImmediate::drawParticlePositionTexColorLmap;
     }
 
     private NTMBufferBuilder fastBuffer() {
@@ -158,13 +147,46 @@ public final class NTMImmediate {
             buffer.reset();
             return;
         }
-        SpecializedUploader uploader = uploaders[fastBuffer().getFastFormat().ordinal()];
+        if (HbmCorePlugin.isOptifinePresent()) {
+            genericUploader.draw(buffer);
+            return;
+        }
+        SpecializedUploader uploader = findUploader(buffer.getVertexFormat());
         if (uploader != null) {
             uploader.draw(buffer);
             buffer.reset();
         } else {
             genericUploader.draw(buffer);
         }
+    }
+
+    private SpecializedUploader findUploader(VertexFormat format) {
+        if (format == DefaultVertexFormats.BLOCK) return NTMImmediate::drawBlock;
+        if (format == DefaultVertexFormats.ITEM) return NTMImmediate::drawItem;
+        if (format == DefaultVertexFormats.POSITION) return NTMImmediate::drawPosition;
+        if (format == DefaultVertexFormats.POSITION_COLOR) return NTMImmediate::drawPositionColor;
+        if (format == DefaultVertexFormats.POSITION_TEX) return NTMImmediate::drawPositionTex;
+        if (format == DefaultVertexFormats.POSITION_NORMAL) return NTMImmediate::drawPositionNormal;
+        if (format == DefaultVertexFormats.POSITION_TEX_COLOR) return NTMImmediate::drawPositionTexColor;
+        if (format == DefaultVertexFormats.POSITION_TEX_NORMAL) return NTMImmediate::drawPositionTexNormal;
+        if (format == DefaultVertexFormats.POSITION_TEX_LMAP_COLOR) return NTMImmediate::drawPositionTexLmapColor;
+        if (format == DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL) return NTMImmediate::drawPositionTexColorNormal;
+        if (format == DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP) return NTMImmediate::drawParticlePositionTexColorLmap;
+
+        if (format == null) return null;
+
+        if (DefaultVertexFormats.BLOCK.equals(format)) return NTMImmediate::drawBlock;
+        if (DefaultVertexFormats.ITEM.equals(format)) return NTMImmediate::drawItem;
+        if (DefaultVertexFormats.POSITION.equals(format)) return NTMImmediate::drawPosition;
+        if (DefaultVertexFormats.POSITION_COLOR.equals(format)) return NTMImmediate::drawPositionColor;
+        if (DefaultVertexFormats.POSITION_TEX.equals(format)) return NTMImmediate::drawPositionTex;
+        if (DefaultVertexFormats.POSITION_NORMAL.equals(format)) return NTMImmediate::drawPositionNormal;
+        if (DefaultVertexFormats.POSITION_TEX_COLOR.equals(format)) return NTMImmediate::drawPositionTexColor;
+        if (DefaultVertexFormats.POSITION_TEX_NORMAL.equals(format)) return NTMImmediate::drawPositionTexNormal;
+        if (DefaultVertexFormats.POSITION_TEX_LMAP_COLOR.equals(format)) return NTMImmediate::drawPositionTexLmapColor;
+        if (DefaultVertexFormats.POSITION_TEX_COLOR_NORMAL.equals(format)) return NTMImmediate::drawPositionTexColorNormal;
+        if (DefaultVertexFormats.PARTICLE_POSITION_TEX_COLOR_LMAP.equals(format)) return NTMImmediate::drawParticlePositionTexColorLmap;
+        return null;
     }
 
     private static void drawPosition(BufferBuilder buffer) {
