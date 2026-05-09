@@ -23,6 +23,7 @@ public abstract class RBMKColumn {
     public boolean moderated;
     public int reasimWater;
     public int reasimSteam;
+    public int indicator;
 
     public final @NotNull ColumnType type;
 
@@ -36,6 +37,7 @@ public abstract class RBMKColumn {
         buf.writeBoolean(moderated);
         buf.writeInt(reasimWater);
         buf.writeInt(reasimSteam);
+        buf.writeByte(indicator);
     }
 
     protected void deserialize(ByteBuf buf) {
@@ -44,6 +46,7 @@ public abstract class RBMKColumn {
         moderated = buf.readBoolean();
         reasimWater = buf.readInt();
         reasimSteam = buf.readInt();
+        indicator = buf.readByte();
     }
 
     @SideOnly(Side.CLIENT)

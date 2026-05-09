@@ -48,7 +48,7 @@ public class TileEntityDroneCrate extends TileEntityMachineBase implements IGUIP
 
     public TileEntityDroneCrate() {
         super(19, false, false);
-        this.tank = new FluidTankNTM(Fluids.NONE, 64_000);
+        this.tank = new FluidTankNTM(Fluids.NONE, 64_000).withOwner(this);
     }
 
     @Override

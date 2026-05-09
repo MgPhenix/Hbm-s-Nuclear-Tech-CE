@@ -50,16 +50,16 @@ public class TileEntityMachineFunnel extends TileEntityMachineBase implements IG
 
             for (int i = 0; i < 9; i++) {
 
-                if (inventory.getStackInSlot(i) != ItemStack.EMPTY) {
+                if (!inventory.getStackInSlot(i).isEmpty()) {
                     int count = 9;
                     ItemStack compressed = (mode == MODE_2x2 || inventory.getStackInSlot(i).getCount() < 9) ? ItemStack.EMPTY : this.getFrom9(inventory.getStackInSlot(i));
-                    if (compressed == ItemStack.EMPTY) {
+                    if (compressed.isEmpty()) {
                         compressed = (mode == MODE_3x3 || inventory.getStackInSlot(i).getCount() < 4) ? ItemStack.EMPTY : this.getFrom4(inventory.getStackInSlot(i));
                         count = 4;
                     }
 
-                    if (compressed != ItemStack.EMPTY && inventory.getStackInSlot(i).getCount() >= count) {
-                        if (inventory.getStackInSlot(i + 9) == ItemStack.EMPTY) {
+                    if (!compressed.isEmpty() && inventory.getStackInSlot(i).getCount() >= count) {
+                        if (inventory.getStackInSlot(i + 9).isEmpty()) {
                             inventory.setStackInSlot(i + 9, compressed.copy());
                             inventory.getStackInSlot(i).shrink(count);
                         } else if (inventory.getStackInSlot(i + 9).getItem() == compressed.getItem() && inventory.getStackInSlot(i + 9).getItemDamage() == compressed.getItemDamage() && inventory.getStackInSlot(i + 9).getCount() + compressed.getCount() <= compressed.getMaxStackSize()) {
@@ -113,10 +113,10 @@ public class TileEntityMachineFunnel extends TileEntityMachineBase implements IG
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack stack) {
         if (slot > 8) return false;
-        if (inventory.getStackInSlot(slot) != ItemStack.EMPTY)
+        if (!inventory.getStackInSlot(slot).isEmpty())
             return true; // if the slot is already occupied, return true because then the same type
         // merging skips the validity check
-        return this.getFrom9(stack) != ItemStack.EMPTY || this.getFrom4(stack) != ItemStack.EMPTY;
+        return !this.getFrom9(stack).isEmpty() || !this.getFrom4(stack).isEmpty();
     }
 
     protected TileEntityMachineAutocrafter.InventoryCraftingAuto craftingInventory = new TileEntityMachineAutocrafter.InventoryCraftingAuto(3, 3);
@@ -135,7 +135,7 @@ public class TileEntityMachineFunnel extends TileEntityMachineBase implements IG
         this.craftingInventory.setInventorySlotContents(3, ingredient.copy());
         this.craftingInventory.setInventorySlotContents(4, ingredient.copy());
         ItemStack match = getMatch(this.craftingInventory);
-        from4Cache.put(singular, match != ItemStack.EMPTY ? match.copy() : ItemStack.EMPTY);
+        from4Cache.put(singular, !match.isEmpty() ? match.copy() : ItemStack.EMPTY);
         return match;
     }
 
@@ -146,7 +146,7 @@ public class TileEntityMachineFunnel extends TileEntityMachineBase implements IG
         for (int i = 0; i < 9; i++)
             this.craftingInventory.setInventorySlotContents(i, ingredient.copy());
         ItemStack match = getMatch(this.craftingInventory);
-        from9Cache.put(singular, match != ItemStack.EMPTY ? match.copy() : ItemStack.EMPTY);
+        from9Cache.put(singular, !match.isEmpty() ? match.copy() : ItemStack.EMPTY);
         return match;
     }
 

@@ -50,7 +50,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -221,9 +220,15 @@ public class ItemToolAbility extends ItemTool implements IDepthRockTool, IGUIPro
 	// Should be safe, considering the AoE ability does a similar trick already.
 	// If not, wrap this in a ThreadLocal or something...
 	public static int dropX, dropY, dropZ;
-	
+
+	// Set while we re-enter vanilla's tryHarvestBlock from our own ability path, so the
+	// reentrant onBlockStartBreak call falls through to vanilla instead of looping.
+	private static final ThreadLocal<Boolean> bypassStartBreak = ThreadLocal.withInitial(() -> Boolean.FALSE);
+
 	@Override
 	public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, EntityPlayer player) {
+		if (bypassStartBreak.get()) return false;
+
 		World world = player.world;
     	IBlockState state = world.getBlockState(pos);
     	Block block = state.getBlock();
@@ -373,10 +378,6 @@ public class ItemToolAbility extends ItemTool implements IDepthRockTool, IGUIPro
 		)
 			return;
 
-		int exp = ForgeHooks.onBlockBreakEvent(world, player.interactionManager.getGameType(), player, pos);
-		if (exp == -1)
-			return;
-
 		Configuration config = getConfiguration(stack);
 		ToolPreset preset = config.getActivePreset();
 
@@ -411,65 +412,20 @@ public class ItemToolAbility extends ItemTool implements IDepthRockTool, IGUIPro
 
 	private static final MethodHandle blockCaptureDrops = MethodHandleHelper.findVirtual(Block.class, "captureDrops", MethodType.methodType(NonNullList.class, boolean.class));
 
-	public static void standardDigPost(World world, int x, int y, int z, EntityPlayerMP player) {
-
-		BlockPos pos = new BlockPos(x, y, z);
-		IBlockState state = world.getBlockState(pos);
-		Block block = state.getBlock();
-		int l = block.getMetaFromState(state);
-
-		world.playEvent(player, 2001, pos, Block.getStateId(state));
-
-		boolean removedByPlayer = false;
-
-		if (player.capabilities.isCreativeMode) {
-			removedByPlayer = removeBlock(world, x, y, z, false, player);
-			player.connection.sendPacket(new SPacketBlockChange(world, pos));
-		} else {
-			ItemStack itemstack = player.getHeldItemMainhand();
-			boolean canHarvest = ForgeHooks.canHarvestBlock(block, player, world, pos);
-
-			removedByPlayer = removeBlock(world, x, y, z, canHarvest, player);
-
-			if (!itemstack.isEmpty()) {
-				itemstack.onBlockDestroyed(world, state, pos, player);
-
-				if (itemstack.getCount() == 0) {
-					player.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
-				}
-			}
-
-			if (removedByPlayer && canHarvest) {
-				try {
-                    //noinspection unchecked
-					NonNullList<ItemStack> ignored = (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, true);
-					block.harvestBlock(world, player, pos, state, world.getTileEntity(pos), itemstack);
-					//noinspection unchecked
-					List<ItemStack> drops = (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, false);
-					for (ItemStack stack : drops) {
-						Block.spawnAsEntity(world, new BlockPos(dropX, dropY, dropZ), stack);
-					}
-				} catch (Throwable e) {
-                    MainRegistry.logger.error("Failed to capture drops for block {}", block, e);
-                    throw new RuntimeException(e);
-                }
-            }
-		}
-	}
-
-	public static boolean removeBlock(World world, int x, int y, int z, boolean canHarvest, EntityPlayerMP player) {
-		BlockPos pos = new BlockPos(x, y, z);
-		IBlockState state = world.getBlockState(pos);
-		Block block = state.getBlock();
-
-		block.onBlockHarvested(world, pos, state, player);
-		boolean flag = block.removedByPlayer(state, world, pos, player, canHarvest);
-
-		if (flag) {
-			block.onPlayerDestroy(world, pos, state);
-		}
-
-		return flag;
+	@SuppressWarnings("unchecked")
+	public static NonNullList<ItemStack> harvestAndCapture(World world, BlockPos pos, EntityPlayerMP player) {
+		try {
+            Block block = world.getBlockState(pos).getBlock();
+            NonNullList<ItemStack> drops;
+            bypassStartBreak.set(Boolean.TRUE);
+            NonNullList<ItemStack> ignored = (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, true);
+            player.interactionManager.tryHarvestBlock(pos);
+            drops = (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, false);
+            bypassStartBreak.set(Boolean.FALSE);
+            return drops;
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
 	}
 
 	public static class Configuration {

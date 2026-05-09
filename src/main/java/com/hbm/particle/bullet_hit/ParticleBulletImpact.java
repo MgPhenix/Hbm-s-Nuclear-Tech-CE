@@ -144,10 +144,10 @@ public class ParticleBulletImpact extends ParticleLayerBase {
         	NTMBufferBuilder fastBuffer = (NTMBufferBuilder) buffer;
             int packedColor = NTMBufferBuilder.packColor(particleRed, particleGreen, particleBlue, particleAlpha);
             int packedLightmap = NTMBufferBuilder.packLightmap(j, k);
-        	fastBuffer.appendParticlePositionTexColorLmapUnchecked(vertices[0].x*scale+f5, vertices[0].y*scale+f6, vertices[0].z*scale+f7, 0, 0, packedColor, packedLightmap);
-            fastBuffer.appendParticlePositionTexColorLmapUnchecked(vertices[1].x*scale+f5, vertices[1].y*scale+f6, vertices[1].z*scale+f7, 1, 0, packedColor, packedLightmap);
-            fastBuffer.appendParticlePositionTexColorLmapUnchecked(vertices[2].x*scale+f5, vertices[2].y*scale+f6, vertices[2].z*scale+f7, 1, 1, packedColor, packedLightmap);
-            fastBuffer.appendParticlePositionTexColorLmapUnchecked(vertices[3].x*scale+f5, vertices[3].y*scale+f6, vertices[3].z*scale+f7, 0, 1, packedColor, packedLightmap);
+        	fastBuffer.appendParticlePositionTexColorLmapUnchecked((float) vertices[0].x * scale + f5, (float) vertices[0].y * scale + f6, (float) vertices[0].z * scale + f7, 0, 0, packedColor, packedLightmap);
+            fastBuffer.appendParticlePositionTexColorLmapUnchecked((float) vertices[1].x * scale + f5, (float) vertices[1].y * scale + f6, (float) vertices[1].z * scale + f7, 1, 0, packedColor, packedLightmap);
+            fastBuffer.appendParticlePositionTexColorLmapUnchecked((float) vertices[2].x * scale + f5, (float) vertices[2].y * scale + f6, (float) vertices[2].z * scale + f7, 1, 1, packedColor, packedLightmap);
+            fastBuffer.appendParticlePositionTexColorLmapUnchecked((float) vertices[3].x * scale + f5, (float) vertices[3].y * scale + f6, (float) vertices[3].z * scale + f7, 0, 1, packedColor, packedLightmap);
         }
 	}
 

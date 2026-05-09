@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.GlStateManager.SourceFactor;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -116,18 +115,22 @@ public class ParticleTauParticle extends Particle {
         float f5 = (float)(this.prevPosX + (this.posX - this.prevPosX) * (double)partialTicks - interpPosX);
         float f6 = (float)(this.prevPosY + (this.posY - this.prevPosY) * (double)partialTicks - interpPosY);
         float f7 = (float)(this.prevPosZ + (this.posZ - this.prevPosZ) * (double)partialTicks - interpPosZ);
-        Vec3d[] avec3d = new Vec3d[] {new Vec3d((double)(-rotationX * f4 - rotationXY * f4), (double)(-rotationZ * f4), (double)(-rotationYZ * f4 - rotationXZ * f4)), new Vec3d((double)(-rotationX * f4 + rotationXY * f4), (double)(rotationZ * f4), (double)(-rotationYZ * f4 + rotationXZ * f4)), new Vec3d((double)(rotationX * f4 + rotationXY * f4), (double)(rotationZ * f4), (double)(rotationYZ * f4 + rotationXZ * f4)), new Vec3d((double)(rotationX * f4 - rotationXY * f4), (double)(-rotationZ * f4), (double)(rotationYZ * f4 - rotationXZ * f4))};
-        
+        float rX = rotationX * f4;
+        float rZ = rotationZ * f4;
+        float rXY = rotationXY * f4;
+        float rYZ = rotationYZ * f4;
+        float rXZ = rotationXZ * f4;
+
         NTMBufferBuilder fastBuffer = NTMImmediate.INSTANCE.beginParticlePositionTexColorLmap(GL11.GL_QUADS, MathHelper.ceil(workingAlpha) * 4);
-        
+
         float a = workingAlpha;
         int packedLightmap = NTMBufferBuilder.packLightmap(240, 240);
         for(int i = 0; i < workingAlpha; i ++){
 	        int packedColor = NTMBufferBuilder.packColor(this.particleRed, this.particleGreen, this.particleBlue, Math.min(a, 1));
-	        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[0].x, (double)f6 + avec3d[0].y, (double)f7 + avec3d[0].z, 1, 1, packedColor, packedLightmap);
-	        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[1].x, (double)f6 + avec3d[1].y, (double)f7 + avec3d[1].z, 1, 0, packedColor, packedLightmap);
-	        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[2].x, (double)f6 + avec3d[2].y, (double)f7 + avec3d[2].z, 0, 0, packedColor, packedLightmap);
-	        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[3].x, (double)f6 + avec3d[3].y, (double)f7 + avec3d[3].z, 0, 1, packedColor, packedLightmap);
+	        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 - rX - rXY, f6 - rZ, f7 - rYZ - rXZ, 1, 1, packedColor, packedLightmap);
+	        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 - rX + rXY, f6 + rZ, f7 - rYZ + rXZ, 1, 0, packedColor, packedLightmap);
+	        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 + rX + rXY, f6 + rZ, f7 + rYZ + rXZ, 0, 0, packedColor, packedLightmap);
+	        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 + rX - rXY, f6 - rZ, f7 + rYZ - rXZ, 0, 1, packedColor, packedLightmap);
 	        a-=1;
         }
         

@@ -26,6 +26,7 @@ import com.hbm.main.MainRegistry;
 import com.hbm.modules.ModuleBurnTime;
 import com.hbm.packet.toclient.AuxParticlePacketNT;
 import com.hbm.tileentity.IConfigurableMachine;
+import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IFluidCopiable;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.util.CrucibleUtil;
@@ -51,7 +52,7 @@ import java.io.IOException;
 import java.util.Random;
 
 @AutoRegister
-public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting implements IFluidStandardTransceiver, IGUIProvider, IFluidCopiable, IConfigurableMachine, ITickable {
+public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting implements IFluidStandardTransceiver, IGUIProvider, IFluidCopiable, IConfigurableMachine, ITickable, IConnectionAnchors {
 
     public FluidTankNTM[] tanks;
     public boolean isProgressing;
@@ -82,9 +83,9 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
     public TileEntityMachineRotaryFurnace() {
         super(5, 50, true, false);
         tanks = new FluidTankNTM[3];
-        tanks[0] = new FluidTankNTM(Fluids.NONE, 16_000);
-        tanks[1] = new FluidTankNTM(Fluids.STEAM, 12_000);
-        tanks[2] = new FluidTankNTM(Fluids.SPENTSTEAM, 120);
+        tanks[0] = new FluidTankNTM(Fluids.NONE, 16_000).withOwner(this);
+        tanks[1] = new FluidTankNTM(Fluids.STEAM, 12_000).withOwner(this);
+        tanks[2] = new FluidTankNTM(Fluids.SPENTSTEAM, 120).withOwner(this);
     }
 
     @Override
@@ -155,13 +156,14 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
                     markDirty();
                 }
 
-                if (this.canProcess(recipe)) {
-                    float speed = Math.max((float) burnHeat, 1);
-                    this.progress += speed / recipe.duration;
+                float processSpeed = Math.max((float) burnHeat, 1);
+                float steamUseMult = (float)(10 * Math.log10(processSpeed) + 1);
 
-                    speed = (float) (13 * Math.log10(speed) + 1);
-                    tanks[1].setFill((int) (tanks[1].getFill() - recipe.steam * speed));
-                    steamUsed += (int) (recipe.steam * speed);
+                if (this.canProcess(recipe, steamUseMult)) {
+                    this.progress += processSpeed / recipe.duration;
+
+                    tanks[1].setFill((int) (tanks[1].getFill() - recipe.steam * steamUseMult));
+                    steamUsed += (int) (recipe.steam * steamUseMult);
                     this.isProgressing = true;
 
                     if (this.progress >= 1F) {
@@ -324,7 +326,20 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
         };
     }
 
-    public boolean canProcess(RotaryFurnaceRecipe recipe) {
+    @Override
+    public DirPos[] getConPos() {
+        ForgeDirection dir = ForgeDirection.getOrientation(this.getBlockMetadata() - 10);
+        ForgeDirection rot = dir.getRotation(ForgeDirection.DOWN);
+        DirPos[] steam = getSteamPos();
+        DirPos[] fluid = getFluidPos();
+        DirPos[] result = new DirPos[steam.length + fluid.length + 1];
+        System.arraycopy(steam, 0, result, 0, steam.length);
+        System.arraycopy(fluid, 0, result, steam.length, fluid.length);
+        result[steam.length + fluid.length] = new DirPos(pos.getX() + rot.offsetX, pos.getY() + 5, pos.getZ() + rot.offsetZ, Library.POS_Y);
+        return result;
+    }
+
+    public boolean canProcess(RotaryFurnaceRecipe recipe, float steamUseMult) {
 
         if (this.burnTime <= 0) return false;
 
@@ -333,10 +348,8 @@ public class TileEntityMachineRotaryFurnace extends TileEntityMachinePolluting i
             if (this.tanks[0].getFill() < recipe.fluid.fill) return false;
         }
 
-        float speed = Math.max((float) burnHeat, 1);
-
-        if (tanks[1].getFill() < recipe.steam * speed) return false;
-        if (tanks[2].getMaxFill() - tanks[2].getFill() < recipe.steam * speed / 100) return false;
+        if (tanks[1].getFill() < recipe.steam * steamUseMult) return false;
+        if (tanks[2].getMaxFill() - tanks[2].getFill() < recipe.steam * steamUseMult / 100) return false;
         if (this.steamUsed > 100) return false;
 
         if (this.output != null) {

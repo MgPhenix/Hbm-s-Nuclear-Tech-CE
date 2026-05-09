@@ -93,10 +93,10 @@ public class RenderNTMSkyboxImpact extends IRenderHandler {
         GlStateManager.color(0.0F, 0.0F, 0.0F, 1.0F);
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionQuads(1);
         buf.appendPositionQuadUnchecked(
-                -size, 99.9D, -size,
-                 size, 99.9D, -size,
-                 size, 99.9D,  size,
-                -size, 99.9D,  size
+                -size, 99.9F, -size,
+                 size, 99.9F, -size,
+                 size, 99.9F,  size,
+                -size, 99.9F,  size
         );
         NTMImmediate.INSTANCE.draw();
 
@@ -105,10 +105,10 @@ public class RenderNTMSkyboxImpact extends IRenderHandler {
         mc.getTextureManager().bindTexture(sunTexture);
         buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
         buf.appendPositionTexQuadUnchecked(
-                -size, 100.0D, -size, 0.0D, 0.0D,
-                 size, 100.0D, -size, 1.0D, 0.0D,
-                 size, 100.0D,  size, 1.0D, 1.0D,
-                -size, 100.0D,  size, 0.0D, 1.0D
+                -size, 100.0F, -size, 0.0F, 0.0F,
+                 size, 100.0F, -size, 1.0F, 0.0F,
+                 size, 100.0F,  size, 1.0F, 1.0F,
+                -size, 100.0F,  size, 0.0F, 1.0F
         );
         NTMImmediate.INSTANCE.draw();
 
@@ -124,10 +124,10 @@ public class RenderNTMSkyboxImpact extends IRenderHandler {
         float maxV = (moonRow + 1) / 2.0F;
         buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
         buf.appendPositionTexQuadUnchecked(
-                -size, -100.0D,  size, maxU, maxV,
-                 size, -100.0D,  size, minU, maxV,
-                 size, -100.0D, -size, minU, minV,
-                -size, -100.0D, -size, maxU, minV
+                -size, -100.0F,  size, maxU, maxV,
+                 size, -100.0F,  size, minU, maxV,
+                 size, -100.0F, -size, minU, minV,
+                -size, -100.0F, -size, maxU, minV
         );
         NTMImmediate.INSTANCE.draw();
 
@@ -143,15 +143,15 @@ public class RenderNTMSkyboxImpact extends IRenderHandler {
         mc.getTextureManager().bindTexture(digammaStar);
 
         double digamma = HbmLivingProps.getDigamma(mc.player);
-        double digammaSize = 1.0D + digamma * 0.25D;
-        double digammaDistance = 100.0D - digamma * 2.5D;
+        float digammaSize = (float) (1.0D + digamma * 0.25D);
+        float digammaDistance = (float) (100.0D - digamma * 2.5D);
 
         buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
         buf.appendPositionTexQuadUnchecked(
-                -digammaSize, digammaDistance, -digammaSize, 0.0D, 0.0D,
-                 digammaSize, digammaDistance, -digammaSize, 0.0D, 1.0D,
-                 digammaSize, digammaDistance,  digammaSize, 1.0D, 1.0D,
-                -digammaSize, digammaDistance,  digammaSize, 1.0D, 0.0D
+                -digammaSize, digammaDistance, -digammaSize, 0.0F, 0.0F,
+                 digammaSize, digammaDistance, -digammaSize, 0.0F, 1.0F,
+                 digammaSize, digammaDistance,  digammaSize, 1.0F, 1.0F,
+                -digammaSize, digammaDistance,  digammaSize, 1.0F, 0.0F
         );
         NTMImmediate.INSTANCE.draw();
         GlStateManager.popMatrix();
@@ -163,14 +163,14 @@ public class RenderNTMSkyboxImpact extends IRenderHandler {
         GlStateManager.rotate((System.currentTimeMillis() % (360 * 100)) / 100.0F, 1.0F, 0.0F, 0.0F);
         mc.getTextureManager().bindTexture(bobmazonSat);
 
-        double satelliteSize = 0.5D;
-        double satelliteDistance = 100.0D;
+        float satelliteSize = 0.5F;
+        float satelliteDistance = 100.0F;
         buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
         buf.appendPositionTexQuadUnchecked(
-                -satelliteSize, satelliteDistance, -satelliteSize, 0.0D, 0.0D,
-                 satelliteSize, satelliteDistance, -satelliteSize, 0.0D, 1.0D,
-                 satelliteSize, satelliteDistance,  satelliteSize, 1.0D, 1.0D,
-                -satelliteSize, satelliteDistance,  satelliteSize, 1.0D, 0.0D
+                -satelliteSize, satelliteDistance, -satelliteSize, 0.0F, 0.0F,
+                 satelliteSize, satelliteDistance, -satelliteSize, 0.0F, 1.0F,
+                 satelliteSize, satelliteDistance,  satelliteSize, 1.0F, 1.0F,
+                -satelliteSize, satelliteDistance,  satelliteSize, 1.0F, 0.0F
         );
         NTMImmediate.INSTANCE.draw();
         GlStateManager.popMatrix();
@@ -303,7 +303,7 @@ public class RenderNTMSkyboxImpact extends IRenderHandler {
                     double pitchedZ = -rotatedY * cosPitch;
                     double finalX = pitchedZ * sinYaw - rotatedZ * cosYaw;
                     double finalZ = rotatedZ * sinYaw + pitchedZ * cosYaw;
-                    buffer.appendPositionUnchecked(pointX + finalX, pointY + pitchedY, pointZ + finalZ);
+                    buffer.appendPositionUnchecked((float) (pointX + finalX), (float) (pointY + pitchedY), (float) (pointZ + finalZ));
                 }
             }
         }

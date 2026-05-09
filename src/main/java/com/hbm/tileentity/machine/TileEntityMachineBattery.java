@@ -65,8 +65,16 @@ public class TileEntityMachineBattery extends TileEntityMachineBase implements I
 
     public byte lastRedstone = 0;
 
+    public boolean isIndirectlyPowered;
+
     public TileEntityMachineBattery() {
         super(4);
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if(!world.isRemote) isIndirectlyPowered = world.isBlockPowered(pos);
     }
 
     public static ForgeDirection[] getSendDirections() {
@@ -299,8 +307,7 @@ public class TileEntityMachineBattery extends TileEntityMachineBase implements I
 
     public short getRelevantMode(boolean useCache) {
         if (useCache) return this.modeCache;
-        boolean isPowered = world.isBlockPowered(this.pos);
-        this.modeCache = isPowered ? this.redHigh : this.redLow;
+        this.modeCache = isIndirectlyPowered ? this.redHigh : this.redLow;
         return this.modeCache;
     }
 
@@ -349,7 +356,7 @@ public class TileEntityMachineBattery extends TileEntityMachineBase implements I
 
     @Override
     public String[] getFunctionInfo() {
-        return new String[]{PREFIX_VALUE + "fill", PREFIX_VALUE + "fillpercent", PREFIX_VALUE + "delta", PREFIX_FUNCTION + "setmode" + NAME_SEPARATOR + "mode", PREFIX_FUNCTION + "setmode" + NAME_SEPARATOR + "mode" + PARAM_SEPARATOR + "fallback", PREFIX_FUNCTION + "setredmode" + NAME_SEPARATOR + "mode", PREFIX_FUNCTION + "setredmode" + NAME_SEPARATOR + "mode" + PARAM_SEPARATOR + "fallback", PREFIX_FUNCTION + "setpriority" + NAME_SEPARATOR + "priority",};
+        return new String[]{PREFIX_VALUE + "fill", PREFIX_VALUE + "fillpercent", PREFIX_VALUE + "delta", PREFIX_FUNCTION + "setmode" + NAME_SEPARATOR + "mode (0-3)", PREFIX_FUNCTION + "setmode" + NAME_SEPARATOR + "mode" + PARAM_SEPARATOR + "fallback (0-3)", PREFIX_FUNCTION + "setredmode" + NAME_SEPARATOR + "mode (0-3)", PREFIX_FUNCTION + "setredmode" + NAME_SEPARATOR + "mode" + PARAM_SEPARATOR + "fallback (0-3)", PREFIX_FUNCTION + "setpriority" + NAME_SEPARATOR + "priority (0-2)",};
     }
 
     @Override

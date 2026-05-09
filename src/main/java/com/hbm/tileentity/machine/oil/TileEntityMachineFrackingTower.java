@@ -49,9 +49,9 @@ public class TileEntityMachineFrackingTower extends TileEntityOilDrillBase {
     public TileEntityMachineFrackingTower() {
         super();
         tanks = new FluidTankNTM[3];
-        tanks[0] = new FluidTankNTM(Fluids.OIL, 64_000);
-        tanks[1] = new FluidTankNTM(Fluids.GAS, 64_000);
-        tanks[2] = new FluidTankNTM(Fluids.FRACKSOL, 64_000);
+        tanks[0] = new FluidTankNTM(Fluids.OIL, 64_000).withOwner(this);
+        tanks[1] = new FluidTankNTM(Fluids.GAS, 64_000).withOwner(this);
+        tanks[2] = new FluidTankNTM(Fluids.FRACKSOL, 64_000).withOwner(this);
     }
 
     @Override

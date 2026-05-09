@@ -109,10 +109,10 @@ public class ParticleHitDebris extends ParticleLayerBase {
         NTMBufferBuilder fastBuffer = (NTMBufferBuilder) buffer;
         int packedColor = NTMBufferBuilder.packColor(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha);
         int packedLightmap = NTMBufferBuilder.packLightmap(j, k);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[0].x, (double)f6 + avec3d[0].y, (double)f7 + avec3d[0].z, (double)u+size, (double)v+size, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[1].x, (double)f6 + avec3d[1].y, (double)f7 + avec3d[1].z, (double)u+size, (double)v, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[2].x, (double)f6 + avec3d[2].y, (double)f7 + avec3d[2].z, (double)u, (double)v, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked((double)f5 + avec3d[3].x, (double)f6 + avec3d[3].y, (double)f7 + avec3d[3].z, (double)u, (double)v+size, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 + (float) avec3d[0].x, f6 + (float) avec3d[0].y, f7 + (float) avec3d[0].z, u + size, v + size, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 + (float) avec3d[1].x, f6 + (float) avec3d[1].y, f7 + (float) avec3d[1].z, u + size, v, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 + (float) avec3d[2].x, f6 + (float) avec3d[2].y, f7 + (float) avec3d[2].z, u, v, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(f5 + (float) avec3d[3].x, f6 + (float) avec3d[3].y, f7 + (float) avec3d[3].z, u, v + size, packedColor, packedLightmap);
 	}
 
 	@Override

@@ -3,7 +3,9 @@ package com.hbm.main.client;
 import com.hbm.Tags;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.bomb.Balefire;
+import com.hbm.blocks.generic.BlockFissure;
 import com.hbm.blocks.generic.TrappedBrick;
+import com.hbm.blocks.machine.BlockSeal;
 import com.hbm.blocks.network.FluidDuctBox;
 import com.hbm.blocks.network.FluidDuctStandard;
 import com.hbm.entity.siege.SiegeTier;
@@ -25,22 +27,32 @@ import com.hbm.items.tool.ItemCanister;
 import com.hbm.items.tool.ItemGasCanister;
 import com.hbm.items.tool.ItemGuideBook;
 import com.hbm.items.weapon.IMetaItemTesr;
+import com.hbm.main.AutoRegistry;
 import com.hbm.main.MainRegistry;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.GuiCTMWarning;
+import com.hbm.render.entity.RenderBoat;
 import com.hbm.render.icon.RegistrationUtils;
-import com.hbm.render.item.*;
+import com.hbm.render.item.BakedModelNoFPV;
+import com.hbm.render.item.FancyMissingModelPerspective;
+import com.hbm.render.item.TEISRBase;
+import com.hbm.render.item.WrappedTEISRModel;
 import com.hbm.render.item.weapon.B92BakedModel;
 import com.hbm.render.item.weapon.ItemRedstoneSwordRender;
 import com.hbm.render.item.weapon.ItemRenderGunAnim;
 import com.hbm.render.item.weapon.ItemRenderRedstoneSword;
 import com.hbm.render.tileentity.*;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDoor;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.model.ModelRotation;
+import net.minecraft.client.renderer.block.statemap.StateMap;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -55,6 +67,7 @@ import net.minecraft.util.registry.IRegistry;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fluids.BlockFluidBase;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -66,6 +79,7 @@ import java.util.Objects;
  *
  */
 public class NTMClientRegistry {
+    private static boolean itemRendererBindingsInitialized = false;
     public static TextureAtlasSprite contrail;
     public static TextureAtlasSprite particle_base;
     public static TextureAtlasSprite fog;
@@ -91,6 +105,86 @@ public class NTMClientRegistry {
                 bindTeisr(item, provider.getRenderer(item));
             }
         }
+    }
+
+    private static void initializeItemRendererBindings() {
+        if (itemRendererBindingsInitialized) return;
+        itemRendererBindingsInitialized = true;
+        AutoRegistry.preInitClient();
+        bindTeisrs(ItemRendererProviderRegistry.getTileEntityProviders());
+        bindTeisrs(ItemRendererProviderRegistry.getItemProviders());
+        // IItemRendererProvider is not applicable to Render<T extends Entity>
+        bindTeisr(Item.getItemFromBlock(ModBlocks.boat), new RenderBoat.BoatItemRenderer());
+        MainRegistry.proxy.registerMissileItems(null);
+    }
+
+    private static StateMapperBase fixedModelStateMapper(ModelResourceLocation location) {
+        return new StateMapperBase() {
+            @Override
+            protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+                return location;
+            }
+        };
+    }
+
+    private static void registerNormalStateMapper(Block block) {
+        ResourceLocation name = Objects.requireNonNull(block.getRegistryName());
+        ModelLoader.setCustomStateMapper(block, fixedModelStateMapper(new ModelResourceLocation(name, "normal")));
+    }
+
+    private static void registerIgnoringStateMapper(Block block, IProperty<?>... ignored) {
+        ModelLoader.setCustomStateMapper(block, new StateMap.Builder().ignore(ignored).build());
+    }
+
+    private static void registerLoggedStateMappers() {
+        registerIgnoringStateMapper(ModBlocks.door_bunker, BlockDoor.POWERED);
+        registerIgnoringStateMapper(ModBlocks.door_metal, BlockDoor.POWERED);
+        registerIgnoringStateMapper(ModBlocks.door_office, BlockDoor.POWERED);
+        registerIgnoringStateMapper(ModBlocks.door_red, BlockDoor.POWERED);
+        registerIgnoringStateMapper(ModBlocks.acid_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.corium_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.mud_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.schrabidic_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.sulfuric_acid_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.toxic_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.volcanic_lava_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.rad_lava_block, BlockFluidBase.LEVEL);
+        registerIgnoringStateMapper(ModBlocks.ore_volcano, BlockFissure.CRATER);
+        registerIgnoringStateMapper(ModBlocks.seal_controller, BlockSeal.ACTIVATED);
+
+        registerNormalStateMapper(ModBlocks.bm_power_box);
+        registerNormalStateMapper(ModBlocks.brick_jungle_trap);
+        registerNormalStateMapper(ModBlocks.digamma_matter);
+        registerNormalStateMapper(ModBlocks.fire_door);
+        registerNormalStateMapper(ModBlocks.floodlight);
+        registerNormalStateMapper(ModBlocks.frozen_grass);
+        registerNormalStateMapper(ModBlocks.large_vehicle_door);
+        registerNormalStateMapper(ModBlocks.machine_diesel);
+        registerNormalStateMapper(ModBlocks.ntm_dirt);
+        registerNormalStateMapper(ModBlocks.pribris_radiating);
+        registerNormalStateMapper(ModBlocks.qe_containment);
+        registerNormalStateMapper(ModBlocks.qe_sliding_door);
+        registerNormalStateMapper(ModBlocks.red_connector);
+        registerNormalStateMapper(ModBlocks.round_airlock_door);
+        registerNormalStateMapper(ModBlocks.secure_access_door);
+        registerNormalStateMapper(ModBlocks.silo_hatch);
+        registerNormalStateMapper(ModBlocks.silo_hatch_drillgon);
+        registerNormalStateMapper(ModBlocks.silo_hatch_large);
+        registerNormalStateMapper(ModBlocks.sliding_blast_door);
+        registerNormalStateMapper(ModBlocks.sliding_blast_door_2);
+        registerNormalStateMapper(ModBlocks.sliding_blast_door_keypad);
+        registerNormalStateMapper(ModBlocks.sliding_blast_door_legacy);
+        registerNormalStateMapper(ModBlocks.sliding_gate_door);
+        registerNormalStateMapper(ModBlocks.sliding_seal_door);
+        registerNormalStateMapper(ModBlocks.small_hatch);
+        registerNormalStateMapper(ModBlocks.spotlight_beam);
+        registerNormalStateMapper(ModBlocks.transition_seal);
+        registerNormalStateMapper(ModBlocks.turret_sentry);
+        registerNormalStateMapper(ModBlocks.turret_sentry_damaged);
+        registerNormalStateMapper(ModBlocks.vault_door);
+        registerNormalStateMapper(ModBlocks.volcano_core);
+        registerNormalStateMapper(ModBlocks.volcano_rad_core);
+        registerNormalStateMapper(ModBlocks.water_door);
     }
 
     public static void unbindTeisr(Item item) {
@@ -345,6 +439,8 @@ public class NTMClientRegistry {
 
     @SubscribeEvent
     public void registerModels(ModelRegistryEvent event) {
+        initializeItemRendererBindings();
+        registerLoggedStateMappers();
         int i = 0;
         ResourceLocation[] list = new ResourceLocation[SpecialContainerFillLists.EnumCell.VALUES.length];
         for (SpecialContainerFillLists.EnumCell e : SpecialContainerFillLists.EnumCell.VALUES) {
@@ -431,11 +527,7 @@ public class NTMClientRegistry {
             return;
         }
 
-        if (item == ModItems.crucible_template) {
-            for (int i = 0; i < 32; i++) { // FIXME: figure out a better way of doing this
-                ModelLoader.setCustomModelResourceLocation(item, i, new ModelResourceLocation(item.getRegistryName(), "inventory"));
-            }
-        } else if (item == ModItems.siren_track) {
+        if (item == ModItems.siren_track) {
             for (ItemCassette.TrackType track : ItemCassette.TrackType.VALUES.values()) {
                 ModelLoader.setCustomModelResourceLocation(item, track.getId(), new ModelResourceLocation(item.getRegistryName(), "inventory"));
             }
@@ -477,8 +569,8 @@ public class NTMClientRegistry {
             for (int i = 0; i < SiegeTier.getLength(); i++) {
                 ModelLoader.setCustomModelResourceLocation(item, i, new ModelResourceLocation(Tags.MODID + ":coin_siege_" + SiegeTier.tiers[i].name, "inventory"));
             }
-        } else if (item == Item.getItemFromBlock(ModBlocks.volcano_core)) {
-            for (int i = 0; i < 4; i++) {
+        } else if (item == Item.getItemFromBlock(ModBlocks.volcano_core) || item == Item.getItemFromBlock(ModBlocks.volcano_rad_core)) {
+            for (int i = 0; i < 5; i++) {
                 ModelLoader.setCustomModelResourceLocation(item, i, new ModelResourceLocation(item.getRegistryName(), "inventory"));
             }
         } else if (item == ModItems.conveyor_wand) {
@@ -523,7 +615,6 @@ public class NTMClientRegistry {
         ResourceManager.init();
         ItemRedstoneSwordRender.INSTANCE.itemModel = registry.getObject(RedstoneSword.rsModel);
         registry.putObject(RedstoneSword.rsModel, new ItemRenderRedstoneSword());
-        wrapModel(evt, ItemCrucibleTemplate.location);
         ItemRenderGunAnim.INSTANCE.b92ItemModel = registry.getObject(GunB92.b92Model);
         registry.putObject(GunB92.b92Model, new B92BakedModel());
         wrapAllTeisrModels(registry);
@@ -533,14 +624,6 @@ public class NTMClientRegistry {
     public void onModelBakeLast(ModelBakeEvent evt) {
         StaticTesrBakedModels.bakeModels(evt.getModelRegistry());
         StaticDecoBakedModels.bakeModels(evt.getModelRegistry());
-    }
-
-    private void wrapModel(ModelBakeEvent event, ModelResourceLocation location) {
-        IBakedModel existingModel = event.getModelRegistry().getObject(location);
-        if (existingModel != null && !(existingModel instanceof TemplateBakedModel)) {
-            TemplateBakedModel wrapper = new TemplateBakedModel(existingModel);
-            event.getModelRegistry().putObject(location, wrapper);
-        }
     }
 
 }

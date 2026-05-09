@@ -1,9 +1,9 @@
 package com.hbm.tileentity.machine.rbmk;
 
+import com.hbm.api.redstoneoverradio.IRORValueProvider;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.machine.rbmk.RBMKBase;
 import com.hbm.blocks.machine.rbmk.RBMKRod;
-import com.hbm.config.MobConfig;
 import com.hbm.entity.projectile.EntityRBMKDebris.DebrisType;
 import com.hbm.handler.CompatHandler;
 import com.hbm.handler.neutron.NeutronNodeWorld;
@@ -12,8 +12,8 @@ import com.hbm.handler.neutron.RBMKNeutronHandler;
 import com.hbm.handler.radiation.ChunkRadiationManager;
 import com.hbm.interfaces.AutoRegister;
 import com.hbm.inventory.container.ContainerRBMKRod;
-import com.hbm.inventory.control_panel.DataValue;
-import com.hbm.inventory.control_panel.DataValueFloat;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.inventory.gui.GUIRBMKRod;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemRBMKRod;
@@ -32,10 +32,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -50,7 +48,7 @@ import java.util.List;
 import java.util.Map;
 @Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")})
 @AutoRegister
-public class TileEntityRBMKRod extends TileEntityRBMKSlottedBase implements IRBMKFluxReceiver, IRBMKLoadable, IGUIProvider, SimpleComponent, CompatHandler.OCComponent {
+public class TileEntityRBMKRod extends TileEntityRBMKSlottedBase implements IRBMKFluxReceiver, IRBMKLoadable, IGUIProvider, SimpleComponent, CompatHandler.OCComponent, IRORValueProvider {
 
 	// New system!!
 	// Used for receiving flux (calculating outbound flux/burning rods)
@@ -85,6 +83,7 @@ public class TileEntityRBMKRod extends TileEntityRBMKSlottedBase implements IRBM
 	
 	@Override
 	public boolean isModerated() {
+        // throws CCE if anything goes wrong
 		return ((RBMKRod)this.getBlockType()).moderated;
 	}
 
@@ -110,15 +109,17 @@ public class TileEntityRBMKRod extends TileEntityRBMKSlottedBase implements IRBM
 		return true;
 	}
 
-	@Override
-	public void invalidate() {
-		super.invalidate();
-
-		if(!inventory.getStackInSlot(0).isEmpty() && inventory.getStackInSlot(0).getItem() instanceof ItemRBMKRod && ItemRBMKRod.getHullHeat(inventory.getStackInSlot(0)) >= 150) {
-			this.meltdown();
-		}
-	}
-	
+    //mlbv: leafia told me that this override made rbmks explode on load, not sure how since 1.7 repo also has it
+    //anyway commenting out for now
+//	@Override
+//	public void invalidate() {
+//		super.invalidate();
+//
+//		if(!inventory.getStackInSlot(0).isEmpty() && inventory.getStackInSlot(0).getItem() instanceof ItemRBMKRod && ItemRBMKRod.getHullHeat(inventory.getStackInSlot(0)) >= 150) {
+//			this.meltdown();
+//		}
+//	}
+//
 	@Override
 	public void update() {
 
@@ -541,5 +542,32 @@ public class TileEntityRBMKRod extends TileEntityRBMKSlottedBase implements IRBM
 	@SideOnly(Side.CLIENT)
 	public GuiScreen provideGUI(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		return new GUIRBMKRod(player.inventory, this);
+	}
+
+	@Override
+	public String[] getFunctionInfo() {
+		return new String[] {
+				PREFIX_VALUE + "columnheat",
+				PREFIX_VALUE + "rodheat",
+				PREFIX_VALUE + "depletion",
+				PREFIX_VALUE + "xenon",
+				PREFIX_VALUE + "fastflux",
+				PREFIX_VALUE + "slowflux",
+				PREFIX_VALUE + "flux"
+		};
+	}
+
+	@Override
+	public String provideRORValue(String name) {
+		if((PREFIX_VALUE + "columnheat").equals(name))		return "" + (int) this.heat;
+		if(inventory.getStackInSlot(0).getItem() instanceof ItemRBMKRod) {
+			if((PREFIX_VALUE + "rodheat").equals(name))		return "" + (int) ItemRBMKRod.getHullHeat(inventory.getStackInSlot(0));
+			if((PREFIX_VALUE + "depletion").equals(name))	return "" + (int) (100 - ItemRBMKRod.getEnrichment(inventory.getStackInSlot(0)) * 100);
+			if((PREFIX_VALUE + "xenon").equals(name))		return "" + (int) (ItemRBMKRod.getPoison(inventory.getStackInSlot(0)));
+		}
+		if((PREFIX_VALUE + "fastflux").equals(name))	return "" + (int) Math.ceil(fluxFromType(NType.FAST));
+		if((PREFIX_VALUE + "slowflux").equals(name))	return "" + (int) Math.ceil(fluxFromType(NType.SLOW));
+		if((PREFIX_VALUE + "flux").equals(name))		return "" + (int) Math.ceil(fluxFromType(NType.ANY));
+		return null;
 	}
 }

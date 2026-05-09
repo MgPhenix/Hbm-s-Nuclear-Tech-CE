@@ -2,6 +2,7 @@ package com.hbm.tileentity.machine;
 
 import com.hbm.api.energymk2.IEnergyProviderMK2;
 import com.hbm.api.fluidmk2.IFluidStandardTransceiverMK2;
+import com.hbm.api.redstoneoverradio.IRORValueProvider;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
@@ -9,6 +10,7 @@ import com.hbm.inventory.fluid.trait.FT_Coolable;
 import com.hbm.inventory.fluid.trait.FT_Coolable.CoolingType;
 import com.hbm.lib.DirPos;
 import com.hbm.tileentity.IBufPacketReceiver;
+import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IFluidCopiable;
 import com.hbm.tileentity.TileEntityLoadedBase;
 
@@ -20,7 +22,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class TileEntityTurbineBase extends TileEntityLoadedBase implements ITickable, IEnergyProviderMK2, IFluidStandardTransceiverMK2, IBufPacketReceiver, IFluidCopiable {
+public abstract class TileEntityTurbineBase extends TileEntityLoadedBase implements ITickable, IEnergyProviderMK2, IFluidStandardTransceiverMK2, IBufPacketReceiver, IFluidCopiable, IRORValueProvider, IConnectionAnchors {
 
     protected ByteBuf buf;
     public long powerBuffer;
@@ -126,6 +128,14 @@ public abstract class TileEntityTurbineBase extends TileEntityLoadedBase impleme
 
     public boolean doesResizeCompressor() {
         return false;
+    }
+
+    @Override
+    public void serializeInitial(ByteBuf buf) {
+        super.serialize(buf);
+        this.tanks[0].serialize(buf);
+        this.tanks[1].serialize(buf);
+        buf.writeLong(this.powerBuffer);
     }
 
     @Override

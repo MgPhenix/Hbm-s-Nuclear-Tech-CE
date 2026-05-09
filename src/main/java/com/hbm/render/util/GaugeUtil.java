@@ -41,13 +41,13 @@ public class GaugeUtil {
 	 * @param z The z-level (from GUI.zLevel)
 	 * @param progress Double from 0-1 how far the gauge has progressed
 	 */
-	public static void renderGauge(Gauge gauge, double x, double y, double z, double progress) {
+	public static void renderGauge(Gauge gauge, float x, float y, float z, float progress) {
 
 		Minecraft.getMinecraft().renderEngine.bindTexture(gauge.texture);
 
 		int frameNum = (int) Math.round((gauge.count - 1) * progress);
-		double singleFrame = 1D / (double)gauge.count;
-		double frameOffset = singleFrame * frameNum;
+		float singleFrame = 1F / gauge.count;
+		float frameOffset = singleFrame * frameNum;
 
 		NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
 		buf.appendPositionTexQuadUnchecked(
@@ -57,6 +57,10 @@ public class GaugeUtil {
 				x, y, z, 0, frameOffset
 		);
 		NTMImmediate.INSTANCE.draw();
+	}
+
+	public static void renderGauge(Gauge gauge, double x, double y, double z, double progress) {
+		renderGauge(gauge, (float) x, (float) y, (float) z, (float) progress);
 	}
 
 	public static void drawSmoothGauge(int x, int y, double z, double progress, double tipLength, double backLength, double backSide, int color) {
@@ -87,16 +91,25 @@ public class GaugeUtil {
 		float g_inner = (float)(color >> 8 & 255) / 255.0F;
 		float b_inner = (float)(color & 255) / 255.0F;
 
-		double mult = 1.5;
+		float xBase = (float) x;
+		float yBase = (float) y;
+		float zBase = (float) z;
+		float mult = 1.5F;
 		int outerColor = NTMBufferBuilder.packColor(r_outer, g_outer, b_outer, 1.0F);
 		int innerColor = NTMBufferBuilder.packColor(r_inner, g_inner, b_inner, 1.0F);
-		bufferbuilder.appendPositionColor(x + tip.x * mult, y + tip.y * mult, z, outerColor);
-		bufferbuilder.appendPositionColor(x + left.x * mult, y + left.y * mult, z, outerColor);
-		bufferbuilder.appendPositionColor(x + right.x * mult, y + right.y * mult, z, outerColor);
+		float tx = (float) tip.x;
+		float ty = (float) tip.y;
+		float lx = (float) left.x;
+		float ly = (float) left.y;
+		float rx = (float) right.x;
+		float ry = (float) right.y;
+		bufferbuilder.appendPositionColor(xBase + tx * mult, yBase + ty * mult, zBase, outerColor);
+		bufferbuilder.appendPositionColor(xBase + lx * mult, yBase + ly * mult, zBase, outerColor);
+		bufferbuilder.appendPositionColor(xBase + rx * mult, yBase + ry * mult, zBase, outerColor);
 
-		bufferbuilder.appendPositionColor(x + tip.x, y + tip.y, z, innerColor);
-		bufferbuilder.appendPositionColor(x + left.x, y + left.y, z, innerColor);
-		bufferbuilder.appendPositionColor(x + right.x, y + right.y, z, innerColor);
+		bufferbuilder.appendPositionColor(xBase + tx, yBase + ty, zBase, innerColor);
+		bufferbuilder.appendPositionColor(xBase + lx, yBase + ly, zBase, innerColor);
+		bufferbuilder.appendPositionColor(xBase + rx, yBase + ry, zBase, innerColor);
 
 		NTMImmediate.INSTANCE.draw();
 

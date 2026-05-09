@@ -60,11 +60,11 @@ public class ParticleMukeWave extends Particle {
         final int j = 240;
         final int k = 240;
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginParticlePositionTexColorLmap(GL11.GL_QUADS, 4);
-        double y = pY - 0.25D;
-        double x0 = pX - growth;
-        double x1 = pX + growth;
-        double z0 = pZ - growth;
-        double z1 = pZ + growth;
+        float y = pY - 0.25F;
+        float x0 = pX - growth;
+        float x1 = pX + growth;
+        float z0 = pZ - growth;
+        float z1 = pZ + growth;
         int packedColor = NTMBufferBuilder.packColor(1F, 1F, 1F, this.particleAlpha);
         int packedLightmap = NTMBufferBuilder.packLightmap(j, k);
         buf.appendParticlePositionTexColorLmapUnchecked(x0, y, z0, 1, 1, packedColor, packedLightmap);

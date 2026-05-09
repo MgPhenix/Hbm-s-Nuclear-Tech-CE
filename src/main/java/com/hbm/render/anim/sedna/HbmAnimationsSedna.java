@@ -67,7 +67,7 @@ public class HbmAnimationsSedna {
         int slot = player.inventory.currentItem;
         ItemStack stack = player.getHeldItem(EnumHand.MAIN_HAND);
 
-        if(stack == ItemStack.EMPTY)
+        if(stack.isEmpty())
             return null;
 
         if(slot < 0 || slot > 8) { //for freak of nature hotbars, probably won't work right but at least it doesn't crash

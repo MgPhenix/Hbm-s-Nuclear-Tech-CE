@@ -30,6 +30,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -48,6 +49,7 @@ public class TileEntityMachineDiesel extends TileEntityMachinePolluting implemen
     public static long maxPower = 50000;
     public long powerCap = 50000;
     public int age = 0;
+    private AxisAlignedBB bb;
     public FluidTankNTM tank;
 
     public boolean wasOn = false;
@@ -67,7 +69,7 @@ public class TileEntityMachineDiesel extends TileEntityMachinePolluting implemen
 
     public TileEntityMachineDiesel() {
         super(5, 100, true, true);
-        tank = new FluidTankNTM(Fluids.DIESEL, 4_000);
+        tank = new FluidTankNTM(Fluids.DIESEL, 4_000).withOwner(this);
     }
 
     @Override
@@ -115,7 +117,7 @@ public class TileEntityMachineDiesel extends TileEntityMachinePolluting implemen
             this.wasOn = false;
             for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
                 this.tryProvide(world, pos.getX() + dir.offsetX, pos.getY() + dir.offsetY, pos.getZ() + dir.offsetZ, dir);
-                this.sendSmoke(pos.getX() + dir.offsetX, pos.getX() + dir.offsetY, pos.getX() + dir.offsetZ, dir);
+                this.sendSmoke(pos.getX() + dir.offsetX, pos.getY() + dir.offsetY, pos.getZ() + dir.offsetZ, dir);
             }
 
             //Tank Management
@@ -325,5 +327,11 @@ public class TileEntityMachineDiesel extends TileEntityMachinePolluting implemen
     @SideOnly(Side.CLIENT)
     public GuiScreen provideGUI(int ID, EntityPlayer player, World world, int x, int y, int z) {
         return new GUIMachineDiesel(player.inventory, this);
+    }
+
+    @Override
+    public AxisAlignedBB getRenderBoundingBox() {
+        if (bb == null) bb = new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1);
+        return bb;
     }
 }

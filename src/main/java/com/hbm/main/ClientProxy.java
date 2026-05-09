@@ -8,13 +8,16 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.bomb.DigammaMatter;
 import com.hbm.blocks.fluid.FluidFogHandler;
 import com.hbm.blocks.generic.BMPowerBox;
+import com.hbm.blocks.generic.BlockFissure;
 import com.hbm.blocks.generic.BlockModDoor;
 import com.hbm.blocks.generic.TrappedBrick;
 import com.hbm.blocks.machine.BlockSeal;
 import com.hbm.blocks.machine.rbmk.RBMKDebrisRadiating;
 import com.hbm.command.CommandRadVisClient;
 import com.hbm.config.GeneralConfig;
-import com.hbm.entity.grenade.*;
+import com.hbm.entity.grenade.EntityDisperserCanister;
+import com.hbm.entity.grenade.EntityGrenadeBouncyGeneric;
+import com.hbm.entity.grenade.EntityGrenadeImpactGeneric;
 import com.hbm.entity.particle.*;
 import com.hbm.entity.projectile.EntityAcidBomb;
 import com.hbm.entity.projectile.EntityDischarge;
@@ -47,7 +50,6 @@ import com.hbm.render.anim.sedna.BusAnimationSedna;
 import com.hbm.render.anim.sedna.BusAnimationSequenceSedna;
 import com.hbm.render.anim.sedna.HbmAnimationsSedna;
 import com.hbm.render.entity.ElectricityRenderer;
-import com.hbm.render.entity.RenderBoat;
 import com.hbm.render.entity.RenderMetaSensitiveItem;
 import com.hbm.render.item.ItemRenderMissile;
 import com.hbm.render.item.ItemRenderMissileGeneric;
@@ -55,10 +57,8 @@ import com.hbm.render.item.ItemRenderMissileGeneric.RenderMissileType;
 import com.hbm.render.item.ItemRenderMissilePart;
 import com.hbm.render.item.weapon.ItemRenderGunAnim;
 import com.hbm.render.item.weapon.sedna.*;
-import com.hbm.render.loader.HFRModelReloader;
 import com.hbm.render.misc.MissilePart;
 import com.hbm.render.modelrenderer.EgonBackpackRenderer;
-import com.hbm.render.tileentity.ItemRendererProviderRegistry;
 import com.hbm.render.util.RenderInfoSystemLegacy;
 import com.hbm.render.util.RenderOverhead;
 import com.hbm.sound.AudioWrapper;
@@ -195,58 +195,16 @@ public class ClientProxy extends ServerProxy {
         Jars.initJars();
 
         ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new QMAWLoader());
-        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new HFRModelReloader());
+//        ((IReloadableResourceManager) Minecraft.getMinecraft().getResourceManager()).registerReloadListener(new HFRModelReloader());
 
 //        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMachineAssembler.class, new RenderAssembler());
         // TODO: replace it with EntityCombineBallNT
         /*RenderingRegistry.registerEntityRenderingHandler(EntityCombineBall.class, (RenderManager man) -> {
         });*/
         RenderingRegistry.registerEntityRenderingHandler(EntityDischarge.class, ElectricityRenderer.FACTORY);
-        RenderingRegistry.registerEntityRenderingHandler(EntityGrenadeGeneric.class, (RenderManager man) -> {
-            return new RenderSnowball<EntityGrenadeGeneric>(man, ModItems.grenade_generic, Minecraft.getMinecraft().getRenderItem());
-        });
-        registerGrenadeRenderer(EntityGrenadeStrong.class, ModItems.grenade_strong);
-        registerGrenadeRenderer(EntityGrenadeFrag.class, ModItems.grenade_frag);
-        registerGrenadeRenderer(EntityGrenadeFire.class, ModItems.grenade_fire);
-        registerGrenadeRenderer(EntityGrenadeCluster.class, ModItems.grenade_cluster);
-        registerGrenadeRenderer(EntityGrenadeElectric.class, ModItems.grenade_electric);
-        registerGrenadeRenderer(EntityGrenadePoison.class, ModItems.grenade_poison);
-        registerGrenadeRenderer(EntityGrenadeGas.class, ModItems.grenade_gas);
-        registerGrenadeRenderer(EntityGrenadeSchrabidium.class, ModItems.grenade_schrabidium);
-        registerGrenadeRenderer(EntityGrenadePulse.class, ModItems.grenade_pulse);
-        registerGrenadeRenderer(EntityGrenadePlasma.class, ModItems.grenade_plasma);
-        registerGrenadeRenderer(EntityGrenadeTau.class, ModItems.grenade_tau);
-        registerGrenadeRenderer(EntityGrenadeCloud.class, ModItems.grenade_cloud);
-        registerGrenadeRenderer(EntityGrenadePC.class, ModItems.grenade_pink_cloud);
-        registerGrenadeRenderer(EntityGrenadeSmart.class, ModItems.grenade_smart);
-        registerGrenadeRenderer(EntityGrenadeMIRV.class, ModItems.grenade_mirv);
-        registerGrenadeRenderer(EntityGrenadeBreach.class, ModItems.grenade_breach);
-        registerGrenadeRenderer(EntityGrenadeBurst.class, ModItems.grenade_burst);
-        registerGrenadeRenderer(EntityGrenadeLemon.class, ModItems.grenade_lemon);
-        registerGrenadeRenderer(EntityGrenadeZOMG.class, ModItems.grenade_zomg);
-        registerGrenadeRenderer(EntityGrenadeSolinium.class, ModItems.grenade_solinium);
-        registerGrenadeRenderer(EntityGrenadeShrapnel.class, ModItems.grenade_shrapnel);
-        registerGrenadeRenderer(EntityGrenadeBlackHole.class, ModItems.grenade_black_hole);
-        registerGrenadeRenderer(EntityGrenadeGascan.class, ModItems.grenade_gascan);
-        registerGrenadeRenderer(EntityGrenadeNuke.class, ModItems.grenade_nuke);
-        registerGrenadeRenderer(EntityGrenadeNuclear.class, ModItems.grenade_nuclear);
-        registerGrenadeRenderer(EntityGrenadeIFGeneric.class, ModItems.grenade_if_generic);
-        registerGrenadeRenderer(EntityGrenadeIFHE.class, ModItems.grenade_if_he);
-        registerGrenadeRenderer(EntityGrenadeIFBouncy.class, ModItems.grenade_if_bouncy);
-        registerGrenadeRenderer(EntityGrenadeIFSticky.class, ModItems.grenade_if_sticky);
-        registerGrenadeRenderer(EntityGrenadeIFImpact.class, ModItems.grenade_if_impact);
-        registerGrenadeRenderer(EntityGrenadeIFIncendiary.class, ModItems.grenade_if_incendiary);
-        registerGrenadeRenderer(EntityGrenadeIFToxic.class, ModItems.grenade_if_toxic);
-        registerGrenadeRenderer(EntityGrenadeIFConcussion.class, ModItems.grenade_if_concussion);
-        registerGrenadeRenderer(EntityGrenadeIFBrimstone.class, ModItems.grenade_if_brimstone);
-        registerGrenadeRenderer(EntityGrenadeIFMystery.class, ModItems.grenade_if_mystery);
-        registerGrenadeRenderer(EntityGrenadeIFSpark.class, ModItems.grenade_if_spark);
-        registerGrenadeRenderer(EntityGrenadeIFHopwire.class, ModItems.grenade_if_hopwire);
-        registerGrenadeRenderer(EntityGrenadeIFNull.class, ModItems.grenade_if_null);
-        registerGrenadeRenderer(EntityGrenadeDynamite.class, ModItems.stick_dynamite);
         registerGrenadeRenderer(EntityAcidBomb.class, Items.SLIME_BALL);
         registerGrenadeRenderer(EntityGrenadeBouncyGeneric.class, ModItems.stick_dynamite_fishing);
-        registerGrenadeRenderer(EntityGrenadeImpactGeneric.class, ModItems.grenade_kyiv);
+        registerGrenadeRenderer(EntityGrenadeImpactGeneric.class, ModItems.stick_dynamite);
         registerMetaSensitiveGrenade(EntityDisperserCanister.class, ModItems.disperser_canister);
         registerMetaSensitiveGrenade(EntityDisperserCanister.class, ModItems.glyphid_gland);
 
@@ -258,10 +216,11 @@ public class ClientProxy extends ServerProxy {
         ModelLoader.setCustomStateMapper(ModBlocks.toxic_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
         ModelLoader.setCustomStateMapper(ModBlocks.mud_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
         ModelLoader.setCustomStateMapper(ModBlocks.acid_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
-        ModelLoader.setCustomStateMapper(ModBlocks.bromine_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
         ModelLoader.setCustomStateMapper(ModBlocks.schrabidic_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
         ModelLoader.setCustomStateMapper(ModBlocks.corium_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
         ModelLoader.setCustomStateMapper(ModBlocks.volcanic_lava_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
+        ModelLoader.setCustomStateMapper(ModBlocks.rad_lava_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
+        ModelLoader.setCustomStateMapper(ModBlocks.ore_volcano, new StateMap.Builder().ignore(BlockFissure.CRATER).build());
         ModelLoader.setCustomStateMapper(ModBlocks.sulfuric_acid_block, new StateMap.Builder().ignore(BlockFluidClassic.LEVEL).build());
 
         ModelLoader.setCustomStateMapper(ModBlocks.seal_controller, new StateMap.Builder().ignore(BlockSeal.ACTIVATED).build());
@@ -269,6 +228,7 @@ public class ClientProxy extends ServerProxy {
         ModelLoader.setCustomStateMapper(ModBlocks.brick_jungle_trap, new StateMap.Builder().ignore(TrappedBrick.TYPE).build());
         ModelLoader.setCustomStateMapper(ModBlocks.stone_porous, new StateMap.Builder().ignore(BlockStone.VARIANT).build());
         ModelLoader.setCustomStateMapper(ModBlocks.volcano_core, new StateMap.Builder().ignore(BlockDummyable.META).build());
+        ModelLoader.setCustomStateMapper(ModBlocks.volcano_rad_core, new StateMap.Builder().ignore(BlockDummyable.META).build());
         ModelLoader.setCustomStateMapper(ModBlocks.bm_power_box, new StateMap.Builder().ignore(BMPowerBox.FACING, BMPowerBox.IS_ON).build());
         ModelLoader.setCustomStateMapper(ModBlocks.floodlight, new StateMap.Builder().ignore(com.hbm.blocks.machine.Floodlight.META).build());
         ModelLoader.setCustomStateMapper(ModBlocks.spotlight_beam, new StateMap.Builder().ignore(com.hbm.blocks.machine.SpotlightBeam.META).build());
@@ -1812,10 +1772,11 @@ public class ClientProxy extends ServerProxy {
                 }
             }
             case "tau" -> {
+                boolean small = data.getBoolean("small");
                 for (int i = 0; i < data.getByte("count"); i++)
                     Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleHbmSpark(world, x, y, z,
-                            rand.nextGaussian() * 0.05, 0.05, rand.nextGaussian() * 0.05));
-                Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleHadron(world, x, y, z));
+                            rand.nextGaussian() * 0.05, 0.05, rand.nextGaussian() * 0.05).makeSmall(small));
+                Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleHadron(world, x, y, z).makeSmall(small));
             }
             case "vanish" -> vanish(data.getInteger("ent"));
             case "giblets" -> {
@@ -1888,6 +1849,7 @@ public class ClientProxy extends ServerProxy {
             case JETPACK -> Minecraft.getMinecraft().gameSettings.keyBindJump.isKeyDown();
             case TOGGLE_JETPACK -> HbmKeybinds.jetpackKey.isKeyDown();
             case TOGGLE_HEAD -> HbmKeybinds.hudKey.isKeyDown();
+            case TOGGLE_MAGNET -> HbmKeybinds.magnetKey.isKeyDown();
             case RELOAD -> HbmKeybinds.reloadKey.isKeyDown();
             case DASH -> HbmKeybinds.dashKey.isKeyDown();
             case CRANE_UP -> HbmKeybinds.craneUpKey.isKeyDown();
@@ -1898,6 +1860,7 @@ public class ClientProxy extends ServerProxy {
             case ABILITY_CYCLE -> HbmKeybinds.abilityCycle.isKeyDown();
             case ABILITY_ALT -> HbmKeybinds.abilityAlt.isKeyDown();
             case TOOL_ALT -> HbmKeybinds.copyToolAlt.isKeyDown();
+            case TOOL_CTRL -> HbmKeybinds.copyToolCtrl.isKeyDown();
             case GUN_PRIMARY -> Mouse.isButtonDown(0);
             case GUN_SECONDARY -> HbmKeybinds.gunSecondaryKey.isKeyDown();
             case GUN_TERTIARY -> HbmKeybinds.gunTertiaryKey.isKeyDown();
@@ -1946,7 +1909,7 @@ public class ClientProxy extends ServerProxy {
 
     @Override
     public void checkGLCaps() {
-        GLCompat.error = GLCompat.init();
+        // Reading GLCompat.error triggers its <clinit>, which runs the caps probe.
         if (GLCompat.error.isEmpty()) {
             MainRegistry.logger.log(Level.INFO, "Advanced rendering fully supported");
         } else {
@@ -1962,14 +1925,9 @@ public class ClientProxy extends ServerProxy {
         OBJLoader.INSTANCE.addDomain(Tags.MODID);
         ModelLoaderRegistry.registerLoader(DynamicPlaceholderModelLoader.INSTANCE);
 
-        AutoRegistry.preInitClient();
         AutoRegistry.registerRenderInfo();
-        NTMClientRegistry.bindTeisrs(ItemRendererProviderRegistry.getTileEntityProviders());
-        NTMClientRegistry.bindTeisrs(ItemRendererProviderRegistry.getItemProviders());
 
-        // IItemRendererProvider is not applicable to Render<T extends Entity>
-        NTMClientRegistry.bindTeisr(Item.getItemFromBlock(ModBlocks.boat), new RenderBoat.BoatItemRenderer());
-        registerMissileItems(null);
+        ClientHttpHandler.preinit();
     }
 
     @Deprecated

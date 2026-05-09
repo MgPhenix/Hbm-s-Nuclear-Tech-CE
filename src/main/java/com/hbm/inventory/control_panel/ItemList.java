@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.GlStateManager.SourceFactor;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -39,13 +41,27 @@ public class ItemList {
 		this.action = a;
 		isClosed = false;
 	}
-	
+
+    public ItemList addItems(String item) {
+        itemNames.add(item);
+        return this;
+    }
+
+    public ItemList addItems(String item1, String item2) {
+        itemNames.add(item1);
+        itemNames.add(item2);
+        return this;
+    }
+
 	public ItemList addItems(String... items){
-		for(String i : items){
-			itemNames.add(i);
-		}
+        Collections.addAll(itemNames, items);
 		return this;
 	}
+
+    public ItemList addItems(Collection<String> items){
+        itemNames.addAll(items);
+        return this;
+    }
 	
 	public void render(float mouseX, float mouseY){
 		if(isClosed)

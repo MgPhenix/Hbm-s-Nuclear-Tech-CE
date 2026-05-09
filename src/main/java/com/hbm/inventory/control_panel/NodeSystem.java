@@ -2,6 +2,10 @@ package com.hbm.inventory.control_panel;
 
 import com.hbm.Tags;
 import com.hbm.inventory.control_panel.nodes.*;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValue.DataType;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
+import com.hbm.inventory.control_panel.types.DataValueString;
 import com.hbm.render.NTMRenderHelper;
 import com.hbm.render.util.NTMImmediate;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -111,6 +115,9 @@ public class NodeSystem {
 		for (int i = 0; i < nodes.getKeySet().size(); i ++) {
 			NBTTagCompound nodeTag = nodes.getCompoundTag("n"+i);
 			Node node = Node.nodeFromNBT(nodeTag, this);
+
+			if (node == null)
+				node = new UnknownNode(0,0,nodeTag);
 
 			if (node instanceof NodeOutput) {
 				outputNodes.add((NodeOutput) node);
@@ -272,6 +279,19 @@ public class NodeSystem {
 
 		List<Node> pastedNodes = new ArrayList<>(pastedSystem.nodes.size());
 		for(Node node : pastedSystem.nodes) {
+			for (NodeConnection input : node.inputs) {
+				if (input.connection == null) {
+					input.connectionIndex = -1;
+					input.drawsLine = false;
+				}
+			}
+			// i don't think output nodes maintain a connection but just to be safe
+			for (NodeConnection output : node.outputs) {
+				if (output.connection == null) {
+					output.connectionIndex = -1;
+					output.drawsLine = false;
+				}
+			}
 			node.setPosition(node.posX + dX, node.posY + dY);
 			addNode(node);
 			if(node instanceof NodeFunction) {
@@ -291,8 +311,15 @@ public class NodeSystem {
 
 		NodeSystem pastedSystem = new NodeSystem(parent);
 		pastedSystem.readFromNBT(tag);
+		Map<String, DataValue> allowedVars = new Object2ObjectOpenHashMap<>(evt.vars);
+		if(sendGraph) {
+			allowedVars.put("to index", new DataValueFloat(0));
+		} else {
+			allowedVars.put("tag", new DataValueString(""));
+			allowedVars.put("from index", new DataValueFloat(0));
+		}
 		return pastedSystem.hasCompatibleGraphNodes(sendGraph)
-				&& pastedSystem.hasCompatibleEventInputs(evt.vars, sendGraph ? "to index" : "from index")
+				&& pastedSystem.hasCompatibleEventInputs(allowedVars, sendGraph ? "to index" : "from index")
 				&& pastedSystem.hasCompatibleVariableReferences();
 	}
 
@@ -450,7 +477,7 @@ public class NodeSystem {
 						return;
 				}
 				if(intersectsBox && NTMRenderHelper.intersects2DBox(gridMX, gridMY, c.getValueBox())){
-					if(currentTypingBox != c && c.connection == null){
+					if(currentTypingBox != c && c.connection == null && c.type != DataType.COMPOSITE){
 						c.isTyping = true;
 						c.startTyping();
 						if(currentTypingBox != null){
@@ -542,12 +569,14 @@ public class NodeSystem {
 	}
 	
 	@SideOnly(Side.CLIENT)
-	public void keyTyped(char c, int key){
+	public boolean keyTyped(char c, int key){
 		if(currentTypingBox != null){
 			currentTypingBox.keyTyped(c, key);
 			if(!currentTypingBox.isTyping())
 				currentTypingBox = null;
+			return true;
 		}
+		return false;
 	}
 
 	public void resetCachedValues(){
@@ -569,7 +598,7 @@ public class NodeSystem {
 			}
 		}
 		for (NodeOutput o : outputNodes) {
-			o.doOutput(panel.parent, ctrl.sendNodeMap, ctrl.connectedSet);
+			o.doOutput(panel.parent, ctrl.sendNodeMap, ctrl.taggedLinks);
 		}
 	}
 

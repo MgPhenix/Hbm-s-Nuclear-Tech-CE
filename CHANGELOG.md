@@ -7,35 +7,21 @@
 >   - For changelog updates, verify actual diffs instead of trusting commit subjects; summarize the net result as if the
 > changes were squashed into one commit. That is, fold follow-up fixes into the original feature/change entry where
 > appropriate, and omit anything that was fully reverted before release.
+>   - Avoid explaining technical details in the changelog; the target audience is end-users, not developers.
 >   - SUBSTANTIAL CHANGES are for changes that could substantially impact backward compatibility, e.g. fluid id
 > shifting. The major version number must be bumped.  
 >   - Breaking Changes are for casual breakages like the removal of a block(minor version bump), or a significant API
 > change(major API bump).  
 >   - Changes, New Features correspond to a minor bump.  
 >   - Fixes/Performance/Misc correspond to a minor or patch bump.
-> - Previous public release: 2.2.0.0
-> - Next release: at least 2.2.1.0
+> - Previous public release: 2.5.0.1
+> - Next release: at least 2.5.0.2
 
 ### SUBSTANTIAL CHANGES
-
 ### Breaking Changes
-
 ### Fixes
-- Fixed impact overworld provider rebinding clashing with OTG / other mods' custom provider
-- Fixed RBMK Display facing/render
-- Fixed RBMK columns' extreme placing / removing lag due to improper quads caching
-- Mitigated duct and cable placing / removing lag due to eager net destruction and reconstruction
-- Fixed potential CME when switching door states
-
+- 2.5 regression that caused boilers crashing the game on load
 ### Changes
-- JEI recipe lookup for `fluid_icon` items is now forwarded to their Forge fluid mirror
-
 ### New Features
-
 ### Performance
-- Moved Tau/Vortex particles, chemical projectiles, black-hole effects, and RBMK console/display overlays onto
-`NTMImmediate` / fast-buffer rendering paths, reducing legacy Tessellator overhead and aligning them with the newer
-client rendering utilities
-- Reworked rebar concrete-fill rendering into a dedicated client renderer. The render-limit client config is removed.
-
 ### Misc

@@ -3,6 +3,8 @@ package com.hbm.inventory.control_panel.nodes;
 import com.hbm.inventory.control_panel.*;
 import com.hbm.inventory.control_panel.modular.INodeLoader;
 import com.hbm.inventory.control_panel.modular.NTMControlPanelRegistry;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.render.NTMRenderHelper;
 import com.hbm.render.util.NTMImmediate;
 import net.minecraft.client.Minecraft;

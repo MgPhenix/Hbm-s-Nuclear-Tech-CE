@@ -97,13 +97,25 @@ public class ParticleVortexBeam extends Particle {
         OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240, 240);
         float alpha = this.particleAlpha;
         NTMBufferBuilder fastBuffer = NTMImmediate.INSTANCE.beginPositionTexColorQuads(MathHelper.ceil(alpha));
+        float point1X = (float) point1.x;
+        float point1Y = (float) point1.y;
+        float point1Z = (float) point1.z;
+        float point2X = (float) point2.x;
+        float point2Y = (float) point2.y;
+        float point2Z = (float) point2.z;
+        float dissolveX = (float) dissolveAmount.x;
+        float dissolveY = (float) dissolveAmount.y;
+        float dissolveZ = (float) dissolveAmount.z;
+        float axisX = (float) particleAxis.x;
+        float axisY = (float) particleAxis.y;
+        float axisZ = (float) particleAxis.z;
         while(alpha > 0){
         	int packedColor = NTMBufferBuilder.packColor(particleRed, particleGreen, particleBlue, MathHelper.clamp(alpha, 0, 1));
         	fastBuffer.appendPositionTexColorQuadUnchecked(
-        			point2.x + dissolveAmount.x, point2.y + dissolveAmount.y, point2.z + dissolveAmount.z, 1, 0, packedColor,
-        			point1.x + dissolveAmount.x, point1.y + dissolveAmount.y, point1.z + dissolveAmount.z, 1, 1, packedColor,
-        			point1.x + particleAxis.x, point1.y + particleAxis.y, point1.z + particleAxis.z, 0, 1, packedColor,
-        			point2.x + particleAxis.x, point2.y + particleAxis.y, point2.z + particleAxis.z, 0, 0, packedColor
+        			point2X + dissolveX, point2Y + dissolveY, point2Z + dissolveZ, 1, 0, packedColor,
+        			point1X + dissolveX, point1Y + dissolveY, point1Z + dissolveZ, 1, 1, packedColor,
+        			point1X + axisX, point1Y + axisY, point1Z + axisZ, 0, 1, packedColor,
+        			point2X + axisX, point2Y + axisY, point2Z + axisZ, 0, 0, packedColor
         	);
         	alpha -= 1;
         }

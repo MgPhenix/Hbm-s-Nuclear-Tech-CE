@@ -5,8 +5,8 @@ import com.hbm.handler.ArmorModHandler;
 import com.hbm.items.ModItems;
 import com.hbm.items.gear.ArmorFSB;
 import com.hbm.main.ResourceManager;
-import com.hbm.render.item.ItemRenderBaseFMM;
 import com.hbm.render.item.ItemRenderBase;
+import com.hbm.render.item.ItemRenderBaseFMM;
 import com.hbm.render.model.ModelArmorTrenchmaster;
 import com.hbm.render.tileentity.IItemRendererProvider;
 import com.hbm.render.util.ViewModelPositonDebugger;
@@ -49,7 +49,7 @@ public class ArmorTrenchmaster extends ArmorFSB implements IItemRendererProvider
 
   public static boolean isTrenchMaster(EntityPlayer player) {
     if (player == null) return false;
-    return player.inventory.armorItemInSlot(2) != ItemStack.EMPTY
+    return !player.inventory.armorItemInSlot(2).isEmpty()
         && player.inventory.armorItemInSlot(2).getItem() == ModItems.trenchmaster_plate
         && ArmorFSB.hasFSBArmor(player);
   }

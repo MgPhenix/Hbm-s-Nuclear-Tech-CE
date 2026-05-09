@@ -228,7 +228,9 @@ public class BlockWandLogic extends BlockContainerBakeable implements ILookOverl
 
             private void replace() {
                 if (!(world.getBlockState(pos).getBlock() instanceof BlockWandLogic)) {
-                    MainRegistry.logger.warn("Somehow the block at: " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + " isn't a logic block but we're doing a TE update as if it is, cancelling!");
+                    MainRegistry.logger.warn(
+                            "Somehow the block at: {}, {}, {} isn't a logic block but we're doing a TE update as if it is, cancelling!",
+                            pos.getX(), pos.getY(), pos.getZ());
                     return;
                 }
                 world.setBlockState(pos, ModBlocks.logic_block.getDefaultState(), 2);

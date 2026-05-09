@@ -6,7 +6,9 @@ import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.gui.GuiInfoContainer;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.IItemFluidIdentifier;
+import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.util.RenderUtil;
+import net.minecraft.tileentity.TileEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -58,6 +60,18 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
     int maxFluid;
     int pressure = 0;
 
+    @Nullable
+    private TileEntity owner;
+
+    public FluidTankNTM withOwner(TileEntity te) {
+        this.owner = te;
+        return this;
+    }
+
+    private void onTypeChanged() {
+        IConnectionAnchors.notifyAnchors(this.owner);
+    }
+
     public FluidTankNTM(@NotNull FluidType type, int maxFluid) {
         this.type = type;
         this.maxFluid = maxFluid;
@@ -69,7 +83,11 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
         this.maxFluid = maxFluid;
         this.index = index;
     }
-
+    public byte getRedstoneComparatorPower() {
+        if(getFill() == 0) return 0;
+        double frac = (double) getFill() / (double) getMaxFill() * 15D;
+        return (byte) (MathHelper.clamp((int) frac, 1, 15));
+    }
     public FluidTankNTM withPressure(int pressure) {
         if (this.pressure != pressure) this.setFill(0);
         this.pressure = pressure;
@@ -89,12 +107,15 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
 
         this.type = type;
         this.setFill(0);
+        onTypeChanged();
     }
 
     public void resetTank() {
+        boolean changed = this.type != Fluids.NONE;
         this.type = Fluids.NONE;
         this.fluid = 0;
         this.pressure = 0;
+        if (changed) onTypeChanged();
     }
 
     /** Changes type and pressure based on a fluid stack, useful for changing tank types based on recipes */
@@ -192,6 +213,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
                 if (type != newType) {
                     type = newType;
                     fluid = 0;
+                    onTypeChanged();
                     return true;
                 }
 
@@ -202,6 +224,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
                     slots.insertItem(out, slots.getStackInSlot(in).copy(), false);
                     slots.getStackInSlot(in).shrink(1);
                     fluid = 0;
+                    onTypeChanged();
                     return true;
                 }
             }
@@ -404,6 +427,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
             if (doFill) {
                 this.type = incomingType;
                 this.setFill(toTransfer);
+                onTypeChanged();
             }
             return toTransfer;
         } else {
@@ -427,6 +451,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
             if (doFill) {
                 this.type = incomingType;
                 this.setFill(toTransfer);
+                onTypeChanged();
             }
             return toTransfer;
         } else {

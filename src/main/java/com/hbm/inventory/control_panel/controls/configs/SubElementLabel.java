@@ -1,8 +1,6 @@
 package com.hbm.inventory.control_panel.controls.configs;
 
-import com.hbm.inventory.control_panel.DataValue;
-import com.hbm.inventory.control_panel.DataValueFloat;
-import com.hbm.inventory.control_panel.DataValueString;
+import com.hbm.inventory.control_panel.types.DataValue;
 import com.hbm.inventory.control_panel.GuiControlEdit;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.NTMRenderHelper;
@@ -14,7 +12,6 @@ import net.minecraftforge.fml.client.config.GuiSlider;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class SubElementLabel extends SubElementBaseConfig {

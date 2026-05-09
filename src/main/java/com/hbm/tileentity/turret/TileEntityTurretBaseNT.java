@@ -2,6 +2,7 @@ package com.hbm.tileentity.turret;
 
 import com.hbm.api.energymk2.IEnergyReceiverMK2;
 import com.hbm.api.entity.IRadarDetectableNT;
+import com.hbm.api.redstoneoverradio.IRORInteractive;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.capability.NTMEnergyCapabilityWrapper;
 import com.hbm.entity.logic.EntityBomber;
@@ -43,7 +44,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
@@ -58,6 +58,7 @@ import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 @Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")})
-public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase implements IEnergyReceiverMK2, IControllable, IControlReceiver, ITickable, SimpleComponent, CompatHandler.OCComponent {
+public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase implements IEnergyReceiverMK2, IControllable, IControlReceiver, ITickable, SimpleComponent, IRORInteractive, CompatHandler.OCComponent {
 
 	@Override
 	public boolean hasPermission(EntityPlayer player){
@@ -117,6 +118,7 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 	public int stattrak;
 	public int casingDelay;
 	protected SpentCasing cachedCasingConfig = null;
+	protected List<String> cachedWhitelist = null;
 
 	/**
 	 * X
@@ -128,6 +130,23 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 
 	public TileEntityTurretBaseNT(){
 		super(11, false, true);
+	}
+
+	@Override
+	protected ItemStackHandler getNewInventory(int scount, int slotlimit) {
+		return new ItemStackHandler(scount) {
+			@Override
+			protected void onContentsChanged(int slot) {
+				super.onContentsChanged(slot);
+				markDirty();
+				if(slot == 0) cachedWhitelist = null;
+			}
+
+			@Override
+			public int getSlotLimit(int slot) {
+				return slotlimit;
+			}
+		};
 	}
 
 	@Override
@@ -386,6 +405,9 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 	 */
 	public List<String> getWhitelist() {
 
+		if(cachedWhitelist != null)
+			return cachedWhitelist;
+
 		if(inventory.getStackInSlot(0).getItem() == ModItems.turret_chip) {
 
 			String[] array = ItemTurretBiometry.getNames(inventory.getStackInSlot(0));
@@ -393,7 +415,7 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 			if(array == null)
 				return null;
 
-			return Arrays.asList(ItemTurretBiometry.getNames(inventory.getStackInSlot(0)));
+			return cachedWhitelist = new ArrayList<>(Arrays.asList(array));
 		}
 
 		return null;
@@ -407,6 +429,7 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 
 		if(inventory.getStackInSlot(0).getItem() == ModItems.turret_chip) {
 			ItemTurretBiometry.addName(inventory.getStackInSlot(0), name);
+			if(cachedWhitelist != null) cachedWhitelist.add(name);
 		}
 	}
 
@@ -430,6 +453,8 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 
 			for(String name : names)
 				ItemTurretBiometry.addName(inventory.getStackInSlot(0), name);
+
+			if(cachedWhitelist != null) cachedWhitelist.remove(index);
 		}
 	}
 
@@ -856,7 +881,9 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 
 	@Override
 	public AxisAlignedBB getRenderBoundingBox() {
-		return TileEntity.INFINITE_EXTENT_AABB;
+		double r = getBarrelLength() + 2;
+		double h = getHeightOffset();
+		return new AxisAlignedBB(pos.getX() - r, pos.getY(), pos.getZ() - r, pos.getX() + 1 + r, pos.getY() + h + r + 1, pos.getZ() + 1 + r);
 	}
 
 	@Override
@@ -1121,5 +1148,56 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 				return isAligned(context, args);
 		}
 		throw new NoSuchMethodException();
+	}
+
+	@Override
+	public String[] getFunctionInfo() {
+		return new String[] {
+				PREFIX_FUNCTION + "setActive" + NAME_SEPARATOR + "active (0 or 1)",
+				PREFIX_FUNCTION + "targetPlayers" + NAME_SEPARATOR + "enabled (0 or 1)",
+				PREFIX_FUNCTION + "targetAnimals" + NAME_SEPARATOR + "enabled (0 or 1)",
+				PREFIX_FUNCTION + "targetMobs" + NAME_SEPARATOR + "enabled (0 or 1)",
+				PREFIX_FUNCTION + "targetMachines" + NAME_SEPARATOR + "enabled (0 or 1)",
+				PREFIX_FUNCTION + "addWhitelist" + NAME_SEPARATOR + "name",
+				PREFIX_FUNCTION + "removeWhitelist" + NAME_SEPARATOR + "name",
+		};
+	}
+
+	@Override
+	public String runRORFunction(String name, String[] params) {
+		if((PREFIX_FUNCTION + "setActive").equals(name) && params.length > 0) {
+			this.isOn = IRORInteractive.parseInt(params[0], 0, 1) == 1;
+			this.markChanged();
+		}
+		if((PREFIX_FUNCTION + "targetPlayers").equals(name) && params.length > 0) {
+			this.targetPlayers = IRORInteractive.parseInt(params[0], 0, 1) == 1;
+			this.markChanged();
+		}
+		if((PREFIX_FUNCTION + "targetAnimals").equals(name) && params.length > 0) {
+			this.targetAnimals = IRORInteractive.parseInt(params[0], 0, 1) == 1;
+			this.markChanged();
+		}
+		if((PREFIX_FUNCTION + "targetMobs").equals(name) && params.length > 0) {
+			this.targetMobs = IRORInteractive.parseInt(params[0], 0, 1) == 1;
+			this.markChanged();
+		}
+		if((PREFIX_FUNCTION + "targetMachines").equals(name) && params.length > 0) {
+			this.targetMachines = IRORInteractive.parseInt(params[0], 0, 1) == 1;
+			this.markChanged();
+		}
+		if((PREFIX_FUNCTION + "addWhitelist").equals(name) && params.length > 0) {
+			String playerName = params[0];
+			List<String> whitelist = this.getWhitelist();
+			if(!whitelist.contains(playerName)) this.addName(playerName);
+			this.markChanged();
+		}
+		if((PREFIX_FUNCTION + "removeWhitelist").equals(name) && params.length > 0) {
+			String playerName = params[0];
+			List<String> whitelist = this.getWhitelist();
+			if(whitelist.contains(playerName)) this.removeName(whitelist.indexOf(playerName));
+			this.markChanged();
+		}
+
+		return null;
 	}
 }

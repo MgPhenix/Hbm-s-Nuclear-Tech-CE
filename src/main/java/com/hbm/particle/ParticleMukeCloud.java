@@ -106,21 +106,21 @@ public class ParticleMukeCloud extends Particle {
         final int j = 240, k = 240;
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginParticlePositionTexColorLmap(GL11.GL_QUADS, 4);
         float r = 1F, g = 1F, b = 1F, a = this.particleAlpha;
-        double x0 = pX - rotationX * particleScale - rotationXY * particleScale;
-        double y0 = pY - 1 * particleScale;
-        double z0 = pZ - rotationYZ * particleScale - rotationXZ * particleScale;
+        float x0 = pX - rotationX * particleScale - rotationXY * particleScale;
+        float y0 = pY - 1 * particleScale;
+        float z0 = pZ - rotationYZ * particleScale - rotationXZ * particleScale;
 
-        double x1 = pX - rotationX * particleScale + rotationXY * particleScale;
-        double y1 = pY + 1 * particleScale;
-        double z1 = pZ - rotationYZ * particleScale + rotationXZ * particleScale;
+        float x1 = pX - rotationX * particleScale + rotationXY * particleScale;
+        float y1 = pY + 1 * particleScale;
+        float z1 = pZ - rotationYZ * particleScale + rotationXZ * particleScale;
 
-        double x2 = pX + rotationX * particleScale + rotationXY * particleScale;
-        double y2 = pY + 1 * particleScale;
-        double z2 = pZ + rotationYZ * particleScale + rotationXZ * particleScale;
+        float x2 = pX + rotationX * particleScale + rotationXY * particleScale;
+        float y2 = pY + 1 * particleScale;
+        float z2 = pZ + rotationYZ * particleScale + rotationXZ * particleScale;
 
-        double x3 = pX + rotationX * particleScale - rotationXY * particleScale;
-        double y3 = pY - 1 * particleScale;
-        double z3 = pZ + rotationYZ * particleScale - rotationXZ * particleScale;
+        float x3 = pX + rotationX * particleScale - rotationXY * particleScale;
+        float y3 = pY - 1 * particleScale;
+        float z3 = pZ + rotationYZ * particleScale - rotationXZ * particleScale;
 
         int packedColor = NTMBufferBuilder.packColor(r, g, b, a);
         int packedLightmap = NTMBufferBuilder.packLightmap(j, k);

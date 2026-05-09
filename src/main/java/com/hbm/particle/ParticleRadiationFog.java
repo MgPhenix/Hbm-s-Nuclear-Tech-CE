@@ -134,15 +134,15 @@ public class ParticleRadiationFog extends Particle {
         int packedColor = NTMBufferBuilder.packColor(COLOR_RED, COLOR_GREEN, COLOR_BLUE, alpha);
         NTMBufferBuilder buffer = NTMImmediate.INSTANCE.beginParticlePositionTexColorLmap(GL11.GL_QUADS, QUAD_COUNT * 4);
         for (int i = 0; i < QUAD_COUNT; i++) {
-            double size = SIZE_MUL[i] * this.particleScale;
-            double pX = baseX + OFF_X[i] + JIT_X[i];
-            double pY = baseY + OFF_Y[i] + JIT_Y[i];
-            double pZ = baseZ + OFF_Z[i] + JIT_Z[i];
+            float size = (float) (SIZE_MUL[i] * this.particleScale);
+            float pX = (float) (baseX + OFF_X[i] + JIT_X[i]);
+            float pY = (float) (baseY + OFF_Y[i] + JIT_Y[i]);
+            float pZ = (float) (baseZ + OFF_Z[i] + JIT_Z[i]);
 
-            buffer.appendParticlePositionTexColorLmapUnchecked(pX - rotationX * size - rotationXY * size, pY - rotationZ * size, pZ - rotationYZ * size - rotationXZ * size, 1.0D, 1.0D, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
-            buffer.appendParticlePositionTexColorLmapUnchecked(pX - rotationX * size + rotationXY * size, pY + rotationZ * size, pZ - rotationYZ * size + rotationXZ * size, 1.0D, 0.0D, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
-            buffer.appendParticlePositionTexColorLmapUnchecked(pX + rotationX * size + rotationXY * size, pY + rotationZ * size, pZ + rotationYZ * size + rotationXZ * size, 0.0D, 0.0D, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
-            buffer.appendParticlePositionTexColorLmapUnchecked(pX + rotationX * size - rotationXY * size, pY - rotationZ * size, pZ + rotationYZ * size - rotationXZ * size, 0.0D, 1.0D, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
+            buffer.appendParticlePositionTexColorLmapUnchecked(pX - rotationX * size - rotationXY * size, pY - rotationZ * size, pZ - rotationYZ * size - rotationXZ * size, 1.0F, 1.0F, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
+            buffer.appendParticlePositionTexColorLmapUnchecked(pX - rotationX * size + rotationXY * size, pY + rotationZ * size, pZ - rotationYZ * size + rotationXZ * size, 1.0F, 0.0F, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
+            buffer.appendParticlePositionTexColorLmapUnchecked(pX + rotationX * size + rotationXY * size, pY + rotationZ * size, pZ + rotationYZ * size + rotationXZ * size, 0.0F, 0.0F, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
+            buffer.appendParticlePositionTexColorLmapUnchecked(pX + rotationX * size - rotationXY * size, pY - rotationZ * size, pZ + rotationYZ * size - rotationXZ * size, 0.0F, 1.0F, packedColor, PACKED_FULLBRIGHT_LIGHTMAP);
         }
         NTMImmediate.INSTANCE.draw();
 

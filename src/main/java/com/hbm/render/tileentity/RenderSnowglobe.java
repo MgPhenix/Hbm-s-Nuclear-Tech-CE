@@ -5,9 +5,8 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.generic.BlockSnowglobe.SnowglobeType;
 import com.hbm.blocks.generic.BlockSnowglobe.TileEntitySnowglobe;
 import com.hbm.interfaces.AutoRegister;
+import com.hbm.main.ResourceManager;
 import com.hbm.render.item.ItemRenderBase;
-import com.hbm.render.loader.HFRWavefrontObject;
-import com.hbm.render.loader.IModelCustom;
 import com.hbm.util.EnumUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -21,7 +20,6 @@ import org.lwjgl.opengl.GL11;
 @AutoRegister
 public class RenderSnowglobe extends TileEntitySpecialRenderer<TileEntitySnowglobe> implements IItemRendererProvider {
 
-    public static final IModelCustom snowglobe = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/trinkets/snowglobe.obj"), false).asVBO();
     public static final ResourceLocation socket = new ResourceLocation(Tags.MODID, "textures/models/trinkets/snowglobe.png");
     public static final ResourceLocation glass = new ResourceLocation(Tags.MODID, "textures/models/trinkets/snowglobe_glass.png");
     public static final ResourceLocation features = new ResourceLocation(Tags.MODID, "textures/models/trinkets/snowglobe_features.png");
@@ -48,27 +46,27 @@ public class RenderSnowglobe extends TileEntitySpecialRenderer<TileEntitySnowglo
         GlStateManager.scale(scale, scale, scale);
 
         Minecraft.getMinecraft().getTextureManager().bindTexture(socket);
-        snowglobe.renderPart("Socket");
+        ResourceManager.snowglobe.renderPart("Socket");
         Minecraft.getMinecraft().getTextureManager().bindTexture(glass);
-        snowglobe.renderPart("Glass");
+        ResourceManager.snowglobe.renderPart("Glass");
 
         Minecraft.getMinecraft().getTextureManager().bindTexture(features);
 
         switch (type) {
             case RIVETCITY:
-                snowglobe.renderPart("RivetCity");
+                ResourceManager.snowglobe.renderPart("RivetCity");
                 break;
             case TENPENNYTOWER:
-                snowglobe.renderPart("TenpennyTower");
+                ResourceManager.snowglobe.renderPart("TenpennyTower");
                 break;
             case LUCKY38:
-                snowglobe.renderPart("Lucky38");
+                ResourceManager.snowglobe.renderPart("Lucky38");
                 break;
             case SIERRAMADRE:
-                snowglobe.renderPart("SierraMadre");
+                ResourceManager.snowglobe.renderPart("SierraMadre");
                 break;
             case PRYDWEN:
-                snowglobe.renderPart("Prydwen");
+                ResourceManager.snowglobe.renderPart("Prydwen");
                 break;
             default:
                 break;

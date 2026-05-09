@@ -99,11 +99,23 @@ public class ParticleTauMuzzleLightning extends ParticleFirstPerson {
 			Vec3d pos2 = pos1.scale(-1);
 			float al = i == 0 || i == 9 ? 0.5F : 1;
 			int packedColor = NTMBufferBuilder.packColor(1.0F, 0.7F, 0.1F, fade * al);
+			float pos1CurrentX = (float) (pos1.x + current.x);
+			float pos1CurrentY = (float) (pos1.y + current.y);
+			float pos1CurrentZ = (float) (pos1.z + current.z);
+			float pos2CurrentX = (float) (pos2.x + current.x);
+			float pos2CurrentY = (float) (pos2.y + current.y);
+			float pos2CurrentZ = (float) (pos2.z + current.z);
+			float pos2NextX = (float) (pos2.x + next.x);
+			float pos2NextY = (float) (pos2.y + next.y);
+			float pos2NextZ = (float) (pos2.z + next.z);
+			float pos1NextX = (float) (pos1.x + next.x);
+			float pos1NextY = (float) (pos1.y + next.y);
+			float pos1NextZ = (float) (pos1.z + next.z);
 			fastBuffer.appendPositionTexColorQuadUnchecked(
-					pos1.x + current.x, pos1.y + current.y, pos1.z + current.z, randU, 0, packedColor,
-					pos2.x + current.x, pos2.y + current.y, pos2.z + current.z, randU, 1, packedColor,
-					pos2.x + next.x, pos2.y + next.y, pos2.z + next.z, randU, 1, packedColor,
-					pos1.x + next.x, pos1.y + next.y, pos1.z + next.z, randU, 0, packedColor
+					pos1CurrentX, pos1CurrentY, pos1CurrentZ, randU, 0, packedColor,
+					pos2CurrentX, pos2CurrentY, pos2CurrentZ, randU, 1, packedColor,
+					pos2NextX, pos2NextY, pos2NextZ, randU, 1, packedColor,
+					pos1NextX, pos1NextY, pos1NextZ, randU, 0, packedColor
 			);
 		}
 		NTMImmediate.INSTANCE.draw();

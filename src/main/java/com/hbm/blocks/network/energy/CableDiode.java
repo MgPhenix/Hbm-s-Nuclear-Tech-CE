@@ -39,8 +39,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -277,28 +275,6 @@ public class CableDiode extends BlockContainer implements IEnergyConnectorBlock,
             nbt.setInteger("level", level);
             nbt.setByte("p", (byte) this.priority.ordinal());
             return super.writeToNBT(nbt);
-        }
-
-        @Override
-        public @Nullable SPacketUpdateTileEntity getUpdatePacket() {
-            NBTTagCompound nbt = new NBTTagCompound();
-            this.writeToNBT(nbt);
-            return new SPacketUpdateTileEntity(this.pos, 0, nbt);
-        }
-
-        @Override
-        public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-            this.readFromNBT(pkt.getNbtCompound());
-        }
-
-        @Override
-        public NBTTagCompound getUpdateTag() {
-            return this.writeToNBT(new NBTTagCompound());
-        }
-
-        @Override
-        public void handleUpdateTag(NBTTagCompound tag) {
-            this.readFromNBT(tag);
         }
 
         private ForgeDirection getDir() {

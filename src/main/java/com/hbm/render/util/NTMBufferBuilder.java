@@ -29,79 +29,79 @@ public interface NTMBufferBuilder {
 
     void reservePositionColorQuads(int quadCount);
 
-    void appendPosition(double x, double y, double z);
+    void appendPosition(float x, float y, float z);
 
-    void appendPositionColor(double x, double y, double z, int packedColor);
+    void appendPositionColor(float x, float y, float z, int packedColor);
 
-    void appendPositionColorQuad(double x0, double y0, double z0,
-                                 double x1, double y1, double z1,
-                                 double x2, double y2, double z2,
-                                 double x3, double y3, double z3,
+    void appendPositionColorQuad(float x0, float y0, float z0,
+                                 float x1, float y1, float z1,
+                                 float x2, float y2, float z2,
+                                 float x3, float y3, float z3,
                                  int packedColor);
 
-    void appendPositionTex(double x, double y, double z, double u, double v);
+    void appendPositionTex(float x, float y, float z, float u, float v);
 
-    void appendPositionTexColor(double x, double y, double z, double u, double v, int packedColor);
+    void appendPositionTexColor(float x, float y, float z, float u, float v, int packedColor);
 
-    void appendPositionTexNormal(double x, double y, double z, double u, double v, int packedNormal);
+    void appendPositionTexNormal(float x, float y, float z, float u, float v, int packedNormal);
 
-    void appendPositionTexLmapColor(double x, double y, double z, double u, double v, int packedLightmap,
+    void appendPositionTexLmapColor(float x, float y, float z, float u, float v, int packedLightmap,
                                     int packedColor);
 
-    void appendPositionTexColorNormal(double x, double y, double z, double u, double v, int packedColor,
+    void appendPositionTexColorNormal(float x, float y, float z, float u, float v, int packedColor,
                                       int packedNormal);
 
-    void appendPositionNormal(double x, double y, double z, int packedNormal);
+    void appendPositionNormal(float x, float y, float z, int packedNormal);
 
-    void appendParticlePositionTexColorLmap(double x, double y, double z, double u, double v, int packedColor,
+    void appendParticlePositionTexColorLmap(float x, float y, float z, float u, float v, int packedColor,
                                             int packedLightmap);
 
-    void appendPositionUnchecked(double x, double y, double z);
+    void appendPositionUnchecked(float x, float y, float z);
 
-    void appendPositionQuadUnchecked(double x0, double y0, double z0,
-                                     double x1, double y1, double z1,
-                                     double x2, double y2, double z2,
-                                     double x3, double y3, double z3);
+    void appendPositionQuadUnchecked(float x0, float y0, float z0,
+                                     float x1, float y1, float z1,
+                                     float x2, float y2, float z2,
+                                     float x3, float y3, float z3);
 
-    void appendPositionColorUnchecked(double x, double y, double z, int packedColor);
+    void appendPositionColorUnchecked(float x, float y, float z, int packedColor);
 
-    void appendPositionColorQuadUnchecked(double x0, double y0, double z0,
-                                          double x1, double y1, double z1,
-                                          double x2, double y2, double z2,
-                                          double x3, double y3, double z3,
+    void appendPositionColorQuadUnchecked(float x0, float y0, float z0,
+                                          float x1, float y1, float z1,
+                                          float x2, float y2, float z2,
+                                          float x3, float y3, float z3,
                                           int packedColor);
 
-    void appendPositionTexUnchecked(double x, double y, double z, double u, double v);
+    void appendPositionTexUnchecked(float x, float y, float z, float u, float v);
 
-    void appendPositionTexQuadUnchecked(double x0, double y0, double z0, double u0, double v0,
-                                        double x1, double y1, double z1, double u1, double v1,
-                                        double x2, double y2, double z2, double u2, double v2,
-                                        double x3, double y3, double z3, double u3, double v3);
+    void appendPositionTexQuadUnchecked(float x0, float y0, float z0, float u0, float v0,
+                                        float x1, float y1, float z1, float u1, float v1,
+                                        float x2, float y2, float z2, float u2, float v2,
+                                        float x3, float y3, float z3, float u3, float v3);
 
-    void appendPositionTexColorUnchecked(double x, double y, double z, double u, double v, int packedColor);
+    void appendPositionTexColorUnchecked(float x, float y, float z, float u, float v, int packedColor);
 
-    void appendPositionTexNormalUnchecked(double x, double y, double z, double u, double v, int packedNormal);
+    void appendPositionTexNormalUnchecked(float x, float y, float z, float u, float v, int packedNormal);
 
-    void appendPositionTexLmapColorUnchecked(double x, double y, double z, double u, double v, int packedLightmap,
+    void appendPositionTexLmapColorUnchecked(float x, float y, float z, float u, float v, int packedLightmap,
                                              int packedColor);
 
-    void appendPositionTexColorNormalUnchecked(double x, double y, double z, double u, double v, int packedColor,
+    void appendPositionTexColorNormalUnchecked(float x, float y, float z, float u, float v, int packedColor,
                                                int packedNormal);
 
-    void appendPositionTexColorQuadUnchecked(double x0, double y0, double z0, double u0, double v0, int c0,
-                                             double x1, double y1, double z1, double u1, double v1, int c1,
-                                             double x2, double y2, double z2, double u2, double v2, int c2,
-                                             double x3, double y3, double z3, double u3, double v3, int c3);
+    void appendPositionTexColorQuadUnchecked(float x0, float y0, float z0, float u0, float v0, int c0,
+                                             float x1, float y1, float z1, float u1, float v1, int c1,
+                                             float x2, float y2, float z2, float u2, float v2, int c2,
+                                             float x3, float y3, float z3, float u3, float v3, int c3);
 
-    void appendPositionNormalUnchecked(double x, double y, double z, int packedNormal);
+    void appendPositionNormalUnchecked(float x, float y, float z, int packedNormal);
 
-    void appendParticlePositionTexColorLmapUnchecked(double x, double y, double z, double u, double v,
+    void appendParticlePositionTexColorLmapUnchecked(float x, float y, float z, float u, float v,
                                                      int packedColor, int packedLightmap);
 
-    void appendParticlePositionTexColorLmapQuadUnchecked(double x0, double y0, double z0, double u0, double v0,
-                                                         double x1, double y1, double z1, double u1, double v1,
-                                                         double x2, double y2, double z2, double u2, double v2,
-                                                         double x3, double y3, double z3, double u3, double v3,
+    void appendParticlePositionTexColorLmapQuadUnchecked(float x0, float y0, float z0, float u0, float v0,
+                                                         float x1, float y1, float z1, float u1, float v1,
+                                                         float x2, float y2, float z2, float u2, float v2,
+                                                         float x3, float y3, float z3, float u3, float v3,
                                                          int packedColor, int packedLightmap);
 
     void setVertexCount(int vertexCount);

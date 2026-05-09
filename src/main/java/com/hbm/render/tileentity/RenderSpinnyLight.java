@@ -7,7 +7,6 @@ import com.hbm.render.GLCompat;
 import com.hbm.render.amlfrom1710.Vec3;
 import com.hbm.render.item.ItemRenderBase;
 import com.hbm.render.model.BakedModelTransforms;
-import com.hbm.render.util.ViewModelPositonDebugger;
 import com.hbm.tileentity.deco.TileEntitySpinnyLight;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;
@@ -81,12 +80,6 @@ public class RenderSpinnyLight extends TileEntitySpecialRenderer<TileEntitySpinn
         meshData[index++] = a;
         return index;
     }
-
-    @Override
-    public boolean isGlobalRenderer(TileEntitySpinnyLight te) {
-        return true;
-    }
-
     @Override
     public void render(TileEntitySpinnyLight te, double x, double y, double z, float partialTicks, int destroyStage,
                        float alpha) {
@@ -216,11 +209,6 @@ public class RenderSpinnyLight extends TileEntitySpecialRenderer<TileEntitySpinn
             GLCompat.bufferData(GLCompat.GL_ARRAY_BUFFER, data, GLCompat.GL_STATIC_DRAW);
             GLCompat.bindBuffer(GLCompat.GL_ARRAY_BUFFER, 0);
 
-            if (GLCompat.aplLwjglWorkaround) {
-                this.vaoHandle = -1;
-                return;
-            }
-
             this.vaoHandle = GLCompat.genVertexArrays();
             GLCompat.bindVertexArray(vaoHandle);
             GLCompat.bindBuffer(GLCompat.GL_ARRAY_BUFFER, vboHandle);
@@ -233,19 +221,6 @@ public class RenderSpinnyLight extends TileEntitySpecialRenderer<TileEntitySpinn
         }
 
         private void render() {
-            if (GLCompat.aplLwjglWorkaround || vaoHandle == -1) {
-                GLCompat.bindBuffer(GLCompat.GL_ARRAY_BUFFER, vboHandle);
-                GL11.glVertexPointer(3, GL11.GL_FLOAT, CONE_STRIDE, 0L);
-                GL11.glColorPointer(4, GL11.GL_FLOAT, CONE_STRIDE, 3L * Float.BYTES);
-                GL11.glEnableClientState(GL11.GL_VERTEX_ARRAY);
-                GL11.glEnableClientState(GL11.GL_COLOR_ARRAY);
-                GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
-                GL11.glDisableClientState(GL11.GL_VERTEX_ARRAY);
-                GL11.glDisableClientState(GL11.GL_COLOR_ARRAY);
-                GLCompat.bindBuffer(GLCompat.GL_ARRAY_BUFFER, 0);
-                return;
-            }
-
             GLCompat.bindVertexArray(vaoHandle);
             GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, vertexCount);
             GLCompat.bindVertexArray(0);

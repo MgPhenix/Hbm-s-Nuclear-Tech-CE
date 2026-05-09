@@ -61,7 +61,7 @@ public class SubElementNodeEditor extends SubElement {
 		this.sendEvents = sendEvents;
 	}
 
-	private void descendSubsystem(Node node) {
+	public void descendSubsystem(Node node) {
 		systemHistoryStack.push(currentSystem);
 		currentSystem = currentSystem.subSystems.get(node);
 
@@ -84,9 +84,13 @@ public class SubElementNodeEditor extends SubElement {
 	
 	@Override
 	protected void keyTyped(char typedChar, int code){
+		boolean isTyping = false;
+		if(currentSystem != null)
+			isTyping = currentSystem.keyTyped(typedChar, code);
+		if (isTyping) return;
 		boolean ctrl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
 		if(currentSystem != null && currentSystem.currentTypingBox == null && ctrl) {
-			if(code == Keyboard.KEY_C) {
+			if(code == Keyboard.KEY_C || code == Keyboard.KEY_X) {
 				copySelectionToClipboard();
 				return;
 			}
@@ -142,9 +146,6 @@ public class SubElementNodeEditor extends SubElement {
 			for(Node n : selected){
 				currentSystem.removeNode(n);
 			}
-		}
-		if(currentSystem != null){
-			currentSystem.keyTyped(typedChar, code);
 		}
 	}
 
@@ -204,6 +205,14 @@ public class SubElementNodeEditor extends SubElement {
 	
 	@Override
 	protected void drawScreen(){
+		int cX = gui.width/2;
+		int cY = gui.height/2;
+		String hint = "Shift+A to add node";
+		gui.getFontRenderer().drawString(hint, cX - gui.getFontRenderer().getStringWidth(hint) / 2F + 45, cY-108, 0xFF777777, false);
+
+		boolean unicode = gui.getFontRenderer().getUnicodeFlag();
+		gui.getFontRenderer().setUnicodeFlag(false);
+
 		float dWheel = Mouse.getDWheel();
 		float dScale = dWheel*gridScale*0.00075F;
 		
@@ -226,8 +235,6 @@ public class SubElementNodeEditor extends SubElement {
 		}
 		GlStateManager.disableLighting();
 		GL11.glEnable(GL11.GL_SCISSOR_TEST);
-		int cX = gui.width/2;
-		int cY = gui.height/2;
 		int minX = (cX-72)*gui.res.getScaleFactor();
 		int minY = (cY-114)*gui.res.getScaleFactor();
 		int maxX = (cX+120)*gui.res.getScaleFactor();
@@ -271,6 +278,7 @@ public class SubElementNodeEditor extends SubElement {
 			addMenu.render(gui.mouseX, gui.mouseY);
 		}
 		GL11.glDisable(GL11.GL_SCISSOR_TEST);
+		gui.getFontRenderer().setUnicodeFlag(unicode);
 	}
 	
 	@Override
@@ -285,13 +293,8 @@ public class SubElementNodeEditor extends SubElement {
 		} else if(button == 0){
 			// doing this here for now cus i want buttons to be able to make gui changes
 			NodeElement pressed = currentSystem.getNodeElementPressed(mouseX, mouseY);
-			if (pressed != null) {
-				switch (pressed.name) {
-					case "Edit Body": {
-						descendSubsystem(pressed.parent);
-					}
-				}
-			}
+			if (pressed != null)
+				pressed.onClicked(this);
 			currentSystem.onClick(mouseX, mouseY);
 		}
 		if(button == 2){

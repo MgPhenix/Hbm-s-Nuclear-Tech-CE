@@ -2,6 +2,9 @@ package com.hbm.inventory.control_panel.controls;
 
 import com.hbm.inventory.control_panel.controls.configs.SubElementBaseConfig;
 import com.hbm.inventory.control_panel.controls.configs.SubElementDialSquare;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
+import com.hbm.inventory.control_panel.types.DataValueString;
 import com.hbm.render.loader.WaveFrontObjectVAO;
 import com.hbm.inventory.control_panel.*;
 import com.hbm.main.ResourceManager;
@@ -113,6 +116,7 @@ public class DialLarge extends Control {
 
 
     @Override
+    @SideOnly(Side.CLIENT)
     public IModelCustom getModel() {
         return ResourceManager.ctrl_dial_large;
     }

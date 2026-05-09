@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,9 +22,10 @@ import java.util.regex.Pattern;
 public class HFRWavefrontObject implements IModelCustomNamed
 {
     /** For resource reloading */
-    public static LinkedHashSet<HFRWavefrontObject> allModels = new LinkedHashSet();
-    public static LinkedHashMap<WaveFrontObjectVAO, HFRWavefrontObject> allVBOs = new LinkedHashMap();
-    private static Pattern vertexPattern = Pattern.compile("(v( (\\-){0,1}\\d+(\\.\\d+)?){3,4} *\\n)|(v( (\\-){0,1}\\d+(\\.\\d+)?){3,4} *$)");
+    //mlbv: removed. see comments at HFRModelReloader
+//    public static LinkedHashSet<HFRWavefrontObject> allModels = new LinkedHashSet();
+//    public static LinkedHashMap<WaveFrontObjectVAO, HFRWavefrontObject> allVBOs = new LinkedHashMap();
+    private static Pattern vertexPattern = Pattern.compile("(v( (\\-){0,1}\\d+(\\.\\d+)?){3,7} *\\n)|(v( (\\-){0,1}\\d+(\\.\\d+)?){3,7} *$)");
     private static Pattern vertexNormalPattern = Pattern.compile("(vn( (\\-){0,1}\\d+(\\.\\d+)?){3,4} *\\n)|(vn( (\\-){0,1}\\d+(\\.\\d+)?){3,4} *$)");
     private static Pattern textureCoordinatePattern = Pattern.compile("(vt( (\\-){0,1}\\d+\\.\\d+){2,3} *\\n)|(vt( (\\-){0,1}\\d+(\\.\\d+)?){2,3} *$)");
     private static Pattern face_V_VT_VN_Pattern = Pattern.compile("(f( \\d+/\\d+/\\d+){3,4} *\\n)|(f( \\d+/\\d+/\\d+){3,4} *$)");
@@ -68,8 +67,6 @@ public class HFRWavefrontObject implements IModelCustomNamed
         } catch(IOException e) {
             throw new ModelFormatException("IO Exception reading model format", e);
         }
-
-        this.allModels.add(this);
     }
 
     public HFRWavefrontObject(String filename, InputStream inputStream) throws ModelFormatException
@@ -339,6 +336,18 @@ public class HFRWavefrontObject implements IModelCustomNamed
                 {
                     return new Vertex(Float.parseFloat(tokens[0]), Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2]));
                 }
+                else if (tokens.length == 6)
+                {
+                    Vertex v = new Vertex(Float.parseFloat(tokens[0]), Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2]));
+                    v.color = packColor(Float.parseFloat(tokens[3]), Float.parseFloat(tokens[4]), Float.parseFloat(tokens[5]), 1f);
+                    return v;
+                }
+                else if (tokens.length == 7)
+                {
+                    Vertex v = new Vertex(Float.parseFloat(tokens[0]), Float.parseFloat(tokens[1]), Float.parseFloat(tokens[2]));
+                    v.color = packColor(Float.parseFloat(tokens[3]), Float.parseFloat(tokens[4]), Float.parseFloat(tokens[5]), Float.parseFloat(tokens[6]));
+                    return v;
+                }
             }
             catch (NumberFormatException e)
             {
@@ -351,6 +360,15 @@ public class HFRWavefrontObject implements IModelCustomNamed
         }
 
         return vertex;
+    }
+
+    private static int packColor(float r, float g, float b, float a)
+    {
+        int ai = (int) (a * 255f) & 0xFF;
+        int ri = (int) (r * 255f) & 0xFF;
+        int gi = (int) (g * 255f) & 0xFF;
+        int bi = (int) (b * 255f) & 0xFF;
+        return (ai << 24) | (ri << 16) | (gi << 8) | bi;
     }
 
     private Vertex parseVertexNormal(String line, int lineCount) throws ModelFormatException
@@ -627,7 +645,11 @@ public class HFRWavefrontObject implements IModelCustomNamed
     }
 
     public WaveFrontObjectVAO asVBO() {
-        return new WaveFrontObjectVAO(this);
+        return new WaveFrontObjectVAO(this, false);
+    }
+
+    public WaveFrontObjectVAO asColoredVAO() {
+        return new WaveFrontObjectVAO(this, true);
     }
 
     @Override

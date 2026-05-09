@@ -83,7 +83,7 @@ public class TileEntityMachineAutosaw extends TileEntityLoadedBase implements IB
     public float lastSpin;
 
     public TileEntityMachineAutosaw() {
-        this.tank = new FluidTankNTM(Fluids.WOODOIL, 100);
+        this.tank = new FluidTankNTM(Fluids.WOODOIL, 100).withOwner(this);
     }
 
     @Override

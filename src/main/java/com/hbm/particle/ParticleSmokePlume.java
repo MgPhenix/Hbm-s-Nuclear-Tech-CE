@@ -158,10 +158,10 @@ public class ParticleSmokePlume extends Particle {
 
 			int packedColor = NTMBufferBuilder.packColor(this.particleRed, this.particleGreen, this.particleBlue, this.particleAlpha);
 			int packedLightmap = NTMBufferBuilder.packLightmap(j, k);
-			fastBuffer.appendParticlePositionTexColorLmap((double) f5 + avec3d[0].x, (double) f6 + avec3d[0].y, (double) f7 + avec3d[0].z, (double) f1, (double) f3, packedColor, packedLightmap);
-			fastBuffer.appendParticlePositionTexColorLmap((double) f5 + avec3d[1].x, (double) f6 + avec3d[1].y, (double) f7 + avec3d[1].z, (double) f1, (double) f2, packedColor, packedLightmap);
-			fastBuffer.appendParticlePositionTexColorLmap((double) f5 + avec3d[2].x, (double) f6 + avec3d[2].y, (double) f7 + avec3d[2].z, (double) f, (double) f2, packedColor, packedLightmap);
-			fastBuffer.appendParticlePositionTexColorLmap((double) f5 + avec3d[3].x, (double) f6 + avec3d[3].y, (double) f7 + avec3d[3].z, (double) f, (double) f3, packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(f5 + (float) avec3d[0].x, f6 + (float) avec3d[0].y, f7 + (float) avec3d[0].z, f1, f3, packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(f5 + (float) avec3d[1].x, f6 + (float) avec3d[1].y, f7 + (float) avec3d[1].z, f1, f2, packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(f5 + (float) avec3d[2].x, f6 + (float) avec3d[2].y, f7 + (float) avec3d[2].z, f, f2, packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(f5 + (float) avec3d[3].x, f6 + (float) avec3d[3].y, f7 + (float) avec3d[3].z, f, f3, packedColor, packedLightmap);
 		
 		}
 	}

@@ -110,12 +110,19 @@ public class MachineFan extends BlockContainerBakeable implements IToolable, ITo
         public float spin;
         public float prevSpin;
         public boolean falloff = true;
+        private boolean isIndirectlyPowered;
+
+        @Override
+        public void onLoad() {
+            super.onLoad();
+            isIndirectlyPowered = world.isBlockPowered(pos);
+        }
 
         @Override
         public void update() {
             this.prevSpin = this.spin;
 
-            if (world.isBlockPowered(pos)) {
+            if (isIndirectlyPowered) {
                 EnumFacing dir = world.getBlockState(pos).getValue(MachineFan.FACING);
 
                 int range = 10;
@@ -218,6 +225,12 @@ public class MachineFan extends BlockContainerBakeable implements IToolable, ITo
         public void deserialize(ByteBuf buf) {
             falloff = buf.readBoolean();
         }
+    }
+
+    @Override
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        TileEntityFan fan = (TileEntityFan) world.getTileEntity(pos);
+        fan.isIndirectlyPowered = world.isBlockPowered(pos);
     }
 
     @Override

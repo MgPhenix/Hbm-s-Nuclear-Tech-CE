@@ -118,10 +118,10 @@ public class ParticleRocketFlame extends Particle {
 			float alpha = this.particleAlpha * 0.75F;
 			int packedColor = NTMBufferBuilder.packColor(this.particleRed, this.particleGreen, this.particleBlue, alpha);
 			int packedLightmap = NTMBufferBuilder.packLightmap(k, l);
-			fastBuffer.appendParticlePositionTexColorLmap((double)(pX - rotationX * scale - rotationXY * scale), (double)(pY - rotationZ * scale), (double)(pZ - rotationYZ * scale - rotationXZ * scale), particleTexture.getMaxU(), particleTexture.getMaxV(), packedColor, packedLightmap);
-			fastBuffer.appendParticlePositionTexColorLmap((double)(pX - rotationX * scale + rotationXY * scale), (double)(pY + rotationZ * scale), (double)(pZ - rotationYZ * scale + rotationXZ * scale), particleTexture.getMaxU(), particleTexture.getMinV(), packedColor, packedLightmap);
-			fastBuffer.appendParticlePositionTexColorLmap((double)(pX + rotationX * scale + rotationXY * scale), (double)(pY + rotationZ * scale), (double)(pZ + rotationYZ * scale + rotationXZ * scale), particleTexture.getMinU(), particleTexture.getMinV(), packedColor, packedLightmap);
-			fastBuffer.appendParticlePositionTexColorLmap((double)(pX + rotationX * scale - rotationXY * scale), (double)(pY - rotationZ * scale), (double)(pZ + rotationYZ * scale - rotationXZ * scale), particleTexture.getMinU(), particleTexture.getMaxV(), packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(pX - rotationX * scale - rotationXY * scale, pY - rotationZ * scale, pZ - rotationYZ * scale - rotationXZ * scale, particleTexture.getMaxU(), particleTexture.getMaxV(), packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(pX - rotationX * scale + rotationXY * scale, pY + rotationZ * scale, pZ - rotationYZ * scale + rotationXZ * scale, particleTexture.getMaxU(), particleTexture.getMinV(), packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(pX + rotationX * scale + rotationXY * scale, pY + rotationZ * scale, pZ + rotationYZ * scale + rotationXZ * scale, particleTexture.getMinU(), particleTexture.getMinV(), packedColor, packedLightmap);
+			fastBuffer.appendParticlePositionTexColorLmap(pX + rotationX * scale - rotationXY * scale, pY - rotationZ * scale, pZ + rotationYZ * scale - rotationXZ * scale, particleTexture.getMinU(), particleTexture.getMaxV(), packedColor, packedLightmap);
 		}
 		
 	}

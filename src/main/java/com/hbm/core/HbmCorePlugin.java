@@ -16,27 +16,12 @@ import java.util.Map;
 public class HbmCorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
     static final Logger coreLogger = LogManager.getLogger("HBM CoreMod");
+
     private static final Brand brand;
-    private static final BufferBuilderBackend bufferBuilderBackend;
-    private static final boolean optifinePresent;
     private static boolean runtimeDeobfEnabled = false;
     private static boolean hardCrash = true;
 
     static {
-        optifinePresent = Launch.classLoader.getResource("optifine/OptiFineForgeTweaker.class") != null;
-        boolean nothiriumPresent = Launch.classLoader.getResource("meldexun/nothirium/mc/Nothirium.class") != null;
-        boolean neoniumPresent = Launch.classLoader.getResource("io/neox/neonium/Neonium.class") != null;
-
-        if (optifinePresent) {
-            bufferBuilderBackend = BufferBuilderBackend.OPTIFINE;
-        } else if (nothiriumPresent) {
-            bufferBuilderBackend = BufferBuilderBackend.NOTHIRIUM;
-        } else if (neoniumPresent) {
-            bufferBuilderBackend = BufferBuilderBackend.NEONIUM;
-        } else {
-            bufferBuilderBackend = BufferBuilderBackend.DEFAULT;
-        }
-
         if (Launch.classLoader.getResource("catserver/server/CatServer.class") != null) {
             brand = Brand.CAT_SERVER;
         } else if (Launch.classLoader.getResource("com/mohistmc/MohistMC.class") != null) {
@@ -68,14 +53,6 @@ public class HbmCorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
     public static Brand getBrand() {
         return brand;
-    }
-
-    public static boolean isOptifinePresent() {
-        return optifinePresent;
-    }
-
-    public static BufferBuilderBackend getBufferBuilderBackend() {
-        return bufferBuilderBackend;
     }
 
     @Override
@@ -112,21 +89,9 @@ public class HbmCorePlugin implements IFMLLoadingPlugin, IEarlyMixinLoader {
     public List<String> getMixinConfigs() {
         return Arrays.asList(
                 "hbm.common.mixin.json",
-                bufferBuilderBackend.mixinConfig
+                "hbm.mod.mixin.json",
+                "hbm.vanilla.mixin.json"
         );
-    }
-
-    public enum BufferBuilderBackend {
-        DEFAULT("hbm.default.mixin.json"),
-        OPTIFINE("hbm.optifine.mixin.json"),
-        NOTHIRIUM("hbm.nothirium.mixin.json"),
-        NEONIUM("hbm.neonium.mixin.json");
-
-        private final String mixinConfig;
-
-        BufferBuilderBackend(String mixinConfig) {
-            this.mixinConfig = mixinConfig;
-        }
     }
 
     public enum Brand {

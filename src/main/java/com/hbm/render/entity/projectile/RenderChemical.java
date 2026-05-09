@@ -50,8 +50,8 @@ public class RenderChemical extends Render<EntityChemical> {
 
     private void renderGasFire(EntityChemical chem, float interp) {
 
-        float exp = (float) (chem.ticksExisted + interp) / (float) chem.getMaxAge();
-        double size = 0.0 + exp * 2;
+        float exp = (chem.ticksExisted + interp) / (float) chem.getMaxAge();
+        float size = exp * 2F;
         Color color = Color.getHSBColor(Math.max((60 - exp * 100) / 360F, 0.0F), 1 - exp * 0.25F, 1 - exp * 0.5F);
 
         GlStateManager.enableBlend();
@@ -71,10 +71,10 @@ public class RenderChemical extends Render<EntityChemical> {
 
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionTexColorQuads(1);
         buf.appendPositionTexColorQuadUnchecked(
-                -size, -size, 0.0D, 1.0D, 1.0D, packedColor,
-                size, -size, 0.0D, 0.0D, 1.0D, packedColor,
-                size, size, 0.0D, 0.0D, 0.0D, packedColor,
-                -size, size, 0.0D, 1.0D, 0.0D, packedColor
+                -size, -size, 0.0F, 1.0F, 1.0F, packedColor,
+                size, -size, 0.0F, 0.0F, 1.0F, packedColor,
+                size, size, 0.0F, 0.0F, 0.0F, packedColor,
+                -size, size, 0.0F, 1.0F, 0.0F, packedColor
         );
         NTMImmediate.INSTANCE.draw();
 
@@ -86,8 +86,8 @@ public class RenderChemical extends Render<EntityChemical> {
 
     private void renderGasCloud(EntityChemical chem, float interp) {
 
-        double exp = (double) (chem.ticksExisted + interp) / (double) chem.getMaxAge();
-        double size = 0.0 + exp * 10;
+        float exp = (chem.ticksExisted + interp) / (float) chem.getMaxAge();
+        float size = exp * 10F;
         int color = chem.getType().getColor();
 
         GlStateManager.enableBlend();
@@ -103,10 +103,10 @@ public class RenderChemical extends Render<EntityChemical> {
         int i = rand.nextInt(2);
         int j = rand.nextInt(2);
 
-        double u0 = 1 - i;
-        double v0 = 1 - j;
-        double u1 = i;
-        double v1 = j;
+        float u0 = 1 - i;
+        float v0 = 1 - j;
+        float u1 = i;
+        float v1 = j;
 
         int r = (color >> 16) & 0xFF;
         int g = (color >> 8) & 0xFF;
@@ -116,10 +116,10 @@ public class RenderChemical extends Render<EntityChemical> {
 
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionTexColorQuads(1);
         buf.appendPositionTexColorQuadUnchecked(
-                -size, -size, 0.0D, u0, v0, packedColor,
-                size, -size, 0.0D, u1, v0, packedColor,
-                size, size, 0.0D, u1, v1, packedColor,
-                -size, size, 0.0D, u0, v1, packedColor
+                -size, -size, 0.0F, u0, v0, packedColor,
+                size, -size, 0.0F, u1, v0, packedColor,
+                size, size, 0.0F, u1, v1, packedColor,
+                -size, size, 0.0F, u0, v1, packedColor
         );
         NTMImmediate.INSTANCE.draw();
 
@@ -145,30 +145,30 @@ public class RenderChemical extends Render<EntityChemical> {
         GlStateManager.depthMask(false);
 
         double motionLen = Math.sqrt(chem.motionX * chem.motionX + chem.motionY * chem.motionY + chem.motionZ * chem.motionZ);
-        double length = motionLen * (chem.ticksExisted + interp) * 0.75D;
-        double size = 0.0625D;
+        float length = (float) (motionLen * (chem.ticksExisted + interp) * 0.75D);
+        float size = 0.0625F;
         float o = 0.2F;
         int packedNearColor = NTMBufferBuilder.packColor(1.0F, 1.0F, 1.0F, o);
         int packedFarColor = NTMBufferBuilder.packColor(1.0F, 1.0F, 1.0F, 0.0F);
 
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionColorQuads(4);
-        buf.appendPositionColorUnchecked(-size, 0.0D, -size, packedNearColor);
-        buf.appendPositionColorUnchecked(size, 0.0D, -size, packedNearColor);
+        buf.appendPositionColorUnchecked(-size, 0.0F, -size, packedNearColor);
+        buf.appendPositionColorUnchecked(size, 0.0F, -size, packedNearColor);
         buf.appendPositionColorUnchecked(size, length, -size, packedFarColor);
         buf.appendPositionColorUnchecked(-size, length, -size, packedFarColor);
 
-        buf.appendPositionColorUnchecked(-size, 0.0D, size, packedNearColor);
-        buf.appendPositionColorUnchecked(size, 0.0D, size, packedNearColor);
+        buf.appendPositionColorUnchecked(-size, 0.0F, size, packedNearColor);
+        buf.appendPositionColorUnchecked(size, 0.0F, size, packedNearColor);
         buf.appendPositionColorUnchecked(size, length, size, packedFarColor);
         buf.appendPositionColorUnchecked(-size, length, size, packedFarColor);
 
-        buf.appendPositionColorUnchecked(-size, 0.0D, -size, packedNearColor);
-        buf.appendPositionColorUnchecked(-size, 0.0D, size, packedNearColor);
+        buf.appendPositionColorUnchecked(-size, 0.0F, -size, packedNearColor);
+        buf.appendPositionColorUnchecked(-size, 0.0F, size, packedNearColor);
         buf.appendPositionColorUnchecked(-size, length, size, packedFarColor);
         buf.appendPositionColorUnchecked(-size, length, -size, packedFarColor);
 
-        buf.appendPositionColorUnchecked(size, 0.0D, -size, packedNearColor);
-        buf.appendPositionColorUnchecked(size, 0.0D, size, packedNearColor);
+        buf.appendPositionColorUnchecked(size, 0.0F, -size, packedNearColor);
+        buf.appendPositionColorUnchecked(size, 0.0F, size, packedNearColor);
         buf.appendPositionColorUnchecked(size, length, size, packedFarColor);
         buf.appendPositionColorUnchecked(size, length, -size, packedFarColor);
 

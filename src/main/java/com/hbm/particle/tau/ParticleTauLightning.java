@@ -84,10 +84,10 @@ public class ParticleTauLightning extends ParticleFirstPerson {
         NTMBufferBuilder fastBuffer = NTMImmediate.INSTANCE.beginParticlePositionTexColorLmap(GL11.GL_QUADS, 4);
         int packedColor = NTMBufferBuilder.packColor(this.particleRed, this.particleGreen, this.particleBlue, this.workingAlpha);
         int packedLightmap = NTMBufferBuilder.packLightmap(240, 240);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, 0.5, 0.5, 1, 1, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, 0.5, -0.5, 1, 0, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, -0.5, -0.5, 0, 0, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, -0.5, 0.5, 0, 1, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, 0.5F, 0.5F, 1, 1, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, 0.5F, -0.5F, 1, 0, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, -0.5F, -0.5F, 0, 0, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(0, -0.5F, 0.5F, 0, 1, packedColor, packedLightmap);
 
         NTMImmediate.INSTANCE.draw();
         

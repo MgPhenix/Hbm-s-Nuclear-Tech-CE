@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.util.DamageSource;
@@ -82,11 +83,12 @@ public class XFactoryDrill {
                 if(player != null && mop.typeOfHit == RayTraceResult.Type.BLOCK) {
 
                     int aoe = player.isSneaking() ? 0 : getModdableAoE(stack, 1);
+                    boolean didPlink = false;
                     for(int i = -aoe; i <= aoe; i++) {
                         for(int j = -aoe; j <= aoe; j++) {
                             for(int k = -aoe; k <= aoe; k++) {
                                 BlockPos targetPos = mop.getBlockPos().add(i, j, k);
-                                breakExtraBlock(player.world, targetPos, player, mop.getBlockPos());
+                                didPlink = breakExtraBlock(player.world, targetPos, player, mop.getBlockPos(), didPlink);
                             }
                         }
                     }
@@ -100,8 +102,8 @@ public class XFactoryDrill {
         });
     }
 
-    public static void breakExtraBlock(World world, BlockPos pos, EntityPlayer playerEntity, BlockPos refPos) {
-        if (world.isAirBlock(pos) || !(playerEntity instanceof EntityPlayerMP player)) return;
+    public static boolean breakExtraBlock(World world, BlockPos pos, EntityPlayer playerEntity, BlockPos refPos, boolean didPlink) {
+        if (world.isAirBlock(pos) || !(playerEntity instanceof EntityPlayerMP player)) return didPlink;
 
         IBlockState state = world.getBlockState(pos);
         Block block = state.getBlock();
@@ -110,17 +112,11 @@ public class XFactoryDrill {
                 || block.getBlockHardness(state, world, pos) == -1.0F
                 || block.getBlockHardness(state, world, pos) == 0.0F)
         {
-            world.playSound(
-                    null,
-                    pos.getX() + 0.5D,
-                    pos.getY() + 0.5D,
-                    pos.getZ() + 0.5D,
-                    block.getSoundType(state, world, pos, player).getBreakSound(),
-                    SoundCategory.BLOCKS,
-                    block.getSoundType(state, world, pos, player).getVolume(),
-                    0.8F + world.rand.nextFloat() * 0.6F
-            );
-            return;
+            if(!didPlink) {
+                world.playSound(null, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, SoundEvents.ENTITY_ITEM_BREAK, SoundCategory.BLOCKS, 0.5F, 0.8F + world.rand.nextFloat() * 0.6F);
+                return true;
+            }
+            return didPlink;
         }
 
         // we are serverside and tryHarvestBlock already invokes the 2001 packet for every player except the user, so we manually send it for the user as well
@@ -129,6 +125,8 @@ public class XFactoryDrill {
         if(world.isAirBlock(pos)) { // only do this when the block was destroyed. if the block doesn't create air when broken, this breaks, but it's no big deal
             player.connection.sendPacket(new SPacketEffect(2001, pos, Block.getStateId(state), false));
         }
+
+        return didPlink;
     }
 
     // this system technically doesn't need to be part of the GunCfg or Receiver or anything, we can just do this and it works the exact same

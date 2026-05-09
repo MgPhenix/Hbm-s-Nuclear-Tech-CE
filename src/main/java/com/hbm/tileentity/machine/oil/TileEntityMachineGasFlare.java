@@ -19,6 +19,7 @@ import com.hbm.lib.DirPos;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
+import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IFluidCopiable;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.IUpgradeInfoProvider;
@@ -34,7 +35,6 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -55,7 +55,7 @@ import java.util.List;
 public class TileEntityMachineGasFlare extends TileEntityMachineBase
         implements ITickable, IEnergyProviderMK2,
         IFluidStandardReceiver, IGUIProvider,
-        IControlReceiver, IFluidCopiable, IUpgradeInfoProvider {
+        IControlReceiver, IFluidCopiable, IUpgradeInfoProvider, IConnectionAnchors {
     public static final long maxPower = 1000000;
     private final UpgradeManagerNT upgradeManager = new UpgradeManagerNT(this);
     public long power;
@@ -85,7 +85,7 @@ public class TileEntityMachineGasFlare extends TileEntityMachineBase
         };
 
         tankType = Fluids.GAS.getFF();
-        tank = new FluidTankNTM(Fluids.GAS, 64000);
+        tank = new FluidTankNTM(Fluids.GAS, 64000).withOwner(this);
     }
 
     @Override
@@ -280,16 +280,6 @@ public class TileEntityMachineGasFlare extends TileEntityMachineBase
         };
     }
 
-    @Override
-    public @NotNull AxisAlignedBB getRenderBoundingBox() {
-        return TileEntity.INFINITE_EXTENT_AABB;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public double getMaxRenderDistanceSquared() {
-        return 65536.0D;
-    }
 
     @Override
     public FluidTankNTM[] getReceivingTanks() {
@@ -384,5 +374,11 @@ public class TileEntityMachineGasFlare extends TileEntityMachineBase
         upgrades.put(UpgradeType.SPEED, 3);
         upgrades.put(UpgradeType.EFFECT, 3);
         return upgrades;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public double getMaxRenderDistanceSquared() {
+        return 65536.0D;
     }
 }

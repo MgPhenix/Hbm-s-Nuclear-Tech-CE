@@ -2,6 +2,8 @@ package com.hbm.inventory.control_panel.controls;
 
 import com.hbm.inventory.control_panel.controls.configs.SubElementBaseConfig;
 import com.hbm.inventory.control_panel.controls.configs.SubElementDisplaySevenSeg;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.render.loader.WaveFrontObjectVAO;
 import com.hbm.inventory.control_panel.*;
 import com.hbm.main.ResourceManager;

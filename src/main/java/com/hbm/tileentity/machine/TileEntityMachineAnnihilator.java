@@ -21,6 +21,7 @@ import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.saveddata.AnnihilatorSavedData;
 import com.hbm.saveddata.AnnihilatorSavedData.AnnihilatorPool;
+import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
 import com.hbm.util.ParticleUtil;
@@ -43,7 +44,7 @@ import org.jetbrains.annotations.NotNull;
 import java.math.BigInteger;
 
 @AutoRegister
-public class TileEntityMachineAnnihilator extends TileEntityMachineBase implements ITickable, IFluidStandardReceiverMK2, IControlReceiver, IGUIProvider {
+public class TileEntityMachineAnnihilator extends TileEntityMachineBase implements ITickable, IFluidStandardReceiverMK2, IControlReceiver, IGUIProvider, IConnectionAnchors {
 
     public String pool = "Recycling";
     public int timer;
@@ -54,7 +55,7 @@ public class TileEntityMachineAnnihilator extends TileEntityMachineBase implemen
     public TileEntityMachineAnnihilator() {
         super(11, true, false);
 
-        this.tank = new FluidTankNTM(Fluids.NONE, 2_500_000);
+        this.tank = new FluidTankNTM(Fluids.NONE, 2_500_000).withOwner(this);
     }
 
     @Override

@@ -3,6 +3,9 @@ package com.hbm.inventory.control_panel.controls;
 import com.hbm.inventory.control_panel.*;
 import com.hbm.inventory.control_panel.controls.configs.SubElementBaseConfig;
 import com.hbm.inventory.control_panel.controls.configs.SubElementLabel;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
+import com.hbm.inventory.control_panel.types.DataValueString;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.loader.IModelCustom;
 import net.minecraft.client.Minecraft;
@@ -62,7 +65,7 @@ public class Label extends Control {
 
     @Override
     protected void onConfigMapChanged() {
-        for (Map.Entry<String, DataValue> e : configMap.entrySet()) {
+        for (Map.Entry<String,DataValue> e : configMap.entrySet()) {
             switch (e.getKey()) {
                 case "colorR" : {
                     color[0] = e.getValue().getNumber();
@@ -128,9 +131,11 @@ public class Label extends Control {
 
         GlStateManager.depthMask(true);
         GlStateManager.popMatrix();
+        GlStateManager.color(1F, 1F, 1F, 1F);
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public IModelCustom getModel() {
         return ResourceManager.ctrl_display_seven_seg;
     }

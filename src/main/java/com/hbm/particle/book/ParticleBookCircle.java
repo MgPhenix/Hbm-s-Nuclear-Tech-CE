@@ -77,10 +77,10 @@ public class ParticleBookCircle extends Particle {
         
         float scale = particleScale;
 		NTMBufferBuilder fastBuffer = NTMImmediate.INSTANCE.beginPositionTex(GL11.GL_QUADS, 4);
-		fastBuffer.appendPositionTexUnchecked(-0.5*scale, 0, -0.5*scale, 0, 0);
-		fastBuffer.appendPositionTexUnchecked(0.5*scale, 0, -0.5*scale, 1, 0);
-		fastBuffer.appendPositionTexUnchecked(0.5*scale, 0, 0.5*scale, 1, 1);
-		fastBuffer.appendPositionTexUnchecked(-0.5*scale, 0, 0.5*scale, 0, 1);
+		fastBuffer.appendPositionTexUnchecked(-0.5F * scale, 0, -0.5F * scale, 0, 0);
+		fastBuffer.appendPositionTexUnchecked(0.5F * scale, 0, -0.5F * scale, 1, 0);
+		fastBuffer.appendPositionTexUnchecked(0.5F * scale, 0, 0.5F * scale, 1, 1);
+		fastBuffer.appendPositionTexUnchecked(-0.5F * scale, 0, 0.5F * scale, 0, 1);
 		NTMImmediate.INSTANCE.draw();
 		
 		GlStateManager.disablePolygonOffset();

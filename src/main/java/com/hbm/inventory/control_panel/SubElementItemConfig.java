@@ -2,6 +2,7 @@ package com.hbm.inventory.control_panel;
 
 import com.hbm.Tags;
 import com.hbm.inventory.control_panel.controls.configs.*;
+import com.hbm.inventory.control_panel.types.DataValue;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.NTMRenderHelper;
 import com.hbm.render.util.ControlPanelViewModelPositonDebugger;
@@ -27,7 +28,7 @@ public class SubElementItemConfig extends SubElement {
     private int num_variants = 1;
 
     SubElementBaseConfig config_gui;
-    private Map<String, DataValue> configs;
+    private Map<String,DataValue> configs;
 
     public SubElementItemConfig(GuiControlEdit gui) {
         super(gui);

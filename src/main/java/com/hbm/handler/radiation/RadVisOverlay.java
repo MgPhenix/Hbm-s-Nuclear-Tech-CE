@@ -177,21 +177,21 @@ public final class RadVisOverlay {
         if (face < 0 || face > 5) return;
 
         int planeAxis = FACE_PLANE_AXIS[face];
-        double planeBase = planeAxis == 0 ? baseX : planeAxis == 1 ? baseY : baseZ;
-        double planeCoord = planeBase + plane + (inset * FACE_INSET_SIGN[face]);
+        float planeBase = planeAxis == 0 ? baseX : planeAxis == 1 ? baseY : baseZ;
+        float planeCoord = planeBase + plane + (inset * FACE_INSET_SIGN[face]);
 
         int uAxis = FACE_U_AXIS[face];
         int vAxis = FACE_V_AXIS[face];
-        double uBase = uAxis == 0 ? baseX : baseZ;
-        double vBase = vAxis == 1 ? baseY : baseZ;
+        float uBase = uAxis == 0 ? baseX : baseZ;
+        float vBase = vAxis == 1 ? baseY : baseZ;
 
         emitPocketQuadVertices(buf, planeAxis, planeCoord, uBase + u0, vBase + v0, uBase + u1, vBase + v1,
                 FACE_VERTEX_ORDER[face], packedColor);
     }
 
-    private static void emitPocketQuadVertices(NTMBufferBuilder buf, int planeAxis, double planeCoord, double u0,
-                                               double v0, double u1, double v1, int order, int packedColor) {
-        double p0u, p0v, p1u, p1v, p2u, p2v, p3u, p3v;
+    private static void emitPocketQuadVertices(NTMBufferBuilder buf, int planeAxis, float planeCoord, float u0,
+                                               float v0, float u1, float v1, int order, int packedColor) {
+        float p0u, p0v, p1u, p1v, p2u, p2v, p3u, p3v;
         switch (order) {//@formatter:off
             case 1 -> {p0u = u0;p0v = v1;p1u = u1;p1v = v1;p2u = u1;p2v = v0;p3u = u0;p3v = v0;}
             case 2 -> {p0u = u1;p0v = v0;p1u = u0;p1v = v0;p2u = u0;p2v = v1;p3u = u1;p3v = v1;}
@@ -638,7 +638,7 @@ public final class RadVisOverlay {
 
         int localY = sliceY & 15;
         int idxBase = localY << 8;
-        double y = sliceY + 0.02;
+        float y = sliceY + 0.02F;
 
         float baseAlpha = MathHelper.clamp(CONFIG.alpha, 0.0f, 1.0f);
 
@@ -708,15 +708,16 @@ public final class RadVisOverlay {
                             }
                         }
 
-                        double x0 = baseX + x;
-                        double z0 = baseZ + z;
+                        float x0 = baseX + x;
+                        float z0 = baseZ + z;
+                        float y0 = y;
 
                         int packedColor = NTMBufferBuilder.packColor(r, g, b, a);
                         buf.appendPositionColorQuad(
-                                x0, y, z0,
-                                x0 + 1, y, z0,
-                                x0 + 1, y, z0 + 1,
-                                x0, y, z0 + 1,
+                                x0, y0, z0,
+                                x0 + 1, y0, z0,
+                                x0 + 1, y0, z0 + 1,
+                                x0, y0, z0 + 1,
                                 packedColor
                         );
                     }
@@ -1681,8 +1682,8 @@ public final class RadVisOverlay {
     private static void addLine(NTMBufferBuilder buf, double x1, double y1, double z1, double x2, double y2, double z2,
                                 float r, float g, float b, float a) {
         int packedColor = NTMBufferBuilder.packColor(r, g, b, a);
-        buf.appendPositionColor(x1, y1, z1, packedColor);
-        buf.appendPositionColor(x2, y2, z2, packedColor);
+        buf.appendPositionColor((float) x1, (float) y1, (float) z1, packedColor);
+        buf.appendPositionColor((float) x2, (float) y2, (float) z2, packedColor);
     }
 
     private static Vec3d sectionCenter(long sectionKey) {

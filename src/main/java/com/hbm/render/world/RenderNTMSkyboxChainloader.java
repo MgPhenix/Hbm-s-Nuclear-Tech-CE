@@ -67,8 +67,8 @@ public class RenderNTMSkyboxChainloader extends IRenderHandler { //why an abstra
             GlStateManager.color(1F, 1F, 1F, 1F);
             mc.getTextureManager().bindTexture(lodeStar);
 
-            double size = 0.5D + world.rand.nextFloat() * 0.25D;
-            double dist = 100.0D;
+            float size = (float) (0.5D + world.rand.nextFloat() * 0.25D);
+            float dist = 100.0F;
 
             NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
             buf.appendPositionTexQuadUnchecked(
@@ -96,8 +96,8 @@ public class RenderNTMSkyboxChainloader extends IRenderHandler { //why an abstra
         mc.getTextureManager().bindTexture(digammaStar);
 
         double digamma = HbmLivingProps.getDigamma(mc.player);
-        double size = (1.0D + digamma * 0.25D);
-        double dist = 100.0D - digamma * 2.5D;
+        float size = (float) (1.0D + digamma * 0.25D);
+        float dist = (float) (100.0D - digamma * 2.5D);
 
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
         buf.appendPositionTexQuadUnchecked(
@@ -116,8 +116,8 @@ public class RenderNTMSkyboxChainloader extends IRenderHandler { //why an abstra
 
         mc.getTextureManager().bindTexture(bobmazonSat);
 
-        size = 0.5D;
-        dist = 100.0D;
+        size = 0.5F;
+        dist = 100.0F;
 
         buf = NTMImmediate.INSTANCE.beginPositionTexQuads(1);
         buf.appendPositionTexQuadUnchecked(

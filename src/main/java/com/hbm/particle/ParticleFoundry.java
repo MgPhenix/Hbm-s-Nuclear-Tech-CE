@@ -21,15 +21,15 @@ public class ParticleFoundry extends Particle {
 	protected int color;
 	protected ForgeDirection dir;
 	/* how far the metal splooshes down from the base point */
-	protected double length;
+	protected float length;
 	/* the material coming right out of the faucet, either above or next to the base point */
-	protected double base;
+	protected float base;
 	/* how far the base part goes back */
-	protected double offset;
-	
+	protected float offset;
+
 	public static final ResourceLocation lava = new ResourceLocation(Tags.MODID + ":textures/models/machines/lava_gray.png");
 
-	public ParticleFoundry(World world, double x, double y, double z, int color, int direction, double length, double base, double offset) {
+	public ParticleFoundry(World world, double x, double y, double z, int color, int direction, float length, float base, float offset) {
 		super(world, x, y, z);
 		this.color = color;
 		this.dir = ForgeDirection.getOrientation(direction);
@@ -71,8 +71,8 @@ public class ParticleFoundry extends Particle {
 		float pZ = (float) ((this.prevPosZ + (this.posZ - this.prevPosZ) * partialTicks) - dZ);
 
 		ForgeDirection rot = this.dir.getRotation(ForgeDirection.UP);
-		double width = 0.0625 + ((this.particleAge + partialTicks) / this.particleMaxAge) * 0.0625;
-		double girth = 0.125 * (1 - ((this.particleAge + partialTicks) / this.particleMaxAge));
+		float width = (float) (0.0625D + ((this.particleAge + partialTicks) / this.particleMaxAge) * 0.0625D);
+		float girth = (float) (0.125D * (1 - ((this.particleAge + partialTicks) / this.particleMaxAge)));
 
 		Color color = new Color(this.color).brighter();
 		double brightener = 0.7D;
@@ -92,17 +92,17 @@ public class ParticleFoundry extends Particle {
         int packedColor = NTMBufferBuilder.packColor(r, g, b, 255);
         int packedLightmap = NTMBufferBuilder.packLightmap(240, 240);
 
-		double dirXG = dir.offsetX * girth;
-		double dirZG = dir.offsetZ * girth;
-		double rotXW = rot.offsetX * width;
-		double rotZW = rot.offsetZ * width;
+		float dirXG = dir.offsetX * girth;
+		float dirZG = dir.offsetZ * girth;
+		float rotXW = rot.offsetX * width;
+		float rotZW = rot.offsetZ * width;
 
-		double uMin = 0.5 - width;
-		double uMax = 0.5 + width;
-		double vMin = 0;
-		double vMax = length;
+		float uMin = 0.5F - width;
+		float uMax = 0.5F + width;
+		float vMin = 0.0F;
+		float vMax = length;
 
-		double add = (int) (System.currentTimeMillis() / 100 % 16) / 16D;
+		float add = (int) (System.currentTimeMillis() / 100 % 16) / 16F;
 
 		// Lower back
 		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, uMax, vMax + add + girth, packedColor, packedLightmap);
@@ -116,8 +116,8 @@ public class ParticleFoundry extends Particle {
 		fastBuffer.appendParticlePositionTexColorLmapUnchecked(dirXG - rotXW, -length, dirZG - rotZW, uMin, vMin + add, packedColor, packedLightmap);
 		fastBuffer.appendParticlePositionTexColorLmapUnchecked(dirXG + rotXW, -length, dirZG + rotZW, uMax, vMin + add, packedColor, packedLightmap);
 
-		double wMin = 0;
-		double wMax = girth;
+		float wMin = 0.0F;
+		float wMax = girth;
 
 		// Lower left
 		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, wMin, vMax + add + girth, packedColor, packedLightmap);
@@ -131,8 +131,8 @@ public class ParticleFoundry extends Particle {
 		fastBuffer.appendParticlePositionTexColorLmapUnchecked(dirXG - rotXW, -length, dirZG - rotZW, wMax, vMin + add, packedColor, packedLightmap);
 		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, -length, -rotZW, wMin, vMin + add, packedColor, packedLightmap);
 
-		double dirOX = dir.offsetX * offset;
-		double dirOZ = dir.offsetZ * offset;
+		float dirOX = dir.offsetX * offset;
+		float dirOZ = dir.offsetZ * offset;
 
 		vMax = offset;
 
@@ -143,30 +143,30 @@ public class ParticleFoundry extends Particle {
 		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW - dirOX, base, rotZW - dirOZ, uMax, vMin - add, packedColor, packedLightmap);
 
 		// Upper front
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, uMax, vMax - add + 0.25, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, girth, -rotZW, uMin, vMax - add + 0.25, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW - dirOX, base + girth, -rotZW - dirOZ, uMin, vMin - add + 0.25, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW - dirOX, base + girth, rotZW - dirOZ, uMax, vMin - add + 0.25, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, uMax, vMax - add + 0.25F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, girth, -rotZW, uMin, vMax - add + 0.25F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW - dirOX, base + girth, -rotZW - dirOZ, uMin, vMin - add + 0.25F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW - dirOX, base + girth, rotZW - dirOZ, uMax, vMin - add + 0.25F, packedColor, packedLightmap);
 
 		// Upper left
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, 0, rotZW, wMax, vMax - add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, wMin, vMax - add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW - dirOX, base + girth, rotZW - dirOZ, wMin, vMin - add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW - dirOX, base, rotZW - dirOZ, wMax, vMin - add + 0.75, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, 0, rotZW, wMax, vMax - add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, wMin, vMax - add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW - dirOX, base + girth, rotZW - dirOZ, wMin, vMin - add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW - dirOX, base, rotZW - dirOZ, wMax, vMin - add + 0.75F, packedColor, packedLightmap);
 
 		// Upper right
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, 0, -rotZW, wMax, vMax - add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, girth, -rotZW, wMin, vMax - add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW - dirOX, base + girth, -rotZW - dirOZ, wMin, vMin - add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW - dirOX, base, -rotZW - dirOZ, wMax, vMin - add + 0.75, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, 0, -rotZW, wMax, vMax - add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, girth, -rotZW, wMin, vMax - add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW - dirOX, base + girth, -rotZW - dirOZ, wMin, vMin - add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW - dirOX, base, -rotZW - dirOZ, wMax, vMin - add + 0.75F, packedColor, packedLightmap);
 
 		vMax = 0.125F;
 
 		// Bend
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(dirXG + rotXW, 0, dirZG + rotZW, uMax, vMin + add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(dirXG - rotXW, 0, dirZG - rotZW, uMin, vMin + add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, girth, -rotZW, uMin, vMax + add + 0.75, packedColor, packedLightmap);
-		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, uMax, vMax + add + 0.75, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(dirXG + rotXW, 0, dirZG + rotZW, uMax, vMin + add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(dirXG - rotXW, 0, dirZG - rotZW, uMin, vMin + add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rotXW, girth, -rotZW, uMin, vMax + add + 0.75F, packedColor, packedLightmap);
+		fastBuffer.appendParticlePositionTexColorLmapUnchecked(rotXW, girth, rotZW, uMax, vMax + add + 0.75F, packedColor, packedLightmap);
 
 		NTMImmediate.INSTANCE.draw();
 

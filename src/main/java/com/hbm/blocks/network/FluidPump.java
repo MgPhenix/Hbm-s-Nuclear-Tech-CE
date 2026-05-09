@@ -217,7 +217,7 @@ public class FluidPump extends BlockContainerBakeable implements INBTBlockTransf
 
         public TileEntityFluidPump() {
             this.tank = new FluidTankNTM[1];
-            this.tank[0] = new FluidTankNTM(Fluids.NONE, bufferSize);
+            this.tank[0] = new FluidTankNTM(Fluids.NONE, bufferSize).withOwner(this);
         }
 
         @Override

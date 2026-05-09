@@ -17,12 +17,6 @@ import org.jetbrains.annotations.NotNull;
 public class RenderRBMKLid extends TileEntitySpecialRenderer<TileEntityRBMKRod> {
 
 	private static final ResourceLocation TEX_FUEL = new ResourceLocation(Tags.MODID, "textures/blocks/rbmk/rbmk_element_fuel.png");
-
-	@Override
-	public boolean isGlobalRenderer(@NotNull TileEntityRBMKRod te) {
-		return true;
-	}
-
 	@Override
 	public void render(@NotNull TileEntityRBMKRod te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
         if (!te.hasRod) return;
@@ -58,12 +52,12 @@ public class RenderRBMKLid extends TileEntitySpecialRenderer<TileEntityRBMKRod> 
         NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionColorQuads(layerCount);
         int packedColor = NTMBufferBuilder.packColor(r, g, b, a);
 
-		for (double j = 0; j <= height; j += 0.25) {
+		for (float j = 0.0F; j <= height; j += 0.25F) {
             buf.appendPositionColorQuadUnchecked(
-                    -0.5, j, -0.5,
-                    -0.5, j, 0.5,
-                    0.5, j, 0.5,
-                    0.5, j, -0.5,
+                    -0.5F, j, -0.5F,
+                    -0.5F, j, 0.5F,
+                    0.5F, j, 0.5F,
+                    0.5F, j, -0.5F,
                     packedColor);
 		}
         NTMImmediate.INSTANCE.draw();

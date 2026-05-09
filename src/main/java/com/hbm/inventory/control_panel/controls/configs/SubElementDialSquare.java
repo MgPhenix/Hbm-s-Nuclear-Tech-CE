@@ -1,12 +1,10 @@
 package com.hbm.inventory.control_panel.controls.configs;
 
-import com.hbm.inventory.control_panel.DataValue;
-import com.hbm.inventory.control_panel.DataValueString;
+import com.hbm.inventory.control_panel.types.DataValue;
 import com.hbm.inventory.control_panel.GuiControlEdit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiTextField;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class SubElementDialSquare extends SubElementBaseConfig {

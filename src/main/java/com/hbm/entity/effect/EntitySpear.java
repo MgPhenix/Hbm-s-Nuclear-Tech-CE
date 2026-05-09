@@ -4,6 +4,7 @@ import com.hbm.explosion.ExplosionNT;
 import com.hbm.explosion.ExplosionNT.ExAttrib;
 import com.hbm.interfaces.AutoRegister;
 import com.hbm.lib.HBMSoundHandler;
+import com.hbm.lib.ModDamageSource;
 import com.hbm.main.AdvancementManager;
 import com.hbm.main.MainRegistry;
 import com.hbm.util.ContaminationUtil;
@@ -102,9 +103,12 @@ public class EntitySpear extends Entity {
 				
 				List<Entity> entities =  new ArrayList<>(world.loadedEntityList);
 				for(Object obj : entities) {
-					
-					if(obj instanceof EntityLivingBase)
-						ContaminationUtil.contaminate((EntityLivingBase) obj, HazardType.DIGAMMA, ContaminationType.DIGAMMA2, 10F);
+
+					if (obj instanceof EntityLivingBase) {
+						ContaminationUtil.contaminate((EntityLivingBase)obj,HazardType.DIGAMMA,ContaminationType.DIGAMMA2,10F);
+						// ntmleafia: you're supposed to die even on creative
+						((EntityLivingBase) obj).attackEntityFrom(ModDamageSource.digamma,((EntityLivingBase) obj).getMaxHealth());
+					}
 				}
 				this.setDead();
 				

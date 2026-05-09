@@ -71,6 +71,9 @@ public class ItemBlockStorageCrate extends ItemBlock implements IGUIProvider {
         if (stack.hasTagCompound()) {
             dummy.readNBT(stack.getTagCompound());
         }
+        if (stack.hasDisplayName()) {
+            dummy.setCustomName(stack.getDisplayName());
+        }
         return dummy;
     }
 

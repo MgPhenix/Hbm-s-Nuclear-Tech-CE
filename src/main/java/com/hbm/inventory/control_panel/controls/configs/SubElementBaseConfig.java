@@ -1,8 +1,8 @@
 package com.hbm.inventory.control_panel.controls.configs;
 
-import com.hbm.inventory.control_panel.DataValue;
-import com.hbm.inventory.control_panel.DataValueFloat;
-import com.hbm.inventory.control_panel.DataValueString;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
+import com.hbm.inventory.control_panel.types.DataValueString;
 import com.hbm.inventory.control_panel.GuiControlEdit;
 import com.hbm.inventory.control_panel.SubElement;
 import net.minecraftforge.fml.relauncher.Side;

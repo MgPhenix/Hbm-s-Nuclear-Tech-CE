@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
@@ -70,15 +69,19 @@ public class ParticleGluonParticle extends Particle {
 		mat.rewind();
 		GL11.glLoadMatrix(mat);
 		
-        Vec3d[] avec3d = new Vec3d[] {new Vec3d((double)(-rotationX * f4 - rotationXY * f4), (double)(-rotationZ * f4), (double)(-rotationYZ * f4 - rotationXZ * f4)), new Vec3d((double)(-rotationX * f4 + rotationXY * f4), (double)(rotationZ * f4), (double)(-rotationYZ * f4 + rotationXZ * f4)), new Vec3d((double)(rotationX * f4 + rotationXY * f4), (double)(rotationZ * f4), (double)(rotationYZ * f4 + rotationXZ * f4)), new Vec3d((double)(rotationX * f4 - rotationXY * f4), (double)(-rotationZ * f4), (double)(rotationYZ * f4 - rotationXZ * f4))};
+        float rX = rotationX * f4;
+        float rZ = rotationZ * f4;
+        float rXY = rotationXY * f4;
+        float rYZ = rotationYZ * f4;
+        float rXZ = rotationXZ * f4;
         //I can't figure out a way to batch these particles without screwing up the hacky rotation fixes I'm doing.
         NTMBufferBuilder fastBuffer = NTMImmediate.INSTANCE.beginParticlePositionTexColorLmap(GL11.GL_QUADS, 4);
         int packedColor = NTMBufferBuilder.packColor(this.particleRed, this.particleGreen, this.particleBlue, this.workingAlpha);
         int packedLightmap = NTMBufferBuilder.packLightmap(240, 240);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(avec3d[0].x, avec3d[0].y, avec3d[0].z, 1, 1, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(avec3d[1].x, avec3d[1].y, avec3d[1].z, 1, 0, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(avec3d[2].x, avec3d[2].y, avec3d[2].z, 0, 0, packedColor, packedLightmap);
-        fastBuffer.appendParticlePositionTexColorLmapUnchecked(avec3d[3].x, avec3d[3].y, avec3d[3].z, 0, 1, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rX - rXY, -rZ, -rYZ - rXZ, 1, 1, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(-rX + rXY, rZ, -rYZ + rXZ, 1, 0, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(rX + rXY, rZ, rYZ + rXZ, 0, 0, packedColor, packedLightmap);
+        fastBuffer.appendParticlePositionTexColorLmapUnchecked(rX - rXY, -rZ, rYZ - rXZ, 0, 1, packedColor, packedLightmap);
         NTMImmediate.INSTANCE.draw();
         GlStateManager.popMatrix();
 	}

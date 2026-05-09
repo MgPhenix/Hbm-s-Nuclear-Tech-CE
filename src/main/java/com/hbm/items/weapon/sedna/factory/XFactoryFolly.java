@@ -25,6 +25,7 @@ import com.hbm.util.EntityDamageUtil;
 import com.hbm.util.Vec3NT;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -122,9 +123,11 @@ public class XFactoryFolly {
     public static BiConsumer<ItemStack, ItemGunBaseNT.LambdaContext> LAMBDA_FIRE = (stack, ctx) -> Lego.doStandardFire(stack, ctx, AnimationEnums.GunAnimation.CYCLE, 0, false);
 
     public static BiFunction<ItemStack, ItemGunBaseNT.LambdaContext, Boolean> LAMBDA_CAN_FIRE = (stack, ctx) -> {
-        if(!ItemGunBaseNT.getIsAiming(stack)) return false;
-        if(ItemGunBaseNT.getLastAnim(stack, ctx.configIndex) != AnimationEnums.GunAnimation.SPINUP) return false;
-        if(ItemGunBaseNT.getAnimTimer(stack, ctx.configIndex) < 100) return false;
+        if(ctx.entity instanceof EntityPlayer) {
+            if(!ItemGunBaseNT.getIsAiming(stack)) return false;
+            if(ItemGunBaseNT.getLastAnim(stack, ctx.configIndex) != AnimationEnums.GunAnimation.SPINUP) return false;
+            if(ItemGunBaseNT.getAnimTimer(stack, ctx.configIndex) < 100) return false;
+        }
         return ctx.config.getReceivers(stack)[0].getMagazine(stack).getAmount(stack, ctx.inventory) > 0;
     };
 

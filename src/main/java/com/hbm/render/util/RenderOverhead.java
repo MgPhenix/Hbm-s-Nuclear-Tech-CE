@@ -91,10 +91,10 @@ public class RenderOverhead {
 			int center = fontrenderer.getStringWidth(name) / 2;
 			GlStateManager.color(0.0F, 0.0F, 0.0F, 0.25F);
 			buf.appendPositionQuadUnchecked(
-					-center - 1, -1 + heightOffset, 0.0D,
-					-center - 1, 8 + heightOffset, 0.0D,
-					center + 1, 8 + heightOffset, 0.0D,
-					center + 1, -1 + heightOffset, 0.0D
+					-center - 1, -1 + heightOffset, 0.0F,
+					-center - 1, 8 + heightOffset, 0.0F,
+					center + 1, 8 + heightOffset, 0.0F,
+					center + 1, -1 + heightOffset, 0.0F
 			);
 			NTMImmediate.INSTANCE.draw();
 			GlStateManager.enableTexture2D();
@@ -140,10 +140,10 @@ public class RenderOverhead {
 			int center = fontrenderer.getStringWidth(name) / 2;
 			GlStateManager.color(0.0F, 0.0F, 0.0F, 0.25F);
 			buf.appendPositionQuadUnchecked(
-					-center - 1, -1 + heightOffset, 0.0D,
-					-center - 1, 8 + heightOffset, 0.0D,
-					center + 1, 8 + heightOffset, 0.0D,
-					center + 1, -1 + heightOffset, 0.0D
+					-center - 1, -1 + heightOffset, 0.0F,
+					-center - 1, 8 + heightOffset, 0.0F,
+					center + 1, 8 + heightOffset, 0.0F,
+					center + 1, -1 + heightOffset, 0.0F
 			);
 			NTMImmediate.INSTANCE.draw();
 			GlStateManager.enableTexture2D();

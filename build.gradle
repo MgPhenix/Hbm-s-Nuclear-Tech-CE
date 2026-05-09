@@ -148,13 +148,14 @@ if (apiPackage) {
 }
 
 if (accessTransformersFile) {
+    MCPTasks mcpTasks = project.extensions.getByType(MCPTasks)
     for (atFile in accessTransformersFile.split(",")) {
         String targetFile = 'src/main/resources/' + atFile.trim()
         if (!getFile(targetFile).exists()) {
             throw new GradleException("Could not resolve \"accessTransformersFile\"! Could not find " + targetFile)
         }
-        tasks.deobfuscateMergedJarToSrg.accessTransformerFiles.from(targetFile)
-        tasks.srgifyBinpatchedJar.accessTransformerFiles.from(targetFile)
+        mcpTasks.preDecompATs.from(targetFile)
+        mcpTasks.deobfuscationATs.from(targetFile)
     }
 }
 
@@ -307,9 +308,11 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     def suppressCheckedExceptionsPluginArg = '-Xplugin:suppress-checked-exceptions'
     def upgradeInfoProviderSourcePluginArg = '-Xplugin:inject-upgrade-info-provider-source'
+    def vaoRenderCallsitePluginArg = '-Xplugin:inline-vao-render-callsites ' + file('src/main/resources/assets/hbm').absolutePath
     def javacExportPackages = [
             'jdk.compiler/com.sun.tools.javac.api',
             'jdk.compiler/com.sun.tools.javac.code',
+            'jdk.compiler/com.sun.tools.javac.resources',
             'jdk.compiler/com.sun.tools.javac.tree',
             'jdk.compiler/com.sun.tools.javac.util'
     ]
@@ -320,6 +323,9 @@ tasks.withType(JavaCompile).configureEach {
         }
         if (!options.compilerArgs.contains(upgradeInfoProviderSourcePluginArg)) {
             options.compilerArgs.add(upgradeInfoProviderSourcePluginArg)
+        }
+        if (!options.compilerArgs.contains(vaoRenderCallsitePluginArg)) {
+            options.compilerArgs.add(vaoRenderCallsitePluginArg)
         }
         javacExports.each { arg ->
             if (!options.compilerArgs.contains(arg)) {

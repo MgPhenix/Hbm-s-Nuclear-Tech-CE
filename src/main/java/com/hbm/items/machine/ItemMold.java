@@ -91,6 +91,7 @@ public class ItemMold extends Item implements IModelRegister, IClaimedModelLocat
         registerMold(new MoldSingle(13, L, "pipes",
                 () -> new ItemStack(ModItems.pipes_steel),
                 Mats.MAT_STEEL, MaterialShapes.BLOCK.q(3)));
+        registerMold(new MoldShape(     15, L, "plates_cast", MaterialShapes.CASTPLATE, 3));
 
         registerMold(new MoldMulti(16, S, "c9", MaterialShapes.PLATE.q(1, 4),
                 Mats.MAT_GUNMETAL,      (Supplier<ItemStack>) () -> OreDictManager.DictFrame.fromOne(ModItems.casing, ItemEnums.EnumCasingType.SMALL),

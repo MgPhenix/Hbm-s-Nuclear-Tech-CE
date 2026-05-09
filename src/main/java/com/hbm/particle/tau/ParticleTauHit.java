@@ -108,18 +108,20 @@ public class ParticleTauHit extends Particle {
         
         float scale = particleScale * (1-lifeN);
 		NTMBufferBuilder fastBuffer = NTMImmediate.INSTANCE.beginPositionTexQuads(2);
+		float halfScale = 0.5F * scale;
 		fastBuffer.appendPositionTexQuadUnchecked(
-				-0.5 * scale, 0, -0.5 * scale, 0, 0,
-				0.5 * scale, 0, -0.5 * scale, 1, 0,
-				0.5 * scale, 0, 0.5 * scale, 1, 1,
-				-0.5 * scale, 0, 0.5 * scale, 0, 1
+				-halfScale, 0, -halfScale, 0, 0,
+				halfScale, 0, -halfScale, 1, 0,
+				halfScale, 0, halfScale, 1, 1,
+				-halfScale, 0, halfScale, 0, 1
 		);
 		scale *= 0.1;
+		float innerHalfScale = 0.5F * scale;
 		fastBuffer.appendPositionTexQuadUnchecked(
-				-0.5 * scale, 0, -0.5 * scale, 0, 0,
-				0.5 * scale, 0, -0.5 * scale, 1, 0,
-				0.5 * scale, 0, 0.5 * scale, 1, 1,
-				-0.5 * scale, 0, 0.5 * scale, 0, 1
+				-innerHalfScale, 0, -innerHalfScale, 0, 0,
+				innerHalfScale, 0, -innerHalfScale, 1, 0,
+				innerHalfScale, 0, innerHalfScale, 1, 1,
+				-innerHalfScale, 0, innerHalfScale, 0, 1
 		);
 		NTMImmediate.INSTANCE.draw();
 		

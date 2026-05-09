@@ -17,6 +17,7 @@ import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
 import com.hbm.saveddata.TomSaveData;
 import com.hbm.sound.AudioWrapper;
+import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IBufPacketReceiver;
 import com.hbm.tileentity.IConfigurableMachine;
 import com.hbm.tileentity.IFluidCopiable;
@@ -41,7 +42,7 @@ import java.io.IOException;
 
 @AutoRegister
 public class TileEntityHeatBoilerIndustrial extends TileEntityLoadedBase implements IBufPacketReceiver, ITickable, IFluidStandardTransceiver,
-        IConfigurableMachine, IFluidCopiable {
+        IConfigurableMachine, IFluidCopiable, IConnectionAnchors {
 
     /* CONFIGURABLE */
     public static int maxHeat = 12_800_000;
@@ -58,8 +59,8 @@ public class TileEntityHeatBoilerIndustrial extends TileEntityLoadedBase impleme
     public TileEntityHeatBoilerIndustrial() {
         this.tanks = new FluidTankNTM[2];
         this.tanksSync = new FluidTankNTM[2];
-        this.tanks[0] = new FluidTankNTM(Fluids.WATER, 64_000);
-        this.tanks[1] = new FluidTankNTM(Fluids.STEAM, 64_000 * 100);
+        this.tanks[0] = new FluidTankNTM(Fluids.WATER, 64_000).withOwner(this);
+        this.tanks[1] = new FluidTankNTM(Fluids.STEAM, 64_000 * 100).withOwner(this);
     }
 
     @Override
@@ -140,6 +141,15 @@ public class TileEntityHeatBoilerIndustrial extends TileEntityLoadedBase impleme
             audio.stopSound();
             audio = null;
         }
+    }
+
+    @Override
+    public void serializeInitial(ByteBuf buf) {
+        super.serialize(buf);
+        buf.writeInt(this.heat);
+        this.tanks[0].serialize(buf);
+        this.tanks[1].serialize(buf);
+        buf.writeBoolean(this.isOn);
     }
 
     @Override
@@ -243,7 +253,7 @@ public class TileEntityHeatBoilerIndustrial extends TileEntityLoadedBase impleme
         }
     }
 
-    private DirPos[] getConPos() {
+    public DirPos[] getConPos() {
         double x = pos.getX();
         double y = pos.getY();
         double z = pos.getZ();

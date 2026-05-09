@@ -17,9 +17,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -31,7 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Queue;
 
-public abstract class TileEntityOilDrillBase extends TileEntityMachineBase implements ITickable, IEnergyReceiverMK2, IFluidStandardTransceiver, IConfigurableMachine, IPersistentNBT, IGUIProvider, IFluidCopiable, IUpgradeInfoProvider {
+public abstract class TileEntityOilDrillBase extends TileEntityMachineBase implements ITickable, IEnergyReceiverMK2, IFluidStandardTransceiver, IConfigurableMachine, IPersistentNBT, IGUIProvider, IFluidCopiable, IUpgradeInfoProvider, IConnectionAnchors {
     private final UpgradeManagerNT upgradeManager = new UpgradeManagerNT(this);
     public long power;
     public int indicator = 0;
@@ -60,8 +58,8 @@ public abstract class TileEntityOilDrillBase extends TileEntityMachineBase imple
         };
 
         tanks = new FluidTankNTM[2];
-        tanks[0] = new FluidTankNTM(Fluids.OIL, 64_000);
-        tanks[1] = new FluidTankNTM(Fluids.GAS, 64_000);
+        tanks[0] = new FluidTankNTM(Fluids.OIL, 64_000).withOwner(this);
+        tanks[1] = new FluidTankNTM(Fluids.GAS, 64_000).withOwner(this);
     }
 
     @Override
@@ -282,16 +280,6 @@ public abstract class TileEntityOilDrillBase extends TileEntityMachineBase imple
 
     }
 
-    @Override
-    public @NotNull AxisAlignedBB getRenderBoundingBox() {
-        return TileEntity.INFINITE_EXTENT_AABB;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public double getMaxRenderDistanceSquared() {
-        return 65536.0D;
-    }
 
     @Override
     public FluidTankNTM[] getSendingTanks() {
@@ -334,6 +322,12 @@ public abstract class TileEntityOilDrillBase extends TileEntityMachineBase imple
         upgrades.put(ItemMachineUpgrade.UpgradeType.AFTERBURN, 3);
         upgrades.put(ItemMachineUpgrade.UpgradeType.OVERDRIVE, 3);
         return upgrades;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public double getMaxRenderDistanceSquared() {
+        return 65536.0D;
     }
 
 }

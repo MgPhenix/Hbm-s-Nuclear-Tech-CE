@@ -93,10 +93,10 @@ public class ParticleGluonMuzzleSmoke extends ParticleFirstPerson {
         int packedLightmap = NTMBufferBuilder.packLightmap(240, 240);
         for(int i = 0; i < workingAlpha; i ++){
             int packedColor = NTMBufferBuilder.packColor(this.particleRed, this.particleGreen, this.particleBlue, Math.min(a, 1));
-            fastBuffer.appendParticlePositionTexColorLmap(vecs[0].xCoord, vecs[0].yCoord, vecs[0].zCoord, 1, 1, packedColor, packedLightmap);
-            fastBuffer.appendParticlePositionTexColorLmap(vecs[1].xCoord, vecs[1].yCoord, vecs[1].zCoord, 1, 0, packedColor, packedLightmap);
-            fastBuffer.appendParticlePositionTexColorLmap(vecs[2].xCoord, vecs[2].yCoord, vecs[2].zCoord, 0, 0, packedColor, packedLightmap);
-            fastBuffer.appendParticlePositionTexColorLmap(vecs[3].xCoord, vecs[3].yCoord, vecs[3].zCoord, 0, 1, packedColor, packedLightmap);
+            fastBuffer.appendParticlePositionTexColorLmap((float) vecs[0].xCoord, (float) vecs[0].yCoord, (float) vecs[0].zCoord, 1, 1, packedColor, packedLightmap);
+            fastBuffer.appendParticlePositionTexColorLmap((float) vecs[1].xCoord, (float) vecs[1].yCoord, (float) vecs[1].zCoord, 1, 0, packedColor, packedLightmap);
+            fastBuffer.appendParticlePositionTexColorLmap((float) vecs[2].xCoord, (float) vecs[2].yCoord, (float) vecs[2].zCoord, 0, 0, packedColor, packedLightmap);
+            fastBuffer.appendParticlePositionTexColorLmap((float) vecs[3].xCoord, (float) vecs[3].yCoord, (float) vecs[3].zCoord, 0, 1, packedColor, packedLightmap);
              a-=1;
         }
 	

@@ -334,7 +334,7 @@ public class ModBlocks {
     public static final Block ore_bedrock_block = new BlockBedrockOreTE("ore_bedrock_block").setCreativeTab(MainRegistry.resourceTab).setBlockUnbreakable().setResistance(3_600_000);
     public static final Block ore_volcano = new BlockFissure(Material.ROCK, "ore_volcano").setLightLevel(1F).setCreativeTab(MainRegistry.blockTab);
 
-    public static final Block ore_oil = new BlockNTMOre("ore_oil", 1).setCreativeTab(MainRegistry.resourceTab).setHardness(5.0F).setResistance(10.0F);
+    public static final Block ore_oil = new BlockNTMOre("ore_oil", OreEnum.OIL, 1).setCreativeTab(MainRegistry.resourceTab).setHardness(5.0F).setResistance(10.0F);
     public static final Block ore_oil_empty = new BlockBase(Material.ROCK, "ore_oil_empty").setCreativeTab(MainRegistry.resourceTab).setHardness(5.0F).setResistance(10.0F);
     public static final Block ore_oil_sand = new BlockFallingBase(Material.SAND, "ore_oil_sand", SoundType.SAND).setCreativeTab(MainRegistry.resourceTab).setHardness(0.5F).setResistance(1.0F);
 
@@ -840,10 +840,11 @@ public class ModBlocks {
 
     public static final Block vault_door = new BlockDoorGeneric(Material.IRON, DoorDecl.VAULT_DOOR, true, "vault_door").setHardness(500.0F).setResistance(1000.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block blast_door = new BlastDoor(Material.IRON, "blast_door").setHardness(250.0F).setResistance(1000.0F).setCreativeTab(MainRegistry.machineTab);
-    public static final Block sliding_blast_door = new BlockSlidingBlastDoor(Material.IRON, "sliding_blast_door").setHardness(150.0F).setResistance(750.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block sliding_blast_door_legacy = new BlockSlidingBlastDoor(Material.IRON, "sliding_blast_door_legacy").setHardness(150.0F).setResistance(750.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block sliding_blast_door_2 = new BlockSlidingBlastDoor(Material.IRON, "sliding_blast_door_2").setHardness(150.0F).setResistance(750.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block sliding_blast_door_keypad = new BlockSlidingBlastDoor(Material.IRON, "sliding_blast_door_keypad").setHardness(150.0F).setResistance(750.0F).setCreativeTab(null);
 
+    public static final Block sliding_blast_door = new BlockDoorGeneric(Material.IRON, DoorDecl.SLIDE_DOOR, false, "sliding_blast_door").setHardness(150.0F).setResistance(750.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block small_hatch = new BlockDoorGeneric(Material.IRON, DoorDecl.HATCH, true, "small_hatch").setHardness(100.0F).setResistance(150.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block sliding_seal_door = new BlockDoorGeneric(Material.IRON, DoorDecl.SLIDING_SEAL_DOOR, false, "sliding_seal_door").setHardness(10.0F).setResistance(1000.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block sliding_gate_door = new BlockDoorGeneric(Material.IRON, DoorDecl.SLIDING_GATE_DOOR, true, "sliding_gate_door").setHardness(100.0F).setResistance(1000.0F).setCreativeTab(MainRegistry.machineTab);
@@ -981,7 +982,15 @@ public class ModBlocks {
     public static final Block rbmk_storage = new RBMKStorage("rbmk_storage", "rbmk_storage").setHardness(15.0F).setResistance(100.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block rbmk_console = new RBMKConsole("rbmk_console").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block rbmk_crane_console = new RBMKCraneConsole("rbmk_crane_console").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_display_blank = new RBMKMiniPanelBase("rbmk_display_blank").setCreativeTab(MainRegistry.machineTab);
     public static final Block rbmk_display = new RBMKDisplay("rbmk_display").setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_key_pad = new RBMKKeyPad("rbmk_key_pad").setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_gauge = new RBMKGauge("rbmk_gauge").setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_numitron = new RBMKNumitron("rbmk_numitron").setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_graph = new RBMKGraph("rbmk_graph").setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_lever = new RBMKLever("rbmk_lever").setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_indicator = new RBMKIndicator("rbmk_indicator").setCreativeTab(MainRegistry.machineTab);
+    public static final Block rbmk_terminal = new RBMKTerminal("rbmk_terminal").setCreativeTab(MainRegistry.machineTab);
     public static final Block rbmk_autoloader = new RBMKAutoloader("rbmk_autoloader").setCreativeTab(MainRegistry.machineTab).setHardness(50.0F).setResistance(60.0F);
     public static final Block rbmk_loader = new RBMKLoader(Material.IRON, "rbmk_loader").setHardness(15.0F).setResistance(100.0F).setCreativeTab(MainRegistry.machineTab).setHardness(50.0F).setResistance(60.0F);
     public static final Block rbmk_steam_inlet = new RBMKInlet(Material.IRON, "rbmk_steam_inlet").setCreativeTab(MainRegistry.machineTab).setHardness(50.0F).setResistance(60.0F);
@@ -1195,6 +1204,8 @@ public class ModBlocks {
     public static final Block foundry_basin = new FoundryBasin("foundry_basin").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block foundry_channel = new FoundryChannel("foundry_channel").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block foundry_outlet = new FoundryOutlet("foundry_outlet").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block foundry_slagtap = new FoundrySlagtap("foundry_slagtap").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block slag = new BlockDynamicSlag("slag").setHardness(5.0F).setResistance(10.0F).setCreativeTab(null);
     public static final Block machine_industrial_boiler = new MachineHeatBoilerIndustrial(Material.IRON, "machine_industrial_boiler").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
 
     //Misc
@@ -1243,18 +1254,19 @@ public class ModBlocks {
     public static final Block fusion_heater = new BlockBase(Material.IRON, "fusion_heater").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_hatch = new BlockBase(Material.IRON, "fusion_hatch").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_core = new BlockBase(Material.IRON, "fusion_core_block").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
-    public static final Block plasma = new BlockPlasma(Material.IRON, "plasma").setHardness(5.0F).setResistance(6000.0F).setLightLevel(1.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block iter = new MachineITER("iter").setHardness(5.0F).setResistance(6000.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block plasma_heater = new MachinePlasmaHeater("plasma_heater").setHardness(5.0F).setResistance(6000.0F).setCreativeTab(MainRegistry.machineTab);
 
     public static final Block fusion_component = new BlockFusionComponent().setHardness(5.0F).setResistance(30.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_torus = new MachineFusionTorus("fusion_torus").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_klystron = new MachineFusionKlystron("fusion_klystron").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block fusion_klystron_creative = new MachineFusionKlystronCreative("fusion_klystron_creative").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_breeder = new MachineFusionBreeder("fusion_breeder").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_collector = new MachineFusionCollector("fusion_collector").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_boiler = new MachineFusionBoiler("fusion_boiler").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_mhdt = new MachineFusionMHDT("fusion_mhdt").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block fusion_coupler = new MachineFusionCoupler("fusion_coupler").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block fusion_plasma_forge = new MachineFusionPlasmaForge("fusion_plasma_forge").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
 
     public static final Block machine_icf_press = new MachineICFPress().setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block icf = new MachineICF("icf").setHardness(5.0F).setResistance(60.0F).setCreativeTab(MainRegistry.machineTab);
@@ -1337,6 +1349,7 @@ public class ModBlocks {
 
     //Misc and more misc
     public static final Block volcano_core = new BlockVolcano("volcano_core").setBlockUnbreakable().setResistance(10000.0F).setCreativeTab(MainRegistry.nukeTab);
+    public static final Block volcano_rad_core = new BlockVolcano("volcano_rad_core").setBlockUnbreakable().setResistance(10000.0F).setCreativeTab(MainRegistry.nukeTab);
     public static final Block taint = new BlockTaint(Material.IRON, "taint").setCreativeTab(MainRegistry.nukeTab).setHardness(15.0F).setResistance(10.0F);
     public static final Block residue = new BlockCloudResidue(Material.IRON, "residue").setHardness(0.5F).setResistance(0.5F).setCreativeTab(MainRegistry.nukeTab);
 
@@ -1379,6 +1392,7 @@ public class ModBlocks {
     public static final Block radio_torch_reader = new RadioTorchReader("radio_torch_reader").setHardness(0.1F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block radio_torch_controller = new RadioTorchController("radio_torch_controller").setHardness(0.1F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block radio_telex = new RadioTelex("radio_telex").setHardness(3F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block cargo_elevator = new BlockCargoElevator("cargo_elevator").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
 
     //Drillgon200: Removed, by order of lord Bob.
     //Alcater: excecuting removal of classes/registry/render
@@ -1393,6 +1407,8 @@ public class ModBlocks {
 
     public static final Block pneumatic_tube = new PneumoTube("pneumatic_tube").setSoundType(ModSoundTypes.pipe).setHardness(0.1F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
     public static final Block pneumatic_tube_paintable = new PneumoTubePaintableBlock("pneumatic_tube_paintable").setHardness(5.0F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block pneumatic_storage_access = new PneumoStorageAccess("pneumatic_storage_access").setSoundType(ModSoundTypes.pipe).setHardness(0.1F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
+    public static final Block pneumatic_storage_clutter = new PneumoStorageClutter("pneumatic_storage_clutter").setSoundType(ModSoundTypes.pipe).setHardness(0.1F).setResistance(10.0F).setCreativeTab(MainRegistry.machineTab);
 
     public static final Block chain = new BlockChain(Material.IRON, "dungeon_chain").setHardness(0.25F).setResistance(2.0F).setCreativeTab(MainRegistry.blockTab);
 
@@ -1443,6 +1459,7 @@ public class ModBlocks {
 
     }.setImmovableMobility());
     public static final Material fluidvolcanic = (new MaterialLiquid(MapColor.RED));
+    public static final Material fluidrad = (new MaterialLiquid(MapColor.LIME));
 
     public static Block mercury_block;
 
@@ -1498,10 +1515,10 @@ public class ModBlocks {
     public static final Block schrabidic_block = new SchrabidicBlock(ModFluids.schrabidic_fluid, fluidschrabidic.setReplaceable(), ModDamageSource.radiation, "schrabidic_block").setResistance(500F);
     public static final Block corium_block = new CoriumFinite(ModFluids.corium_fluid, fluidcorium, "corium_block").setResistance(500F);
     public static final Block volcanic_lava_block = new VolcanicBlock(ModFluids.volcanic_lava_fluid, fluidvolcanic, "volcanic_lava_block").setResistance(500F);
-    public static final Block bromine_block = new BromineBlock(ModFluids.bromine_fluid, Material.WATER, "bromine_block").setResistance(500F);
-    public static final Block sulfuric_acid_block = new SulfuricAcidBlock(ModFluids.sulfuric_acid_fluid, Material.WATER, "sulfuric_acid_block").setDamage(ModDamageSource.acid, 5F).setResistance(500F);
+    public static final Block rad_lava_block = new RadBlock(ModFluids.rad_lava_fluid, fluidrad, "rad_lava_block").setResistance(500F);
+    public static final Block sulfuric_acid_block = new GenericFluidBlock(ModFluids.sulfuric_acid_fluid, Material.WATER, "sulfuric_acid_block").setDamage(ModDamageSource.acid, 5F).setResistance(500F);
 
-    public static void preInit() {
+    public static void registerBlocks() {
         for (Block block : ALL_BLOCKS) {
             ForgeRegistries.BLOCKS.register(block);
         }
@@ -1512,7 +1529,7 @@ public class ModBlocks {
     public static void init() {
     }
 
-    public static void postInit() {
+    public static void initializeHazardsAndPlacables() {
 
         for (Block block : ALL_BLOCKS) {
             if (block instanceof BlockHazard) {
@@ -1525,13 +1542,13 @@ public class ModBlocks {
     }
 
     private static void registerFluidBlocks() {
-        ModFluids.toxic_fluid.setBlock(ModBlocks.toxic_block);
-        ModFluids.mud_fluid.setBlock(ModBlocks.mud_block);
-        ModFluids.acid_fluid.setBlock(ModBlocks.acid_block);
-        ModFluids.schrabidic_fluid.setBlock(ModBlocks.schrabidic_block);
-        ModFluids.corium_fluid.setBlock(ModBlocks.corium_block);
-        ModFluids.volcanic_lava_fluid.setBlock(ModBlocks.volcanic_lava_block);
-        ModFluids.bromine_fluid.setBlock(ModBlocks.bromine_block);
-        ModFluids.sulfuric_acid_fluid.setBlock(ModBlocks.sulfuric_acid_block);
+        ModFluids.toxic_fluid.setBlock(toxic_block);
+        ModFluids.mud_fluid.setBlock(mud_block);
+        ModFluids.acid_fluid.setBlock(acid_block);
+        ModFluids.schrabidic_fluid.setBlock(schrabidic_block);
+        ModFluids.corium_fluid.setBlock(corium_block);
+        ModFluids.volcanic_lava_fluid.setBlock(volcanic_lava_block);
+        ModFluids.rad_lava_fluid.setBlock(rad_lava_block);
+        ModFluids.sulfuric_acid_fluid.setBlock(sulfuric_acid_block);
     }
 }

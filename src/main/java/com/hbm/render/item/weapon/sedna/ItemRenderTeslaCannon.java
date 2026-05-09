@@ -104,7 +104,7 @@ public class ItemRenderTeslaCannon extends ItemRenderWeaponBase {
 		GlStateManager.rotate(135F, 0, 1, 0);
 		GlStateManager.scale(squeeze[0], squeeze[1], squeeze[2]);
 		Minecraft.getMinecraft().renderEngine.bindTexture(RenderPlushie.yomiTex);
-		RenderPlushie.yomiModel.renderAll();
+		ResourceManager.plushie_yomi.renderAll();
 		GlStateManager.popMatrix();
 	}
 

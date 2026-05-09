@@ -110,7 +110,7 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 			GlStateManager.pushMatrix();
 			GlStateManager.rotate((entity.ticksExisted + interp % 360) * -((float)Math.pow(k + 1, 1.25)), 0, 1, 0);
 			GlStateManager.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
-			double s = 3 - k * 0.175D;
+			float s = 3F - k * 0.175F;
 
 			for(int j = 0; j < 2; j++) {
 
@@ -126,24 +126,28 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 						color[3] = glow;
 					}
 					int innerColor = packCurrentColor(color);
-					double x0 = vec.xCoord * s;
-					double z0 = vec.zCoord * s;
-					double u0 = 0.5 + vec.xCoord * 0.25;
-					double v0 = 0.5 + vec.zCoord * 0.25;
+					float vx0 = (float) vec.xCoord;
+					float vz0 = (float) vec.zCoord;
+					float x0 = vx0 * s;
+					float z0 = vz0 * s;
+					float u0 = 0.5F + vx0 * 0.25F;
+					float v0 = 0.5F + vz0 * 0.25F;
 
 					this.setColorFromIteration(k, 0F, color);
 					int outerColor = packCurrentColor(color);
-					double x1 = vec.xCoord * s * 2;
-					double z1 = vec.zCoord * s * 2;
-					double u1 = 0.5 + vec.xCoord * 0.5;
-					double v1 = 0.5 + vec.zCoord * 0.5;
+					float x1 = vx0 * s * 2F;
+					float z1 = vz0 * s * 2F;
+					float u1 = 0.5F + vx0 * 0.5F;
+					float v1 = 0.5F + vz0 * 0.5F;
 
 					vec.rotateAroundY((float)(Math.PI * 2 / count));
+					float vx1 = (float) vec.xCoord;
+					float vz1 = (float) vec.zCoord;
 					buf.appendPositionTexColorQuadUnchecked(
 							x0, 0, z0, u0, v0, innerColor,
 							x1, 0, z1, u1, v1, outerColor,
-							vec.xCoord * s * 2, 0, vec.zCoord * s * 2, 0.5 + vec.xCoord * 0.5, 0.5 + vec.zCoord * 0.5, outerColor,
-							vec.xCoord * s, 0, vec.zCoord * s, 0.5 + vec.xCoord * 0.25, 0.5 + vec.zCoord * 0.25, innerColor
+							vx1 * s * 2F, 0, vz1 * s * 2F, 0.5F + vx1 * 0.5F, 0.5F + vz1 * 0.5F, outerColor,
+							vx1 * s, 0, vz1 * s, 0.5F + vx1 * 0.25F, 0.5F + vz1 * 0.25F, innerColor
 					);
 				}
 				NTMImmediate.INSTANCE.draw();
@@ -218,11 +222,11 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 		GlStateManager.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 		Vec3 vec = Vec3.createVectorHelper(1, 0, 0);
 
-		double s = 3;
+		float s = 3F;
 		int count = 16;
 
 		float[] color = {0, 0, 0, 0};
-		
+
 		//swirl, inner part (solid)
 		for(int j = 0; j < 2; j++) {
 			NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionTexColorQuads(count);
@@ -232,10 +236,12 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 				color[2] = 0;
 				color[3] = 1;
 				int innerCoreColor = packCurrentColor(color);
-				double x0 = vec.xCoord * 0.9;
-				double z0 = vec.zCoord * 0.9;
-				double u0 = 0.5 + vec.xCoord * 0.25 / s * 0.9;
-				double v0 = 0.5 + vec.zCoord * 0.25 / s * 0.9;
+				float vx0 = (float) vec.xCoord;
+				float vz0 = (float) vec.zCoord;
+				float x0 = vx0 * 0.9F;
+				float z0 = vz0 * 0.9F;
+				float u0 = 0.5F + vx0 * 0.25F / s * 0.9F;
+				float v0 = 0.5F + vz0 * 0.25F / s * 0.9F;
 
 				if(j == 0){
 					this.setColorFull(entity, color);
@@ -246,17 +252,19 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 					color[3] = glow;
 				}
 				int ringColor = packCurrentColor(color);
-				double x1 = vec.xCoord * s;
-				double z1 = vec.zCoord * s;
-				double u1 = 0.5 + vec.xCoord * 0.25;
-				double v1 = 0.5 + vec.zCoord * 0.25;
+				float x1 = vx0 * s;
+				float z1 = vz0 * s;
+				float u1 = 0.5F + vx0 * 0.25F;
+				float v1 = 0.5F + vz0 * 0.25F;
 
 				vec.rotateAroundY((float)(Math.PI * 2 / count));
+				float vx1 = (float) vec.xCoord;
+				float vz1 = (float) vec.zCoord;
 				buf.appendPositionTexColorQuadUnchecked(
 						x0, 0, z0, u0, v0, innerCoreColor,
 						x1, 0, z1, u1, v1, ringColor,
-						vec.xCoord * s, 0, vec.zCoord * s, 0.5 + vec.xCoord * 0.25, 0.5 + vec.zCoord * 0.25, ringColor,
-						vec.xCoord * 0.9, 0, vec.zCoord * 0.9, 0.5 + vec.xCoord * 0.25 / s * 0.9, 0.5 + vec.zCoord * 0.25 / s * 0.9, innerCoreColor
+						vx1 * s, 0, vz1 * s, 0.5F + vx1 * 0.25F, 0.5F + vz1 * 0.25F, ringColor,
+						vx1 * 0.9F, 0, vz1 * 0.9F, 0.5F + vx1 * 0.25F / s * 0.9F, 0.5F + vz1 * 0.25F / s * 0.9F, innerCoreColor
 				);
 			}
 
@@ -282,23 +290,27 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 					color[3] = glow;
 				}
 				int innerRingColor = packCurrentColor(color);
-				double x0 = vec.xCoord * s;
-				double z0 = vec.zCoord * s;
-				double u0 = 0.5 + vec.xCoord * 0.25;
-				double v0 = 0.5 + vec.zCoord * 0.25;
+				float vx0 = (float) vec.xCoord;
+				float vz0 = (float) vec.zCoord;
+				float x0 = vx0 * s;
+				float z0 = vz0 * s;
+				float u0 = 0.5F + vx0 * 0.25F;
+				float v0 = 0.5F + vz0 * 0.25F;
 				this.setColorNone(entity, color);
 				int outerFadeColor = packCurrentColor(color);
-				double x1 = vec.xCoord * s * 2;
-				double z1 = vec.zCoord * s * 2;
-				double u1 = 0.5 + vec.xCoord * 0.5;
-				double v1 = 0.5 + vec.zCoord * 0.5;
+				float x1 = vx0 * s * 2F;
+				float z1 = vz0 * s * 2F;
+				float u1 = 0.5F + vx0 * 0.5F;
+				float v1 = 0.5F + vz0 * 0.5F;
 
 				vec.rotateAroundY((float)(Math.PI * 2 / count));
+				float vx1 = (float) vec.xCoord;
+				float vz1 = (float) vec.zCoord;
 				buf.appendPositionTexColorQuadUnchecked(
 						x0, 0, z0, u0, v0, innerRingColor,
 						x1, 0, z1, u1, v1, outerFadeColor,
-						vec.xCoord * s * 2, 0, vec.zCoord * s * 2, 0.5 + vec.xCoord * 0.5, 0.5 + vec.zCoord * 0.5, outerFadeColor,
-						vec.xCoord * s, 0, vec.zCoord * s, 0.5 + vec.xCoord * 0.25, 0.5 + vec.zCoord * 0.25, innerRingColor
+						vx1 * s * 2F, 0, vz1 * s * 2F, 0.5F + vx1 * 0.5F, 0.5F + vz1 * 0.5F, outerFadeColor,
+						vx1 * s, 0, vz1 * s, 0.5F + vx1 * 0.25F, 0.5F + vz1 * 0.25F, innerRingColor
 				);
 			}
 			NTMImmediate.INSTANCE.draw();
@@ -338,7 +350,7 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 			Vec3 jet = Vec3.createVectorHelper(0.5, 0, 0);
 
 			for(int i = 0; i <= 12; i++) {
-				buf.appendPositionColorUnchecked(jet.xCoord, 10 * j, jet.zCoord, edgeColor);
+				buf.appendPositionColorUnchecked((float) jet.xCoord, 10 * j, (float) jet.zCoord, edgeColor);
 				jet.rotateAroundY((float)(Math.PI / 6 * -j));
 			}
 
@@ -394,11 +406,11 @@ public class RenderBlackHole extends Render<EntityBlackHole> {
 			int fullColor = packCurrentColor(color);
 			setColorNone(entity, color);
 			int fadeColor = packCurrentColor(color);
-			buf.appendPositionColorUnchecked(0.0D, 0.0D, 0.0D, fullColor);
-			buf.appendPositionColorUnchecked(-0.866D * f4, f3, -0.5F * f4, fadeColor);
-			buf.appendPositionColorUnchecked(0.866D * f4, f3, -0.5F * f4, fadeColor);
-			buf.appendPositionColorUnchecked(0.0D, f3, 1.0F * f4, fadeColor);
-			buf.appendPositionColorUnchecked(-0.866D * f4, f3, -0.5F * f4, fadeColor);
+			buf.appendPositionColorUnchecked(0.0F, 0.0F, 0.0F, fullColor);
+			buf.appendPositionColorUnchecked(-0.866F * f4, f3, -0.5F * f4, fadeColor);
+			buf.appendPositionColorUnchecked(0.866F * f4, f3, -0.5F * f4, fadeColor);
+			buf.appendPositionColorUnchecked(0.0F, f3, 1.0F * f4, fadeColor);
+			buf.appendPositionColorUnchecked(-0.866F * f4, f3, -0.5F * f4, fadeColor);
 			NTMImmediate.INSTANCE.draw();
 		}
 

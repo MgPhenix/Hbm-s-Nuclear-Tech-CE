@@ -3,6 +3,10 @@ package com.hbm.inventory.control_panel.controls;
 import com.hbm.inventory.control_panel.*;
 import com.hbm.inventory.control_panel.controls.configs.SubElementBaseConfig;
 import com.hbm.inventory.control_panel.controls.configs.SubElementDisplayText;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueEnum;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
+import com.hbm.inventory.control_panel.types.DataValueString;
 import com.hbm.main.ResourceManager;
 import com.hbm.render.loader.IModelCustom;
 import com.hbm.render.util.NTMBufferBuilder;
@@ -126,10 +130,10 @@ public class DisplayText extends Control {
         float d = 0;
         int packedColor = NTMBufferBuilder.packColor(rgb[0], rgb[1], rgb[2], 1);
         buf.appendPositionTexColorQuadUnchecked(
-                box[0]-d, box[1]-d, -.01, 0, 0, packedColor,
-                box[0]-d, box[3], -.01, 0, 1, packedColor,
-                box[2]+d, box[3], -.01, 1, 1, packedColor,
-                box[2]+d, box[1]-d, -.01, 1, 0, packedColor
+                box[0]-d, box[1]-d, -0.01F, 0, 0, packedColor,
+                box[0]-d, box[3], -0.01F, 0, 1, packedColor,
+                box[2]+d, box[3], -0.01F, 1, 1, packedColor,
+                box[2]+d, box[1]-d, -0.01F, 1, 0, packedColor
         );
         rgb = new float[]{.3F, .3F, .3F};
         d = .05F;
@@ -143,10 +147,11 @@ public class DisplayText extends Control {
         NTMImmediate.INSTANCE.draw();
         GlStateManager.enableTexture2D();
         GlStateManager.popMatrix();
-
+        GlStateManager.color(1F, 1F, 1F, 1F);
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     public IModelCustom getModel() {
         return ResourceManager.ctrl_display_seven_seg;
     }

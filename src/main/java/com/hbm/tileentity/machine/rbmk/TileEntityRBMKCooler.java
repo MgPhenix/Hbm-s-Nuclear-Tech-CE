@@ -4,9 +4,9 @@ import com.hbm.api.fluidmk2.IFluidStandardTransceiverMK2;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.handler.CompatHandler;
 import com.hbm.interfaces.AutoRegister;
-import com.hbm.inventory.control_panel.DataValue;
-import com.hbm.inventory.control_panel.DataValueFloat;
-import com.hbm.inventory.control_panel.DataValueString;
+import com.hbm.inventory.control_panel.types.DataValue;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
+import com.hbm.inventory.control_panel.types.DataValueString;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
 import com.hbm.lib.DirPos;
@@ -29,18 +29,21 @@ import java.util.Map;
 public class TileEntityRBMKCooler extends TileEntityRBMKBase implements IFluidStandardTransceiverMK2, SimpleComponent, CompatHandler.OCComponent {
 
 	protected int timer = 0;
+	public int lastCooled;
 	private final FluidTankNTM[] tanks;
 	protected TileEntityRBMKBase[] neighborCache = new TileEntityRBMKBase[25];
 
 	public TileEntityRBMKCooler() {
 		super();
 		tanks = new FluidTankNTM[2];
-		tanks[0] = new FluidTankNTM(Fluids.PERFLUOROMETHYL_COLD, 4_000);
-		tanks[1] = new FluidTankNTM(Fluids.PERFLUOROMETHYL, 4_000);
+		tanks[0] = new FluidTankNTM(Fluids.PERFLUOROMETHYL_COLD, 4_000).withOwner(this);
+		tanks[1] = new FluidTankNTM(Fluids.PERFLUOROMETHYL, 4_000).withOwner(this);
 	}
 
 	public void getDiagData(NBTTagCompound nbt) {
+		diag = true;
 		writeToNBT(nbt);
+		diag = false;
 		nbt.removeTag("jumpheight");
 	}
 
@@ -69,12 +72,22 @@ public class TileEntityRBMKCooler extends TileEntityRBMKBase implements IFluidSt
 				tanks[0].setFill(tanks[0].getFill() - 50);
 				tanks[1].setFill(tanks[1].getFill() + 50);
 
+				int cooled = 0;
 				for(TileEntityRBMKBase neighbor : neighborCache) {
-					if(neighbor != null) {
+					if(neighbor != null && !neighbor.isInvalid()) {
+						double before = neighbor.heat;
 						neighbor.heat -= 200;
 						if(neighbor.heat < 20) neighbor.heat = 20;
+						int delta = (int)(before - neighbor.heat);
+						if(delta > 0) {
+							cooled += delta;
+							neighbor.markDirty();
+						}
 					}
 				}
+				lastCooled = cooled;
+			} else {
+				lastCooled = 0;
 			}
 
 			trySubscribe(tanks[0].getTankType(), world, pos.getX(), pos.getY() - 1, pos.getZ(), Library.NEG_Y);
@@ -153,6 +166,7 @@ public class TileEntityRBMKCooler extends TileEntityRBMKBase implements IFluidSt
 	@Override
 	public RBMKColumn getConsoleData() {
 		RBMKColumn.CoolerColumn data = (RBMKColumn.CoolerColumn) super.getConsoleData();
+		data.cooled = lastCooled;
 		data.cryo = tanks[0].getFill();
 		data.maxCryo = tanks[0].getMaxFill();
 		data.hot = tanks[1].getFill();
@@ -185,6 +199,15 @@ public class TileEntityRBMKCooler extends TileEntityRBMKBase implements IFluidSt
 	@Optional.Method(modid = "opencomputers")
 	public Object[] getHeat(Context context, Arguments args) {
 		return new Object[]{heat};
+	}
+
+	@Callback(direct = true)
+	@Optional.Method(modid = "opencomputers")
+	public Object[] getCoolant(Context context, Arguments args) {
+		return new Object[] {
+				tanks[0].getFill(), tanks[0].getMaxFill(),
+				tanks[1].getFill(), tanks[1].getMaxFill()
+		};
 	}
 	
 	// Th3_Sl1ze: I'm trying to predict for now

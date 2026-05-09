@@ -115,21 +115,21 @@ public class ParticleMukeFlash extends Particle {
             float pY = (float) (dY + seeded.nextDouble() * 7.5 - 3.75);
             float pZ = (float) (dZ + seeded.nextDouble() * 15.0 - 7.5);
 
-            double x0 = pX - rotationX * scale - rotationXY * scale;
-            double y0 = pY - rotationZ * scale;
-            double z0 = pZ - rotationYZ * scale - rotationXZ * scale;
+            float x0 = pX - rotationX * scale - rotationXY * scale;
+            float y0 = pY - rotationZ * scale;
+            float z0 = pZ - rotationYZ * scale - rotationXZ * scale;
 
-            double x1 = pX - rotationX * scale + rotationXY * scale;
-            double y1 = pY + rotationZ * scale;
-            double z1 = pZ - rotationYZ * scale + rotationXZ * scale;
+            float x1 = pX - rotationX * scale + rotationXY * scale;
+            float y1 = pY + rotationZ * scale;
+            float z1 = pZ - rotationYZ * scale + rotationXZ * scale;
 
-            double x2 = pX + rotationX * scale + rotationXY * scale;
-            double y2 = pY + rotationZ * scale;
-            double z2 = pZ + rotationYZ * scale + rotationXZ * scale;
+            float x2 = pX + rotationX * scale + rotationXY * scale;
+            float y2 = pY + rotationZ * scale;
+            float z2 = pZ + rotationYZ * scale + rotationXZ * scale;
 
-            double x3 = pX + rotationX * scale - rotationXY * scale;
-            double y3 = pY - rotationZ * scale;
-            double z3 = pZ + rotationYZ * scale - rotationXZ * scale;
+            float x3 = pX + rotationX * scale - rotationXY * scale;
+            float y3 = pY - rotationZ * scale;
+            float z3 = pZ + rotationYZ * scale - rotationXZ * scale;
 
             buf.appendParticlePositionTexColorLmapUnchecked(x0, y0, z0, 1, 1, packedColor, packedLightmap);
             buf.appendParticlePositionTexColorLmapUnchecked(x1, y1, z1, 1, 0, packedColor, packedLightmap);

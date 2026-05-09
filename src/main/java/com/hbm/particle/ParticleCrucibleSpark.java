@@ -112,11 +112,20 @@ public class ParticleCrucibleSpark extends ParticleFirstPerson {
         
         NTMBufferBuilder fastBuffer = NTMImmediate.INSTANCE.beginPositionTex(GL11.GL_QUADS, MathHelper.ceil(this.particleAlpha) * 4);
         float alpha = this.particleAlpha;
+        float point1X = (float) point1.x;
+        float point1Y = (float) point1.y;
+        float point1Z = (float) point1.z;
+        float point2X = (float) point2.x;
+        float point2Y = (float) point2.y;
+        float point2Z = (float) point2.z;
+        float axisX = (float) particleAxis.x;
+        float axisY = (float) particleAxis.y;
+        float axisZ = (float) particleAxis.z;
         while(alpha > 0){
-        	fastBuffer.appendPositionTexUnchecked(point2.x, point2.y, point2.z, 1, 0);
-        	fastBuffer.appendPositionTexUnchecked(point1.x, point1.y, point1.z, 1, 1);
-        	fastBuffer.appendPositionTexUnchecked(point1.x+particleAxis.x, point1.y+particleAxis.y, point1.z+particleAxis.z, 0, 1);
-        	fastBuffer.appendPositionTexUnchecked(point2.x+particleAxis.x, point2.y+particleAxis.y, point2.z+particleAxis.z, 0, 0);
+        	fastBuffer.appendPositionTexUnchecked(point2X, point2Y, point2Z, 1, 0);
+        	fastBuffer.appendPositionTexUnchecked(point1X, point1Y, point1Z, 1, 1);
+        	fastBuffer.appendPositionTexUnchecked(point1X + axisX, point1Y + axisY, point1Z + axisZ, 0, 1);
+        	fastBuffer.appendPositionTexUnchecked(point2X + axisX, point2Y + axisY, point2Z + axisZ, 0, 0);
         	alpha -= 1;
         }
         NTMImmediate.INSTANCE.draw();

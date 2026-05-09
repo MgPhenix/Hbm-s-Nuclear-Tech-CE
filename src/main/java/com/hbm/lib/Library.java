@@ -112,6 +112,25 @@ public class Library {
     private Library() {
     }
 
+    /// fix for mov making placing dummyables extremely annoying
+    public static boolean checkForPlayerEyePositions(World world,AxisAlignedBB aabb) {
+        // only check for players (cuz fuck off if a sheep gets in way)
+        List<EntityPlayer> entities = world.getEntitiesWithinAABB(EntityPlayer.class,aabb);
+        for (EntityPlayer player : entities) {
+            // imagine building modular turbine in LCA and you can't place large turbine blocks between others
+            if (!player.isCreative() && !player.isSpectator()) {
+                // only check for eye positions
+                if (aabb.contains(new Vec3d(player.posX,player.posY+player.eyeHeight,player.posZ))) {
+                    BlockPos above = new BlockPos(player.posX,player.posY+player.eyeHeight+1,player.posZ);
+                    // finally, if the player cannot escape the block by simply jumping
+                    if (world.getBlockState(above).getCollisionBoundingBox(world,above) != Block.NULL_AABB || aabb.contains(new Vec3d(above).add(0.5,0.5,0.5)))
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
     static Random rand = new Random();
     public static final double DEG_TO_RAD = Math.PI / 180.0;
 

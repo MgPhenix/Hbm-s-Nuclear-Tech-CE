@@ -30,6 +30,7 @@ import org.lwjgl.opengl.GL11;
 public class RenderScreenOverlay {
 
 	private static final ResourceLocation misc = new ResourceLocation(Tags.MODID + ":textures/misc/overlay_misc.png");
+	private static final ResourceLocation dg = new ResourceLocation(Tags.MODID + ":textures/misc/overlay_digamma.png");
 	private static final RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
 	
 	private static long lastRadSurvey;
@@ -129,7 +130,7 @@ public class RenderScreenOverlay {
 		int posX = RadiationConfig.digammaX;
 		int posY = resolution.getScaledHeight() - 18 - RadiationConfig.digammaY;
 
-		Minecraft.getMinecraft().renderEngine.bindTexture(misc);
+		Minecraft.getMinecraft().renderEngine.bindTexture(dg);
         gui.drawTexturedModalRect(posX, posY, 0, 218, 94, 18);
         gui.drawTexturedModalRect(posX + 1, posY + 1, 1, 237, bar, 16);
         
