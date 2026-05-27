@@ -25,9 +25,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
-import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -36,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.property.ExtendedBlockState;
+import net.minecraftforge.common.property.IExtendedBlockState;
 import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.common.property.Properties;
 import net.minecraftforge.fml.relauncher.Side;
@@ -47,6 +46,8 @@ import org.jetbrains.annotations.NotNull;
 public abstract class BlockCraneBase extends BlockContainer implements IToolable, ITooltipProvider, IDynamicModels, IBlockSideRotation {
     public static final PropertyDirection FACING = PropertyDirection.create("facing");
     public static final IUnlistedProperty<EnumFacing> OUTPUT_OVERRIDE = new Properties.PropertyAdapter<>(PropertyDirection.create("output_override"));
+
+    private static boolean keepInventory;
 
     @SideOnly(Side.CLIENT)
     public TextureAtlasSprite iconSide;
@@ -124,13 +125,30 @@ public abstract class BlockCraneBase extends BlockContainer implements IToolable
         return true;
     }
 
+    public static void updateBlockState(boolean needSwapOutput, EnumFacing direction, World world, BlockPos pos) {
+        IBlockState oldState = world.getBlockState(pos);
+        TileEntity entity = world.getTileEntity(pos);
+
+        keepInventory = true;
+        IBlockState newState = oldState.withProperty(FACING, direction);
+        world.setBlockState(pos, newState, needSwapOutput ? 4 : 3);
+        keepInventory = false;
+
+        if (entity != null) {
+            entity.validate();
+            world.setTileEntity(pos, entity);
+        }
+    }
+
     @Override
     public void breakBlock(World worldIn, @NotNull BlockPos pos, @NotNull IBlockState state) {
-        TileEntity tileentity = worldIn.getTileEntity(pos);
+        if (!keepInventory) {
+            TileEntity tileentity = worldIn.getTileEntity(pos);
 
-        if (tileentity instanceof IInventory) {
-            InventoryHelper.dropInventoryItems(worldIn, pos, (IInventory)tileentity);
-            worldIn.updateComparatorOutputLevel(pos, this);
+            if (tileentity instanceof IInventory) {
+                InventoryHelper.dropInventoryItems(worldIn, pos, (IInventory) tileentity);
+                worldIn.updateComparatorOutputLevel(pos, this);
+            }
         }
 
         super.breakBlock(worldIn, pos, state);

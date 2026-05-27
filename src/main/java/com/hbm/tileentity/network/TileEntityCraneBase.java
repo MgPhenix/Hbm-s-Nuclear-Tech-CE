@@ -90,8 +90,7 @@ public abstract class TileEntityCraneBase extends TileEntityMachineBase implemen
 
         IBlockState oldState = world.getBlockState(pos);
         if (oldState.getPropertyKeys().contains(BlockCraneBase.FACING)) {
-            IBlockState newState = oldState.withProperty(BlockCraneBase.FACING, direction);
-            world.setBlockState(pos, newState, needSwapOutput ? 4 : 3);
+            BlockCraneBase.updateBlockState(needSwapOutput, direction, world, pos);
         }
 
         if (needSwapOutput)
