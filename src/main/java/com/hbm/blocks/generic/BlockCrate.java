@@ -55,9 +55,11 @@ public class BlockCrate extends BlockFalling {
     @Override
     public boolean onBlockActivated(@NotNull World world, @NotNull BlockPos pos, @NotNull IBlockState state, EntityPlayer player, @NotNull EnumHand hand, @NotNull EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (player.getHeldItemMainhand().getItem().equals(ModItems.crowbar)) {
-            dropItems(world, pos.getX(), pos.getY(), pos.getZ());
-            world.setBlockToAir(pos);
-            world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), HBMSoundHandler.crateBreak, SoundCategory.BLOCKS, 0.5F, 1.0F);
+            if (!world.isRemote) {
+                dropItems(world, pos.getX(), pos.getY(), pos.getZ());
+                world.setBlockToAir(pos);
+                world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), HBMSoundHandler.crateBreak, SoundCategory.BLOCKS, 0.5F, 1.0F);
+            }
             return true;
         } else {
             if (world.isRemote) {
@@ -121,7 +123,6 @@ public class BlockCrate extends BlockFalling {
 
         //Metal Crate
         BlockCrate.addToListWithWeight(metalList, Item.getItemFromBlock(ModBlocks.machine_press), 10);
-        BlockCrate.addToListWithWeight(metalList, Item.getItemFromBlock(ModBlocks.machine_difurnace_off), 9);
         BlockCrate.addToListWithWeight(metalList, Item.getItemFromBlock(ModBlocks.machine_reactor_breeding), 6);
         BlockCrate.addToListWithWeight(metalList, Item.getItemFromBlock(ModBlocks.machine_wood_burner), 10);
         BlockCrate.addToListWithWeight(metalList, Item.getItemFromBlock(ModBlocks.machine_diesel), 8);

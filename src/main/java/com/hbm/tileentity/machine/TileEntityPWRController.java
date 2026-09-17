@@ -17,10 +17,13 @@ import com.hbm.inventory.fluid.trait.FT_Heatable.HeatingType;
 import com.hbm.inventory.fluid.trait.FT_PWRModerator;
 import com.hbm.inventory.gui.GUIPWR;
 import com.hbm.items.ModItems;
+import com.hbm.items.machine.ItemPWRPrinter;
 import com.hbm.lib.DirPos;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.main.MainRegistry;
+import com.hbm.saveddata.satellites.SatelliteRayScan;
+import com.hbm.saveddata.satellites.SatelliteRayScan.RayEvent;
 import com.hbm.sound.AudioWrapper;
 import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IGUIProvider;
@@ -35,6 +38,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -177,7 +181,7 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
 
         if (!world.isRemote) {
 
-            this.tanks[0].setType(2, inventory);
+            if(this.amountLoaded <= 0) this.tanks[0].setType(2, inventory);
             setupTanks();
 
             if (unloadDelay > 0) unloadDelay--;
@@ -220,6 +224,12 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
                     if (this.rodTarget > this.rodLevel) this.rodLevel++;
                     if (this.rodTarget < this.rodLevel) this.rodLevel--;
 
+                    double multiplier = 1D;
+
+                    if (tanks[0].getTankType().hasTrait(FT_PWRModerator.class)) {
+                        multiplier = tanks[0].getTankType().getTrait(FT_PWRModerator.class).getMultiplier();
+                    }
+
                     int newFlux = this.sourceCount * 20;
 
                     if (typeLoaded != -1 && amountLoaded > 0) {
@@ -229,6 +239,10 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
                         double outputPerRod = fuel.function.effonix(fluxPerRod);
                         double totalOutput = outputPerRod * amountLoaded * usedRods;
                         double totalHeatOutput = totalOutput * fuel.heatEmission;
+
+                        if (tanks[0].getFill() > 0) {
+                            totalHeatOutput *= multiplier;
+                        }
 
                         this.coreHeat += totalHeatOutput;
                         newFlux += totalOutput;
@@ -248,6 +262,9 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
                             this.amountLoaded--;
                             this.markDirty();
                         }
+
+                        if (world.getTotalWorldTime() % 100 == 0)
+                            SatelliteRayScan.reportEvent(world, pos.getX(), pos.getY(), pos.getZ(), RayEvent.INFO_NUCLEAR, 200);
                     }
 
                     if (this.amountLoaded <= 0) {
@@ -269,8 +286,8 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
 
                     this.flux = newFlux;
 
-                    if (tanks[0].getTankType().hasTrait(FT_PWRModerator.class) && tanks[0].getFill() > 0) {
-                        this.flux *= tanks[0].getTankType().getTrait(FT_PWRModerator.class).getMultiplier();
+                    if (tanks[0].getFill() > 0) {
+                        this.flux *= multiplier;
                     }
 
                     if (this.coreHeat > this.coreHeatCapacity) {
@@ -388,8 +405,17 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
         return this.rodCount + (int) Math.ceil(this.heatsinkCount / 4D);
     }
 
+    public boolean isPrinting;
+
     @Override
     public void serialize(ByteBuf buf) {
+        buf.writeBoolean(this.isPrinting);
+        if(this.isPrinting) {
+            ItemPWRPrinter.serialize(world, buf);
+            this.isPrinting = false;
+            return;
+        }
+
         super.serialize(buf);
         buf.writeBoolean(this.assembled);
         buf.writeInt(this.rodCount);
@@ -409,6 +435,11 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
 
     @Override
     public void deserialize(ByteBuf buf) {
+        if(buf.readBoolean()) {
+            ItemPWRPrinter.deserialize(world, buf);
+            return;
+        }
+
         super.deserialize(buf);
         this.assembled = buf.readBoolean();
         this.rodCount = buf.readInt();
@@ -568,7 +599,7 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
     }
 
     @Override
-    public void receiveControl(NBTTagCompound data) {
+    public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
         if (data.hasKey("control")) {
             this.rodTarget = MathHelper.clamp(data.getInteger("control"), 0, 100);
             this.markDirty();
@@ -620,7 +651,7 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
     @Callback(direct = true)
     @Optional.Method(modid = "opencomputers")
     public Object[] getHeat(Context context, Arguments args) {
-        return new Object[]{coreHeat, hullHeat};
+        return new Object[]{coreHeat, hullHeat, coreHeatCapacity, hullHeatCapacityBase};
     }
 
     @SuppressWarnings("unused")
@@ -655,7 +686,7 @@ public class TileEntityPWRController extends TileEntityMachineBase implements IT
     @Callback(direct = true)
     @Optional.Method(modid = "opencomputers")
     public Object[] getInfo(Context context, Arguments args) {
-        return new Object[]{coreHeat, hullHeat, flux, rodTarget, rodLevel, amountLoaded, progress, processTime, tanks[0].getFill(), tanks[0].getMaxFill(), tanks[1].getFill(), tanks[1].getMaxFill()};
+        return new Object[]{coreHeat, hullHeat, coreHeatCapacity, hullHeatCapacityBase, flux, rodTarget, rodLevel, amountLoaded, progress, processTime, tanks[0].getFill(), tanks[0].getMaxFill(), tanks[1].getFill(), tanks[1].getMaxFill()};
     }
 
     @SuppressWarnings("unused")

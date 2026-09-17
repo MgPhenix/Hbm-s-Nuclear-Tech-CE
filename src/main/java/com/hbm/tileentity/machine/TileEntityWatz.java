@@ -1,8 +1,10 @@
 package com.hbm.tileentity.machine;
 
 import com.hbm.api.fluid.IFluidStandardTransceiver;
+import com.hbm.api.redstoneoverradio.IRORValueProvider;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.entity.projectile.EntityShrapnel;
+import com.hbm.handler.CompatHandler;
 import com.hbm.handler.radiation.ChunkRadiationManager;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.interfaces.AutoRegister;
@@ -31,6 +33,10 @@ import com.hbm.util.Compat;
 import com.hbm.util.EnumUtil;
 import com.hbm.util.Function;
 import io.netty.buffer.ByteBuf;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
@@ -45,6 +51,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -54,8 +61,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")})
 @AutoRegister
-public class TileEntityWatz extends TileEntityMachineBase implements ITickable, IFluidStandardTransceiver, IControlReceiver, IGUIProvider, IFluidCopiable, IConnectionAnchors {
+public class TileEntityWatz extends TileEntityMachineBase implements ITickable, IFluidStandardTransceiver, IControlReceiver, IGUIProvider, IFluidCopiable, SimpleComponent, CompatHandler.OCComponent, IRORValueProvider, IConnectionAnchors {
 
 	public FluidTankNTM[] tanks;
 	private FluidTankNTM[] sharedTanks;
@@ -140,11 +148,11 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
             }
 
             /* update reaction, top to bottom */
-            this.updateReaction(null, this.sharedTanks, turnedOn);
+            int mudOverflow = this.updateReaction(null, this.sharedTanks, turnedOn);
             for (int i = 1; i < segments.size(); i++) {
                 TileEntityWatz segment = segments.get(i);
                 TileEntityWatz above = segments.get(i - 1);
-                segment.updateReaction(above, this.sharedTanks, turnedOn);
+                mudOverflow += segment.updateReaction(above, this.sharedTanks, turnedOn);
             }
 
             /* send sync packets (order doesn't matter) */
@@ -173,7 +181,7 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
             segments.get(segments.size() - 1).sendOutBottom();
 
             /* explode on mud overflow */
-            if (sharedTanks[2].getFill() > 0) {
+            if (sharedTanks[2].getFill() > 0 || mudOverflow > 0) {
                 for (int x = -3; x <= 3; x++) {
                     for (int y = 3; y < 6; y++) {
                         for (int z = -3; z <= 3; z++) {
@@ -220,7 +228,9 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 	}
 
 	/** enforces strict top to bottom update order (instead of semi-random based on placement) */
-    private void updateReaction(TileEntityWatz above, FluidTankNTM[] tanks, boolean turnedOn) {
+    private int updateReaction(TileEntityWatz above, FluidTankNTM[] tanks, boolean turnedOn) {
+
+		int overflow = 0;
 
 		if(turnedOn) {
 			List<ItemStack> pellets = new ArrayList<>();
@@ -255,7 +265,7 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 					ItemWatzPellet.setYield(stack, ItemWatzPellet.getYield(stack) - burn);
 					addedFlux += burn;
 					addedHeat += type.heatEmission * burn;
-					tanks[2].setFill(tanks[2].getFill() + (int) Math.round(type.mudContent * burn));
+					overflow += addMud(tanks[2], (int) Math.round(type.mudContent * burn));
 				}
 			}
 
@@ -267,7 +277,7 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 					double absorb = absorbFunc.effonix(baseFlux + fluxLastReaction);
 					addedHeat += absorb;
 					ItemWatzPellet.setYield(stack, ItemWatzPellet.getYield(stack) - absorb);
-					tanks[2].setFill(tanks[2].getFill() + (int) Math.round(type.mudContent * absorb));
+					overflow += addMud(tanks[2], (int) Math.round(type.mudContent * absorb));
 				}
 			}
 
@@ -310,6 +320,14 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 				}
 			}
 		}
+
+		return overflow;
+	}
+
+	private static int addMud(FluidTankNTM tank, int amount) {
+		int space = tank.getMaxFill() - tank.getFill();
+		tank.setFill(tank.getFill() + amount);
+		return Math.max(0, amount - space);
 	}
 
 	@Override
@@ -448,7 +466,7 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 	}
 
 	@Override
-	public void receiveControl(NBTTagCompound data) {
+	public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
 
 		if(data.hasKey("lock")) {
 
@@ -559,7 +577,7 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 		setBrokenColumn(1, ModBlocks.watz_casing, 1, -2, -2);
 
 		List<EntityPlayerMP> players = world.getEntitiesWithinAABB(
-				EntityPlayerMP.class, new AxisAlignedBB(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5).expand(50, 50, 50));
+				EntityPlayerMP.class, new AxisAlignedBB(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5).grow(50, 50, 50));
 
 		for(EntityPlayerMP player : players) {
 			AdvancementManager.grantAchievement(player, AdvancementManager.achWatzBoom);
@@ -608,6 +626,100 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 
 	@Override
 	public FluidTankNTM getTankToPaste() {
+		return null;
+	}
+
+	// opencomputers stuff
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public String getComponentName() {
+		return "watz_reactor";
+	}
+
+	@Callback(direct = true)
+	@Optional.Method(modid = "opencomputers")
+	public Object[] getHeat(Context context, Arguments args) {
+		return new Object[] {heat};
+	}
+
+	@Callback(direct = true)
+	@Optional.Method(modid = "opencomputers")
+	public Object[] getFlux(Context context, Arguments args) {
+		return new Object[] {fluxLastBase + fluxLastReaction};
+	}
+
+	@Callback(direct = true)
+	@Optional.Method(modid = "opencomputers")
+	public Object[] getCoolantInfo(Context context, Arguments args) {
+		return new Object[] {tanks[0].getFill(), tanks[0].getMaxFill(), tanks[1].getFill(), tanks[1].getMaxFill()};
+	}
+
+	@Callback(direct = true)
+	@Optional.Method(modid = "opencomputers")
+	public Object[] getWasteInfo(Context context, Arguments args) {
+		return new Object[] {tanks[2].getFill(), tanks[2].getMaxFill()};
+	}
+
+	@Callback(direct = true)
+	@Optional.Method(modid = "opencomputers")
+	public Object[] isOn(Context context, Arguments args) {
+		return new Object[] {isOn};
+	}
+
+	@Callback(direct = true)
+	@Optional.Method(modid = "opencomputers")
+	public Object[] getInfo(Context context, Arguments args) {
+		return new Object[] {tanks[0].getFill(), tanks[0].getMaxFill(), tanks[1].getFill(), tanks[1].getMaxFill(), tanks[2].getFill(), tanks[2].getMaxFill(), heat, fluxLastBase + fluxLastReaction, isOn};
+	}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public String[] methods() {
+		return new String[] {
+			"getComponentName",
+			"getHeat",
+			"getFlux",
+			"getCoolantInfo",
+			"getWasteInfo",
+			"isOn",
+			"getInfo"
+		};
+	}
+
+	@Override
+	@Optional.Method(modid = "opencomputers")
+	public Object[] invoke(String method, Context context, Arguments args) throws Exception {
+		switch (method) {
+			case "getHeat": return getHeat(context, args);
+			case "getFlux": return getFlux(context, args);
+			case "getCoolantInfo": return getCoolantInfo(context, args);
+			case "getWasteInfo": return getWasteInfo(context, args);
+			case "isOn": return isOn(context, args);
+			case "getInfo": return getInfo(context, args);
+		}
+		throw new NoSuchMethodException();
+	}
+
+	public static final String[] ROR = new String[] { // not to be confused with RUR
+		PREFIX_VALUE + "heat",
+		PREFIX_VALUE + "flux",
+		PREFIX_VALUE + "mud",
+		PREFIX_VALUE + "coolant_hot",
+		PREFIX_VALUE + "coolant_cold",
+	};
+
+	@Override
+	public String[] getFunctionInfo() {
+		return ROR;
+	}
+
+	@Override
+	public String provideRORValue(String name) {
+		if((PREFIX_VALUE + "heat").equals(name))			return "" + this.heat;
+		if((PREFIX_VALUE + "flux").equals(name))			return "" + (int) (this.fluxLastBase + this.fluxLastReaction);
+		if((PREFIX_VALUE + "mud").equals(name))				return "" + this.tanks[2].getFill();
+		if((PREFIX_VALUE + "coolant_hot").equals(name))		return "" + this.tanks[1].getFill();
+		if((PREFIX_VALUE + "coolant_cold").equals(name))	return "" + this.tanks[0].getFill();
 		return null;
 	}
 }

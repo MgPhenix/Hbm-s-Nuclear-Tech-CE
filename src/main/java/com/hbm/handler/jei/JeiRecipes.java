@@ -2,7 +2,6 @@ package com.hbm.handler.jei;
 
 import com.hbm.Tags;
 import com.hbm.inventory.FluidContainerRegistry;
-import com.hbm.inventory.RecipesCommon.AStack;
 import com.hbm.inventory.RecipesCommon.ComparableStack;
 import com.hbm.inventory.fluid.FluidStack;
 import com.hbm.inventory.fluid.FluidType;
@@ -34,7 +33,6 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -43,7 +41,6 @@ public class JeiRecipes {
 
 	private static List<CyclotronRecipe> cyclotronRecipes = null;
 	private static List<AlloyFurnaceRecipe> alloyFurnaceRecipes = null;
-    private static List<CMBFurnaceRecipe> cmbRecipes = null;
 	private static List<GasCentrifugeRecipe> gasCentRecipes = null;
     private static List<StorageDrumRecipe> storageDrumRecipes = null;
 	private static List<RBMKFuelRecipe> rbmkFuelRecipes = null;
@@ -51,10 +48,8 @@ public class JeiRecipes {
 	private static List<FluidRecipe> fluidEquivalences = null;
 	private static List<BookRecipe> bookRecipes = null;
 	private static List<BreederRecipe> breederRecipes = null;
-    private static List<HadronRecipe> hadronRecipes = null;
 	private static List<SILEXRecipe> silexRecipes = null;
 	private static final Map<EnumWavelengths, List<SILEXRecipe>> waveSilexRecipes = new HashMap<>();
-    private static List<TransmutationRecipe> transmutationRecipes = null;
 	private static List<IRecipe> grenadeRecipes = null;
 	
 	private static List<ItemStack> batteries = null;
@@ -100,24 +95,6 @@ public class JeiRecipes {
 		
 	}
 	
-	public static class CMBFurnaceRecipe implements IRecipeWrapper {
-		
-		private final List<ItemStack> inputs;
-		private final ItemStack output;
-		
-		public CMBFurnaceRecipe(List<ItemStack> inputs, ItemStack output) {
-			this.inputs = inputs;
-			this.output = output; 
-		}
-		
-		@Override
-		public void getIngredients(IIngredients ingredients) {
-			ingredients.setInputs(VanillaTypes.ITEM, inputs);
-			ingredients.setOutput(VanillaTypes.ITEM, output);
-		}
-		
-	}
-
 	public static class GasCentrifugeRecipe implements IRecipeWrapper {
 		private final ItemStack input;
 		private final List<ItemStack> outputs;
@@ -178,24 +155,6 @@ public class JeiRecipes {
 		@Override
 		public void getIngredients(IIngredients ingredients) {
 			ingredients.setInput(VanillaTypes.ITEM, input);
-			ingredients.setOutput(VanillaTypes.ITEM, output);
-		}
-	}
-
-	public static class TransmutationRecipe implements IRecipeWrapper {
-		
-		private final List<List<ItemStack>> inputs;
-		private final ItemStack output;
-		
-		public TransmutationRecipe(List<ItemStack> inputs, ItemStack output) {
-			this.inputs = new ArrayList<>();
-			this.inputs.add(inputs);
-			this.output = output; 
-		}
-		
-		@Override
-		public void getIngredients(IIngredients ingredients) {
-			ingredients.setInputLists(VanillaTypes.ITEM, inputs);
 			ingredients.setOutput(VanillaTypes.ITEM, output);
 		}
 	}
@@ -332,40 +291,6 @@ public class JeiRecipes {
 			ingredients.setInput(VanillaTypes.ITEM, input);
 			ingredients.setOutput(VanillaTypes.ITEM, output);
 		}
-	}
-	
-	public static class HadronRecipe implements IRecipeWrapper {
-
-		public ItemStack in1, in2, out1, out2;
-		public int momentum;
-		public boolean analysisOnly;
-		
-		public HadronRecipe(ItemStack in1, ItemStack in2, ItemStack out1, ItemStack out2, int momentum, boolean analysis) {
-			this.in1 = in1;
-			this.in2 = in2;
-			this.out1 = out1;
-			this.out2 = out2;
-			this.momentum = momentum;
-			this.analysisOnly = analysis;
-		}
-		
-		@Override
-		public void getIngredients(IIngredients ingredients) {
-			ingredients.setInputs(VanillaTypes.ITEM, Arrays.asList(in1, in2));
-			ingredients.setOutputs(VanillaTypes.ITEM, Arrays.asList(out1, out2));
-		}
-		
-		@Override
-		public void drawInfo(@NotNull Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
-			if(analysisOnly)
-				HadronRecipeHandler.analysis.draw(minecraft, 117, 17);
-			FontRenderer fontRenderer = minecraft.fontRenderer;
-	    	
-	    	String mom = "" + momentum;
-	    	fontRenderer.drawString(mom, -fontRenderer.getStringWidth(mom) / 2 + 19, 36, 0x404040);
-	    	GlStateManager.color(1, 1, 1, 1);
-		}
-		
 	}
 	
 	public static class SILEXRecipe implements IRecipeWrapper {
@@ -641,17 +566,6 @@ public class JeiRecipes {
 		return batteries;
 	}
 	
-	public static List<CMBFurnaceRecipe> getCMBRecipes() {
-		if(cmbRecipes != null)
-			return cmbRecipes;
-		cmbRecipes = new ArrayList<>();
-		
-		cmbRecipes.add(new CMBFurnaceRecipe(Arrays.asList(new ItemStack(ModItems.ingot_advanced_alloy), new ItemStack(ModItems.ingot_magnetized_tungsten)), new ItemStack(ModItems.ingot_combine_steel, 4)));
-		cmbRecipes.add(new CMBFurnaceRecipe(Arrays.asList(new ItemStack(ModItems.powder_advanced_alloy), new ItemStack(ModItems.powder_magnetized_tungsten)), new ItemStack(ModItems.ingot_combine_steel, 4)));
-		
-		return cmbRecipes;
-	}
-	
 	public static List<GasCentrifugeRecipe> getGasCentrifugeRecipes() {
 		if(gasCentRecipes != null)
 			return gasCentRecipes;
@@ -700,19 +614,6 @@ public class JeiRecipes {
 		return storageDrumRecipes;
 	}
 
-	public static List<TransmutationRecipe> getTransmutationRecipes(){
-		if(transmutationRecipes != null)
-			return transmutationRecipes;
-		transmutationRecipes = new ArrayList<>();
-		
-		for(Map.Entry<AStack, ItemStack> entry : NuclearTransmutationRecipes.recipesOutput.entrySet()){
-			transmutationRecipes.add(new TransmutationRecipe(entry.getKey().getStackList(), entry.getValue()));
-		}
-		
-		return transmutationRecipes;
-	}
-	
-
 	public static List<RefineryRecipe> getRefineryRecipe() {
 		if(refineryRecipes != null)
 			return refineryRecipes;
@@ -741,39 +642,30 @@ public class JeiRecipes {
 			return blades;
 		
 		blades = new ArrayList<>();
-		blades.add(new ItemStack(ModItems.blades_advanced_alloy));
 		blades.add(new ItemStack(ModItems.blades_steel));
 		blades.add(new ItemStack(ModItems.blades_titanium));
+		blades.add(new ItemStack(ModItems.blades_desh));
 		return blades;
 	}
-	
+
 	public static List<FluidRecipe> getFluidEquivalences(){
 		if(fluidEquivalences != null)
 			return fluidEquivalences;
 		fluidEquivalences = new ArrayList<>();
-		
+
 		for(FluidContainerRegistry.FluidContainer container : FluidContainerRegistry.allContainers){
-			if (container.emptyContainer() == null || container.emptyContainer().isEmpty()) {
-				continue;
-			}
 			FluidType fluidType = container.type();
 			ItemStack fullContainerStack = container.fullContainer();
 			ItemStack fluidIconStack = ItemFluidIcon.make(fluidType, container.content());
-			fluidEquivalences.add(new FluidRecipe(fluidIconStack, fullContainerStack.copy()));
-			fluidEquivalences.add(new FluidRecipeInverse(fluidIconStack, fullContainerStack.copy()));
-		}
-		
-		return fluidEquivalences;
-	}
 
-    public static List<HadronRecipe> getHadronRecipes(){
-		if(hadronRecipes != null)
-			return hadronRecipes;
-		hadronRecipes = new ArrayList<>();
-		for(HadronRecipes.HadronRecipe recipe : HadronRecipes.getRecipes()){
-			hadronRecipes.add(new HadronRecipe(recipe.in1.toStack(), recipe.in2.toStack(), recipe.out1, recipe.out2, recipe.momentum, recipe.analysisOnly));
+			fluidEquivalences.add(new FluidRecipeInverse(fluidIconStack, fullContainerStack.copy()));
+
+			if (container.emptyContainer() != null && !container.emptyContainer().isEmpty()) {
+				fluidEquivalences.add(new FluidRecipe(fluidIconStack, fullContainerStack.copy()));
+			}
 		}
-		return hadronRecipes;
+
+		return fluidEquivalences;
 	}
 	
 

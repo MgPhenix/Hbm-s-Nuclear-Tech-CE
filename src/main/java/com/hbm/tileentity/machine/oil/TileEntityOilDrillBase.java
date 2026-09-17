@@ -66,6 +66,7 @@ public abstract class TileEntityOilDrillBase extends TileEntityMachineBase imple
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         this.power = compound.getLong("power");
+        this.indicator = compound.getInteger("indicator");
         for(int i = 0; i < this.tanks.length; i++)
             this.tanks[i].readFromNBT(compound, "t" + i);
     }
@@ -73,6 +74,7 @@ public abstract class TileEntityOilDrillBase extends TileEntityMachineBase imple
     @Override
     public @NotNull NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound.setLong("power", power);
+        compound.setInteger("indicator", indicator);
         for(int i = 0; i < this.tanks.length; i++)
             this.tanks[i].writeToNBT(compound, "t" + i);
         return super.writeToNBT(compound);
@@ -108,7 +110,7 @@ public abstract class TileEntityOilDrillBase extends TileEntityMachineBase imple
             this.tanks[0].unloadTank(1, 2, inventory);
             this.tanks[1].unloadTank(3, 4, inventory);
 
-            upgradeManager.checkSlots(inventory, 5, 7);
+            upgradeManager.checkSlots(inventory, 5, 6);
             this.speedLevel = Math.min(upgradeManager.getLevel(ItemMachineUpgrade.UpgradeType.SPEED), 3);
             this.energyLevel = Math.min(upgradeManager.getLevel(ItemMachineUpgrade.UpgradeType.POWER), 3);
             this.overLevel = Math.min(upgradeManager.getLevel(ItemMachineUpgrade.UpgradeType.OVERDRIVE), 3) + 1;
@@ -226,29 +228,27 @@ public abstract class TileEntityOilDrillBase extends TileEntityMachineBase imple
 
     public boolean trySuck(int y) {
         BlockPos startPos = new BlockPos(pos.getX(), y, pos.getZ());
-        Block startBlock = world.getBlockState(startPos).getBlock();
-        if (!canSuckBlock(startBlock)) return false;
+        if (!canSuckBlock(world.getBlockState(startPos).getBlock())) return false;
         if (!this.canPump()) return true;
         Queue<BlockPos> queue = new ArrayDeque<>();
         processed.clear();
         queue.offer(startPos);
         processed.add(startPos);
 
-        int nodesVisited = 0;
-        while (!queue.isEmpty() && nodesVisited < 256) {
-            BlockPos currentPos = queue.poll();
-            nodesVisited++;
-            Block currentBlock = world.getBlockState(currentPos).getBlock();
-            if (currentBlock == ModBlocks.ore_oil || currentBlock == ModBlocks.ore_bedrock_oil) {
-                doSuck(currentPos);
-                return true;
-            }
-            if (currentBlock != ModBlocks.ore_oil_empty) continue;
-            for (ForgeDirection dir : BobMathUtil.getShuffledDirs()) {
-                BlockPos neighborPos = currentPos.add(dir.offsetX, dir.offsetY, dir.offsetZ);
-                if (!processed.contains(neighborPos) && canSuckBlock(world.getBlockState(neighborPos).getBlock())) {
-                    processed.add(neighborPos);
-                    queue.offer(neighborPos);
+        for (int layer = 0; layer <= 64 && !queue.isEmpty(); layer++) {
+            for (int i = queue.size(); i > 0; i--) {
+                BlockPos currentPos = queue.poll();
+                Block currentBlock = world.getBlockState(currentPos).getBlock();
+                if (currentBlock == ModBlocks.ore_oil || currentBlock == ModBlocks.ore_bedrock_oil) {
+                    doSuck(currentPos);
+                    return true;
+                }
+                if (currentBlock != ModBlocks.ore_oil_empty) continue;
+                for (ForgeDirection dir : BobMathUtil.getShuffledDirs()) {
+                    BlockPos neighborPos = currentPos.add(dir.offsetX, dir.offsetY, dir.offsetZ);
+                    if (processed.add(neighborPos) && canSuckBlock(world.getBlockState(neighborPos).getBlock())) {
+                        queue.offer(neighborPos);
+                    }
                 }
             }
         }

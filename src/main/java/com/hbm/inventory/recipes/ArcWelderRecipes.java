@@ -15,6 +15,7 @@ import com.hbm.inventory.recipes.loader.SerializableRecipe;
 import com.hbm.items.ItemEnums.EnumPartType;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemFluidIcon;
+import com.hbm.items.machine.ItemSatellite.EnumSatType;
 import net.minecraft.item.ItemStack;
 
 import java.io.IOException;
@@ -32,22 +33,6 @@ public class ArcWelderRecipes extends SerializableRecipe {
   public void registerDefaults() {
 
     // Parts
-    recipes.add(
-        new ArcWelderRecipe(
-            new ItemStack(ModItems.motor, 2),
-            100,
-            200L,
-            new OreDictStack(IRON.plate(), 2),
-            new ComparableStack(ModItems.coil_copper),
-            new ComparableStack(ModItems.coil_copper_torus)));
-    recipes.add(
-        new ArcWelderRecipe(
-            new ItemStack(ModItems.motor, 2),
-            100,
-            400L,
-            new OreDictStack(STEEL.plate(), 1),
-            new ComparableStack(ModItems.coil_copper),
-            new ComparableStack(ModItems.coil_copper_torus)));
     recipes.add(
         new ArcWelderRecipe(
             new ItemStack(ModItems.motor, 2),
@@ -73,13 +58,11 @@ public class ArcWelderRecipes extends SerializableRecipe {
             new OreDictStack(ANY_HARDPLASTIC.ingot())));
     recipes.add(
         new ArcWelderRecipe(
-            DictFrame.fromOne(ModItems.part_generic, EnumPartType.HDE),
-            600,
-            25_000_000L,
-            new FluidStack(Fluids.STELLAR_FLUX, 4_000),
-            new OreDictStack(ANY_BISMOIDBRONZE.plateCast(), 2),
-            new OreDictStack(CMB.plateWelded(), 1),
-            new ComparableStack(ModItems.ingot_cft)));
+            new ItemStack(ModItems.neutron_reflector, 2),
+            400,
+            50_000L,
+            new OreDictStack(WC.ingot(), 2),
+            new OreDictStack(DURA.plate())));
 
     // Dense Wires
     recipes.add(
@@ -94,12 +77,6 @@ public class ArcWelderRecipes extends SerializableRecipe {
             100,
             10_000L,
             new OreDictStack(MINGRADE.wireFine(), 8)));
-    recipes.add(
-        new ArcWelderRecipe(
-            new ItemStack(ModItems.wire_dense, 1, Mats.MAT_ALLOY.id),
-            100,
-            10_000L,
-            new OreDictStack(ALLOY.wireFine(), 8)));
     recipes.add(
         new ArcWelderRecipe(
             new ItemStack(ModItems.wire_dense, 1, Mats.MAT_GOLD.id),
@@ -388,35 +365,35 @@ public class ArcWelderRecipes extends SerializableRecipe {
 
     recipes.add(
         new ArcWelderRecipe(
-            new ItemStack(ModItems.sat_mapper),
+            new ItemStack(ModItems.satellite, 1, EnumSatType.SPY.ordinal()),
             600,
             10_000L,
             new ComparableStack(ModItems.sat_base),
             new ComparableStack(ModItems.sat_head_mapper)));
     recipes.add(
         new ArcWelderRecipe(
-            new ItemStack(ModItems.sat_scanner),
+            new ItemStack(ModItems.satellite, 1, EnumSatType.SCANNER.ordinal()),
             600,
             10_000L,
             new ComparableStack(ModItems.sat_base),
             new ComparableStack(ModItems.sat_head_scanner)));
     recipes.add(
         new ArcWelderRecipe(
-            new ItemStack(ModItems.sat_radar),
+            new ItemStack(ModItems.satellite, 1, EnumSatType.RADAR.ordinal()),
             600,
             10_000L,
             new ComparableStack(ModItems.sat_base),
             new ComparableStack(ModItems.sat_head_radar)));
     recipes.add(
         new ArcWelderRecipe(
-            new ItemStack(ModItems.sat_laser),
+            new ItemStack(ModItems.satellite, 1, EnumSatType.DEATH_RAY.ordinal()),
             600,
             50_000L,
             new ComparableStack(ModItems.sat_base),
             new ComparableStack(ModItems.sat_head_laser)));
     recipes.add(
         new ArcWelderRecipe(
-            new ItemStack(ModItems.sat_resonator),
+            new ItemStack(ModItems.satellite, 1, EnumSatType.XENIUM_RESONATOR.ordinal()),
             600,
             50_000L,
             new ComparableStack(ModItems.sat_base),

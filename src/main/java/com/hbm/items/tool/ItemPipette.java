@@ -61,7 +61,7 @@ public class ItemPipette extends ItemBakedBase implements IFillableItem {
             return;
         }
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setShort("type", (short) Fluids.NONE.getID());
+        Fluids.writeType(tag, "type", Fluids.NONE); //stored by name, IDs shift when fluids are added/removed
         tag.setShort("fill", (short) 0);
         tag.setShort("capacity", getMaxFill());
         stack.setTagCompound(tag);
@@ -72,7 +72,7 @@ public class ItemPipette extends ItemBakedBase implements IFillableItem {
             return Fluids.NONE;
         }
         NBTTagCompound tag = getOrCreateTag(stack);
-        return Fluids.fromID(tag.getShort("type"));
+        return Fluids.readType(tag, "type"); //name-based, with legacy numeric-ID fallback
     }
 
     public short getCapacity(ItemStack stack) {
@@ -88,7 +88,7 @@ public class ItemPipette extends ItemBakedBase implements IFillableItem {
             return;
         }
         NBTTagCompound tag = getOrCreateTag(stack);
-        tag.setShort("type", (short) type.getID());
+        Fluids.writeType(tag, "type", type); //stored by name, IDs shift when fluids are added/removed
         tag.setShort("fill", fill);
     }
 

@@ -4,18 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.hbm.Tags;
 import com.hbm.blocks.ICustomBlockItem;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.config.ClientConfig;
 import com.hbm.items.IDynamicModels;
 import com.hbm.items.IModelRegister;
 import com.hbm.render.model.BlockReedsBakedModel;
 import com.hbm.tileentity.TileEntityReeds;
-import com.hbm.util.UnlistedPropertyInteger;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
-import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -41,9 +37,6 @@ import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.common.property.ExtendedBlockState;
-import net.minecraftforge.common.property.IExtendedBlockState;
-import net.minecraftforge.common.property.IUnlistedProperty;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
@@ -56,8 +49,6 @@ import java.util.Random;
 
 public class BlockReeds extends Block implements ICustomBlockItem, IDynamicModels {
     private static final String[] TEXTURES = new String[]{"bottom", "mid", "top"};
-
-    public static final IUnlistedProperty<Integer> DEPTH = new UnlistedPropertyInteger("depth");
 
     @SideOnly(Side.CLIENT)
     private TextureAtlasSprite[] sprites;
@@ -75,8 +66,6 @@ public class BlockReeds extends Block implements ICustomBlockItem, IDynamicModel
         if (FMLCommonHandler.instance().getSide() == Side.CLIENT) {
             sprites = new TextureAtlasSprite[TEXTURES.length];
         }
-
-        setDefaultState(blockState.getBaseState());
     }
 
     @Override
@@ -87,33 +76,6 @@ public class BlockReeds extends Block implements ICustomBlockItem, IDynamicModel
     @Override
     public TileEntity createTileEntity(@NotNull World world, @NotNull IBlockState state) {
         return new TileEntityReeds();
-    }
-
-    @Override
-    protected @NotNull BlockStateContainer createBlockState() {
-        return new ExtendedBlockState(this, new IProperty[0], new IUnlistedProperty[]{DEPTH});
-    }
-
-    @Override
-    public @NotNull IBlockState getExtendedState(@NotNull IBlockState state, @NotNull IBlockAccess world, @NotNull BlockPos pos) {
-        if (!(state instanceof IExtendedBlockState ex)) return state;
-
-        int depth = 0;
-
-        if (!ClientConfig.RENDER_REEDS.get()) {
-            depth = 1;
-        } else {
-            for (int i = pos.getY() - 1; i > 0; i--) {
-                Block depthBlock = world.getBlockState(new BlockPos(pos.getX(), i, pos.getZ())).getBlock();
-
-                depth = pos.getY() - i;
-                if (depthBlock != Blocks.WATER && depthBlock != Blocks.FLOWING_WATER) {
-                    break;
-                }
-            }
-        }
-
-        return ex.withProperty(DEPTH, depth);
     }
 
     @Override
@@ -128,12 +90,6 @@ public class BlockReeds extends Block implements ICustomBlockItem, IDynamicModel
     @Override
     public void neighborChanged(@NotNull IBlockState state, @NotNull World world, @NotNull BlockPos pos, @NotNull Block blockIn, @NotNull BlockPos fromPos) {
         checkAndDropBlock(world, pos);
-        TileEntity te = world.getTileEntity(pos);
-        if (te instanceof TileEntityReeds reeds) {
-            reeds.invalidateRenderBB();
-            // i hope this is good enough
-            world.markBlockRangeForRenderUpdate(pos, pos);
-        }
     }
 
     protected void checkAndDropBlock(World world, BlockPos pos) {

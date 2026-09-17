@@ -176,14 +176,14 @@ public class TileEntityPipeBaseNT extends TileEntityLoadedBase implements IFluid
     @Override
     public void readFromNBT(NBTTagCompound nbt) {
         super.readFromNBT(nbt);
-        this.type = Fluids.fromID(nbt.getInteger("type"));
+        this.type = Fluids.readType(nbt, "type");
         invalidateConnectionCache();
     }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
         super.writeToNBT(nbt);
-        nbt.setInteger("type", this.type.getID());
+        Fluids.writeType(nbt, "type", this.type);
         return nbt;
     }
 

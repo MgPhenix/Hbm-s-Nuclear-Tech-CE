@@ -3,8 +3,7 @@ package com.hbm.render.entity.item;
 import com.hbm.entity.item.EntityMovingItem;
 import com.hbm.interfaces.AutoRegister;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.entity.Render;
@@ -15,7 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.fml.client.registry.IRenderFactory;
-import org.lwjgl.opengl.GL11; import net.minecraft.client.renderer.GlStateManager;
+import org.lwjgl.opengl.GL11;
+
 @AutoRegister(factory = "FACTORY")
 public class RenderMovingItem extends Render<EntityMovingItem> {
 
@@ -31,13 +31,12 @@ public class RenderMovingItem extends Render<EntityMovingItem> {
 		GlStateManager.enableRescaleNormal();
 		GlStateManager.alphaFunc(516, 0.1F);
 		GlStateManager.enableBlend();
-		RenderHelper.enableStandardItemLighting();
 		GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
 
 		ItemStack stack = item.getItemStack();
-		GL11.glScaled(0.5, 0.5, 0.5);
+		GlStateManager.scale(0.5, 0.5, 0.5);
 		if(!(stack.getItem() instanceof ItemBlock)) {
 			GlStateManager.rotate(90F, 1.0F, 0.0F, 0.0F);
 			GlStateManager.translate(0.0, 0, -0.03);
@@ -53,7 +52,6 @@ public class RenderMovingItem extends Render<EntityMovingItem> {
 		GlStateManager.popMatrix();
 		GlStateManager.disableRescaleNormal();
 		GlStateManager.disableBlend();
-		RenderHelper.disableStandardItemLighting();
 	}
 
 	@Override

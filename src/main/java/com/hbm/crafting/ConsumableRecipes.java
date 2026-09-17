@@ -8,6 +8,7 @@ import com.hbm.items.ItemEnums;
 import com.hbm.items.ItemEnums.EnumCircuitType;
 import com.hbm.items.ModItems;
 import com.hbm.items.food.ItemConserve.EnumFoodType;
+import com.hbm.items.machine.ItemBatteryPack;
 import com.hbm.items.weapon.grenade.ItemGrenadeFilling.EnumGrenadeFilling;
 import com.hbm.items.weapon.sedna.factory.GunFactory;
 import com.hbm.main.CraftingManager;
@@ -170,7 +171,7 @@ public class ConsumableRecipes {
 
         //Servos
         CraftingManager.addRecipeAuto(new ItemStack(ModItems.servo_set, 1),"MBM", "PBP", "MBM", 'M', ModItems.motor, 'B', STEEL.bolt(), 'P', IRON.plate() );
-        CraftingManager.addRecipeAuto(new ItemStack(ModItems.servo_set_desh, 1),"MBM", "PSP", "MBM", 'M', ModItems.motor_desh, 'B', DURA.bolt(), 'P', ALLOY.plate(), 'S', ModItems.servo_set );
+        CraftingManager.addRecipeAuto(new ItemStack(ModItems.servo_set_desh, 1),"MBM", "PSP", "MBM", 'M', ModItems.motor_desh, 'B', DURA.bolt(), 'P', ModItems.plate_desh, 'S', ModItems.servo_set );
 
         //Helmet Mods
         CraftingManager.addRecipeAuto(new ItemStack(ModItems.attachment_mask, 1),"DID", "IGI", " F ", 'D', ModItems.ducttape, 'I', ANY_RUBBER.ingot(), 'G', KEY_ANYPANE, 'F', IRON.plate() );
@@ -182,13 +183,13 @@ public class ConsumableRecipes {
         CraftingManager.addRecipeAuto(new ItemStack(ModItems.pads_static, 1),"CDC", "ISI", "CDC", 'C', CU.ingot(), 'D', ModItems.ducttape, 'I', ANY_RUBBER.ingot(), 'S', ModItems.pads_slime );
 
         //Batteries
-        CraftingManager.addRecipeAuto(new ItemStack(ModItems.armor_battery, 1),"PCP", "PCP", "PCP", 'P', STEEL.plate(), 'C', ModBlocks.capacitor_gold );
-        CraftingManager.addRecipeAuto(new ItemStack(ModItems.armor_battery_mk2, 1),"PCP", "PCP", "PCP", 'P', ANY_PLASTIC.ingot(), 'C', ModBlocks.capacitor_niobium );
-        CraftingManager.addRecipeAuto(new ItemStack(ModItems.armor_battery_mk3, 1),"PCP", "PCP", "PCP", 'P', GOLD.plate(), 'C', ModBlocks.capacitor_tantalium );
+        CraftingManager.addRecipeAuto(new ItemStack(ModItems.armor_battery, 1), "PWP", "PCP", "PWP", 'P', STEEL.plate(), 'C', new ItemStack(ModItems.battery_pack, 1, ItemBatteryPack.EnumBatteryPack.CAPACITOR_GOLD.ordinal()), 'W', MINGRADE.wireDense());
+        CraftingManager.addRecipeAuto(new ItemStack(ModItems.armor_battery_mk2, 1), "PWP", "PCP", "PWP", 'P', ANY_PLASTIC.ingot(), 'C', new ItemStack(ModItems.battery_pack, 1, ItemBatteryPack.EnumBatteryPack.CAPACITOR_NIOBIUM.ordinal()), 'W', MINGRADE.wireDense());
+        CraftingManager.addRecipeAuto(new ItemStack(ModItems.armor_battery_mk3, 1), "PWP", "PCP", "PWP", 'P', GOLD.plate(), 'C', new ItemStack(ModItems.battery_pack, 1, ItemBatteryPack.EnumBatteryPack.CAPACITOR_TANTALUM.ordinal()), 'W', MINGRADE.wireDense());
 
         //Special Mods
         CraftingManager.addRecipeAuto(new ItemStack(ModItems.horseshoe_magnet, 1),"L L", "I I", "ILI", 'L', ModItems.lodestone, 'I', IRON.ingot() );
-        CraftingManager.addRecipeAuto(new ItemStack(ModItems.industrial_magnet, 1),"SMS", " B ", "SMS", 'S', STEEL.ingot(), 'M', ModItems.horseshoe_magnet, 'B', new ItemStack(ModBlocks.hadron_coil_alloy, 1, 0) );
+        CraftingManager.addRecipeAuto(new ItemStack(ModItems.industrial_magnet, 1),"SMS", " B ", "SMS", 'S', STEEL.ingot(), 'M', ModItems.horseshoe_magnet, 'B', MINGRADE.wireDense() );
         CraftingManager.addRecipeAuto(new ItemStack(ModItems.heart_container, 1),"HAH", "ACA", "HAH", 'H', ModItems.heart_piece, 'A', AL.ingot(), 'C', ModItems.coin_creeper );
         CraftingManager.addRecipeAuto(new ItemStack(ModItems.heart_booster, 1),"GHG", "MCM", "GHG", 'G', GOLD.ingot(), 'H', ModItems.heart_container, 'M', ModItems.morning_glory, 'C', ModItems.coin_maskman );
         CraftingManager.addRecipeAuto(new ItemStack(ModItems.heart_fab, 1),"GHG", "MCM", "GHG", 'G', PO210.billet(), 'H', ModItems.heart_booster, 'M', ANY_COKE.gem(), 'C', ModItems.coin_worm );

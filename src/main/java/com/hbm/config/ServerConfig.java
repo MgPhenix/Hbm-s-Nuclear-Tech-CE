@@ -22,6 +22,9 @@ public class ServerConfig extends RunningConfig {
     public static ConfigWrapper<Integer> ITEM_HAZARD_DROP_TICKRATE =	new ConfigWrapper<>(2);
     public static ConfigWrapper<Boolean> ENABLE_MKU =					new ConfigWrapper<>(true);
     public static ConfigWrapper<Boolean> LEGACY_CRUCIBLE_RULES =		new ConfigWrapper<>(false);
+    public static ConfigWrapper<Integer> AUTOCAL_MAX_CLOCK =		    new ConfigWrapper<>(20);
+    public static ConfigWrapper<Integer> CONVEYOR_CRAM_MAX =		    new ConfigWrapper<>(25);
+    public static ConfigWrapper<Boolean> CONVEYOR_CRAM_EXPLODE =	    new ConfigWrapper<>(true);
 
     private static void initDefaults() {
         configMap.put("DAMAGE_COMPATIBILITY_MODE", DAMAGE_COMPATIBILITY_MODE);
@@ -36,6 +39,9 @@ public class ServerConfig extends RunningConfig {
         configMap.put("ITEM_HAZARD_DROP_TICKRATE", ITEM_HAZARD_DROP_TICKRATE);
         configMap.put("ENABLE_MKU", ENABLE_MKU);
         configMap.put("LEGACY_CRUCIBLE_RULES", LEGACY_CRUCIBLE_RULES);
+        configMap.put("AUTOCAL_MAX_CLOCK", AUTOCAL_MAX_CLOCK);
+        configMap.put("CONVEYOR_CRAM_MAX", CONVEYOR_CRAM_MAX);
+        configMap.put("CONVEYOR_CRAM_EXPLODE", CONVEYOR_CRAM_EXPLODE);
     }
 
     /** Initializes defaults, then reads the config file if it exists, then writes the config file. */

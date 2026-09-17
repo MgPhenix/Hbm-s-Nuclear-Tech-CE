@@ -2,6 +2,7 @@ package com.hbm.handler.jei;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.config.ClientConfig;
+import com.hbm.config.CustomMachineConfigJSON;
 import com.hbm.config.GeneralConfig;
 import com.hbm.handler.jei.transfer.HbmTransferInfo;
 import com.hbm.inventory.FluidContainerRegistry;
@@ -59,7 +60,6 @@ public class JEIConfig implements IModPlugin {
     public static final String BREEDER = "hbm.breeder";
     public static final String CENTRIFUGE = "hbm.centrifuge";
     public static final String CHEMICAL_PLANT = "hbm.chemical_plant";
-    public static final String CMB = "hbm.cmb_furnace";
     public static final String COKER = "hbm.coker";
     public static final String CONSTRUCTION = "hbm.construction";
     public static final String COMPRESSING = "hbm.compressor";
@@ -79,7 +79,6 @@ public class JEIConfig implements IModPlugin {
     public static final String FUSION_BREEDER = "hbm.fusionbreeder";
     public static final String PLASMA_FORGE = "hbm.plasma_forge";
     public static final String GAS_CENT = "hbm.gas_centrifuge";
-    public static final String HADRON = "hbm.hadron";
     public static final String HYDROTREATING = "hbm.hydrotreating";
     public static final String LIQUEFACTION = "hbm.liquefaction";
     public static final String MIXER = "hbm.mixer";
@@ -90,7 +89,9 @@ public class JEIConfig implements IModPlugin {
     public static final String RBMKOUTGASSER = "hbm.rbmk_outgasser";
     public static final String REFINERY = "hbm.refinery";
     public static final String REFORMING = "hbm.reforming";
+    public static final String ROCKMILL = "hbm.rockmill";
     public static final String ROTARY_FURNACE = "hbm.rotary_furnace";
+    public static final String BLAST_FURNACE = "hbm.blast_furnace_nt";
     public static final String SAWMILL = "hbm.sawmill";
     public static final String SHREDDER = "hbm.shredder";
     public static final String SILEX = "hbm.silex";
@@ -102,7 +103,8 @@ public class JEIConfig implements IModPlugin {
     public static final String SOLDERING_STATION = "hbm.soldering_station";
     public static final String SOLIDIFICATION = "hbm.solidification";
     public static final String STORAGEDRUM = "hbm.storage_drum";
-    public static final String TRANSMUTATION = "hbm.transmutation";
+    public static final String SUPERCOMPUTER = "hbm.supercomputer";
+    public static final String SPACE_ASSEMBLER = "hbm.spaceassembler";
     public static final String WASTEDRUM = "hbm.waste_drum";
     static final String ORE_SLOPPER = "hbm.ore_slopper";
     static final String PA = "hbm.particle_accelerator";
@@ -148,7 +150,11 @@ public class JEIConfig implements IModPlugin {
     private PyroHandler pyroHandler;
     private RBMKOutgasserRecipeHandler outgasserHandler;
     private ReformingHandler reformingHandler;
+    private RockMillRecipeHandler rockMillHandler;
+    private SuperComputerRecipeHandler superComputerHandler;
+    private SpaceAssemblerHandler spaceAssemblerHandler;
     private RotaryFurnaceRecipeHandler rotaryFurnaceRecipeHandler;
+    private BlastFurnaceHandler blastFurnaceHandler;
     private RTGRecipeHandler rtgRecipeHandler;
     private SolderingStationRecipeHandler solderingStationHandler;
     private SolidificationHandler solidificationHandler;
@@ -161,6 +167,7 @@ public class JEIConfig implements IModPlugin {
     private VacuumRecipeHandler vacuumHandler;
     private ZirnoxRecipeHandler zirnoxHandler;
     private PUREXRecipeHandler purexHandler;
+    private final java.util.List<CustomMachineRecipeHandler> customMachineHandlers = new java.util.ArrayList<>();
     private final FluidIconRecipeRegistryPlugin fluidIconRecipeRegistryPlugin = new FluidIconRecipeRegistryPlugin();
 
     @Override
@@ -229,14 +236,17 @@ public class JEIConfig implements IModPlugin {
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_arc_welder), ARC_WELDER);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_annihilator), ANNIHILATING);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_rotary_furnace), ROTARY_FURNACE);
+        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_blast_furnace), BLAST_FURNACE);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_precass), PREC_ASS);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_pyrooven), PYROLYSIS);
+        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_supercomputer), SUPERCOMPUTER);
+        registry.addRecipeCatalyst(com.hbm.items.machine.ItemSatellite.make(com.hbm.items.machine.ItemSatellite.EnumSatType.SCIENCE_ASSEMBLER), SPACE_ASSEMBLER);
+        registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_rockmill), ROCKMILL);
         //This recipe catalyst doesn't work, since the book of is blacklisted.
         registry.addRecipeCatalyst(new ItemStack(ModItems.book_of_), BOOK);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.fusion_torus), FUSION_BYPRODUCT);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.fusion_breeder), FUSION_BREEDER);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.fusion_plasma_forge), PLASMA_FORGE);
-        registry.addRecipeCatalyst(new ItemStack(ModBlocks.hadron_core), HADRON);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_silex), SILEX);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_rtg_grey), RTG);
         registry.addRecipeCatalyst(new ItemStack(ModBlocks.machine_difurnace_rtg_off), RTG);
@@ -262,10 +272,8 @@ public class JEIConfig implements IModPlugin {
 
         registry.addRecipes(assemblyMachineRecipeHandler.getRecipes(), ASSEMBLY_MACHINE);
         registry.addRecipes(JeiRecipes.getCyclotronRecipes(), CYCLOTRON);
-        registry.addRecipes(JeiRecipes.getTransmutationRecipes(), TRANSMUTATION);
         registry.addRecipes(PressRecipeHandler.getRecipes(), PRESS);
         registry.addRecipes(JeiRecipes.getAlloyRecipes(), ALLOY);
-        registry.addRecipes(JeiRecipes.getCMBRecipes(), CMB);
         registry.addRecipes(JeiRecipes.getGasCentrifugeRecipes(), GAS_CENT);
         registry.addRecipes(fuelPoolHandler.getRecipes(), WASTEDRUM);
         registry.addRecipes(JeiRecipes.getStorageDrumRecipes(), STORAGEDRUM);
@@ -300,6 +308,7 @@ public class JEIConfig implements IModPlugin {
         registry.addRecipes(solderingStationHandler.getRecipes(), SOLDERING_STATION);
         registry.addRecipes(arcWelderRecipeHandler.getRecipes(), ARC_WELDER);
         registry.addRecipes(rotaryFurnaceRecipeHandler.getRecipes(), ROTARY_FURNACE);
+        registry.addRecipes(blastFurnaceHandler.getRecipes(), BLAST_FURNACE);
         registry.addRecipes(electrolyserFluidHandler.getRecipes(), ELECTROLYSIS_FLUID);
         registry.addRecipes(electrolyserMetalHandler.getRecipes(), ELECTROLYSIS_METAL);
         registry.addRecipes(rtgRecipeHandler.getRecipes(), RTG);
@@ -310,11 +319,13 @@ public class JEIConfig implements IModPlugin {
         registry.addRecipes(sawmillHandler.getRecipes(), SAWMILL);
         registry.addRecipes(vacuumHandler.getRecipes(), VACUUM);
         registry.addRecipes(zirnoxHandler.getRecipes(), ZIRNOX);
+        registry.addRecipes(rockMillHandler.getRecipes(), ROCKMILL);
+        registry.addRecipes(superComputerHandler.getRecipes(), SUPERCOMPUTER);
+        registry.addRecipes(spaceAssemblerHandler.getRecipes(), SPACE_ASSEMBLER);
         registry.addRecipes(shredderHandler.getRecipes(), SHREDDER);
         registry.addRecipes(JeiRecipes.getFluidEquivalences(), FLUIDS);
         registry.addRecipes(JeiRecipes.getBookRecipes(), BOOK);
         registry.addRecipes(JeiRecipes.getBreederRecipes(), BREEDER);
-        registry.addRecipes(JeiRecipes.getHadronRecipes(), HADRON);
         registry.addRecipes(JeiRecipes.getSILEXRecipes(), SILEX);
         registry.addRecipes(JeiRecipes.getSILEXRecipes(EnumWavelengths.IR), SILEX_IR);
         registry.addRecipes(JeiRecipes.getSILEXRecipes(EnumWavelengths.VISIBLE), SILEX_VISIBLE);
@@ -331,6 +342,15 @@ public class JEIConfig implements IModPlugin {
         registry.addRecipes(combinationHandler.getRecipes(), COMBINATION);
         registry.addRecipes(purexHandler.getRecipes(), PUREX);
 
+        for (CustomMachineRecipeHandler handler : customMachineHandlers) {
+            registry.addRecipes(handler.getRecipes(), handler.getUid());
+            registry.addRecipeCatalyst(new ItemStack(ModBlocks.custom_machine, 1, 100 + CustomMachineConfigJSON.niceList.indexOf(handler.conf)), handler.getUid());
+        }
+        if (!customMachineHandlers.isEmpty()) {
+            String[] uids = customMachineHandlers.stream().map(CustomMachineRecipeHandler::getUid).toArray(String[]::new);
+            registry.addRecipeClickArea(GUIMachineCustom.class, 78, 119, 88, 16, uids);
+        }
+
         registry.addRecipeClickArea(GUIMachineCoker.class, 60, 22, 32, 18, COKER);
         registry.addRecipeClickArea(GUIMachineArcFurnaceLarge.class, 17, 36, 7, 70, ARC_FURNACE_SOLID);
         registry.addRecipeClickArea(GUIMachineArcFurnaceLarge.class, 152, 36, 16, 70, ARC_FURNACE_FLUID);
@@ -341,7 +361,7 @@ public class JEIConfig implements IModPlugin {
         registry.addRecipeClickArea(GUILiquefactor.class, 42, 18, 41, 16, LIQUEFACTION);
         registry.addRecipeClickArea(GUILiquefactor.class, 42, 34, 2, 18, LIQUEFACTION);
         registry.addRecipeClickArea(GUIFurnaceBrick.class, 86, 35, 22, 15, VanillaRecipeCategoryUid.SMELTING);
-        registry.addRecipeClickArea(GUIMachineElectricFurnace.class, 80, 35, 22, 15, VanillaRecipeCategoryUid.SMELTING);
+        registry.addRecipeClickArea(GUIMachineElectricFurnace.class, 43, 37, 27, 11, VanillaRecipeCategoryUid.SMELTING);
         registry.addRecipeClickArea(GUIFurnaceIron.class, 52, 36, 70, 5, VanillaRecipeCategoryUid.SMELTING);
         registry.addRecipeClickArea(GUIFurnaceSteel.class, 54, 18, 68, 5, VanillaRecipeCategoryUid.SMELTING);
         registry.addRecipeClickArea(GUIFurnaceSteel.class, 54, 36, 68, 5, VanillaRecipeCategoryUid.SMELTING);
@@ -358,8 +378,8 @@ public class JEIConfig implements IModPlugin {
         registry.addRecipeClickArea(GUIOreSlopper.class, 90, 18, 6, 34, ORE_SLOPPER);
 		registry.addRecipeClickArea(GUIMixer.class, 62, 36, 52, 44, MIXER);
 		registry.addRecipeClickArea(GUIMachineCyclotron.class, 50, 24, 40, 40, CYCLOTRON);
-		registry.addRecipeClickArea(GUIMachinePress.class, 80, 35, 15, 15, PRESS);
-		registry.addRecipeClickArea(GUIMachineEPress.class, 80, 35, 15, 15, PRESS);
+		registry.addRecipeClickArea(GUIMachinePress.class, 102, 34, 27, 16, PRESS);
+		registry.addRecipeClickArea(GUIMachineEPress.class, 43, 33, 22, 15, PRESS);
 		registry.addRecipeClickArea(GUIDiFurnace.class, 102, 36, 21, 14, ALLOY);
 		registry.addRecipeClickArea(GUIDiFurnaceRTG.class, 102, 36, 21, 14, ALLOY);
         registry.addRecipeClickArea(GUIDiFurnaceRTG.class, 58, 36, 18, 16, RTG);
@@ -371,14 +391,13 @@ public class JEIConfig implements IModPlugin {
 		registry.addRecipeClickArea(GUIMachineShredder.class, 43, 89, 53, 17, SHREDDER);
 		registry.addRecipeClickArea(GUICrystallizer.class, 79, 40, 29, 26, CRYSTALLIZER);
 		registry.addRecipeClickArea(GUIBook.class, 89, 34, 23, 16, BOOK);
-		registry.addRecipeClickArea(GUIHadron.class, 71, 28, 32, 32, HADRON);
 		registry.addRecipeClickArea(GUISILEX.class, 45, 82, 113-45, 125-82, SILEX);
 		registry.addRecipeClickArea(GUIAnvil.class, 34, 26, 52-34, 44-26, ANVIL_SMITH);
 		registry.addRecipeClickArea(GUIAnvil.class, 12, 50, 48-12, 66-50, ANVIL_CON);
 		registry.addRecipeClickArea(GUIRBMKOutgasser.class, 64, 53, 48, 16, RBMKOUTGASSER);
-        registry.addRecipeClickArea(GUIMachineRTG.class, 134, 22, 16, 52, RTG);
         registry.addRecipeClickArea(GUIMachineArcWelder.class, 72, 38, 32, 13, ARC_WELDER);
         registry.addRecipeClickArea(GUIMachineRotaryFurnace.class, 63, 31, 32, 9, ROTARY_FURNACE);
+        registry.addRecipeClickArea(GUIBlastFurnace.class, 62, 64, 56, 15, BLAST_FURNACE);
         registry.addRecipeClickArea(GUIElectrolyserFluid.class, 62, 26, 12, 40, ELECTROLYSIS_FLUID);
         registry.addRecipeClickArea(GUIElectrolyserMetal.class, 7, 46, 22, 25, ELECTROLYSIS_METAL);
         registry.addRecipeClickArea(GUIPyroOven.class, 57, 48, 27, 11, PYROLYSIS);
@@ -395,6 +414,8 @@ public class JEIConfig implements IModPlugin {
         HbmTransferInfo.init(registry.getJeiHelpers());
         HbmTransferInfo.register(t, ContainerMachineAmmoPress.class,        AMMO_PRESS,         range(0, 9),  range(10, 36));
         HbmTransferInfo.register(t, ContainerMachineAnnihilator.class,      ANNIHILATING,       new int[]{0},                 range(11, 36));
+        HbmTransferInfo.register(t, ContainerAnvil.class,                   ANVIL_CON,          range(0, 2),  range(3, 36));
+        HbmTransferInfo.register(t, ContainerAnvil.class,                   ANVIL_SMITH,        range(0, 2),  range(3, 36));
         HbmTransferInfo.register(t, ContainerMachineArcFurnaceLarge.class,  ARC_FURNACE_FLUID,  new int[]{5},                 range(30, 36));
         HbmTransferInfo.register(t, ContainerMachineArcFurnaceLarge.class,  ARC_FURNACE_SOLID,  new int[]{5},                 range(30, 36));
         HbmTransferInfo.register(t, ContainerMachineArcWelder.class,        ARC_WELDER,         range(0, 3),  range(8, 36));
@@ -413,7 +434,6 @@ public class JEIConfig implements IModPlugin {
         HbmTransferInfo.register(t, ContainerElectrolyserMetal.class,       ELECTROLYSIS_METAL, new int[]{3},                 range(10, 36));
         HbmTransferInfo.register(t, ContainerMachineExposureChamber.class,  EXPOSURE,           new int[]{0, 2},              range(7, 36));
         HbmTransferInfo.register(t, ContainerFusionBreeder.class,           FUSION_BREEDER,     new int[]{1},                 range(3, 36));
-        HbmTransferInfo.register(t, ContainerHadron.class,                  HADRON,             range(0, 2),  range(5, 36));
         HbmTransferInfo.register(t, ContainerLiquefactor.class,             LIQUEFACTION,       new int[]{0},                 range(4, 36));
         HbmTransferInfo.register(t, ContainerMixer.class,                   MIXER,              new int[]{1},                 range(5, 36));
         HbmTransferInfo.register(t, ContainerOreSlopper.class,              ORE_SLOPPER,        new int[]{2},                 range(11, 36));
@@ -425,6 +445,7 @@ public class JEIConfig implements IModPlugin {
         HbmTransferInfo.register(t, ContainerPyroOven.class,                PYROLYSIS,          new int[]{1},                 range(6, 36));
         HbmTransferInfo.register(t, ContainerRBMKOutgasser.class,           RBMKOUTGASSER,      new int[]{0},                 range(2, 36));
         HbmTransferInfo.register(t, ContainerMachineRotaryFurnace.class,    ROTARY_FURNACE,     range(0, 3),  range(5, 36));
+        HbmTransferInfo.register(t, ContainerBlastFurnace.class,            BLAST_FURNACE,      range(1, 2),  range(5, 36));
         HbmTransferInfo.register(t, ContainerMachineRTG.class,              RTG,                range(0, 15), range(15, 36));
         HbmTransferInfo.register(t, ContainerRtgFurnace.class,              RTG,                range(1, 3),  range(5, 36));
         HbmTransferInfo.register(t, ContainerMachineShredder.class,         SHREDDER,           new int[]{0},                 range(30, 36));
@@ -535,6 +556,7 @@ public class JEIConfig implements IModPlugin {
                 pyroHandler = new PyroHandler(help),
                 reformingHandler = new ReformingHandler(help),
                 rotaryFurnaceRecipeHandler = new RotaryFurnaceRecipeHandler(help),
+                blastFurnaceHandler = new BlastFurnaceHandler(help),
                 solderingStationHandler = new SolderingStationRecipeHandler(help),
                 solidificationHandler = new SolidificationHandler(help),
                 oreSlopperHandler = new OreSlopperHandler(help),
@@ -544,13 +566,14 @@ public class JEIConfig implements IModPlugin {
                 rtgRecipeHandler = new RTGRecipeHandler(help),
                 sawmillHandler = new SawmillHandler(help),
                 vacuumHandler = new VacuumRecipeHandler(help),
+                rockMillHandler = new RockMillRecipeHandler(help),
+                superComputerHandler = new SuperComputerRecipeHandler(help),
+                spaceAssemblerHandler = new SpaceAssemblerHandler(help),
                 zirnoxHandler = new ZirnoxRecipeHandler(help),
                 purexHandler = new PUREXRecipeHandler(help),
                 new GasCentrifugeRecipeHandler(help),
                 new BreederRecipeHandler(help),
                 new CyclotronRecipeHandler(help),
-                new TransmutationRecipeHandler(help),
-                new CMBFurnaceRecipeHandler(help),
                 new StorageDrumRecipeHandler(help),
                 new FluidRecipeHandler(help),
                 new SILEXRecipeHandler(help),
@@ -560,9 +583,15 @@ public class JEIConfig implements IModPlugin {
                 new SILEXGammaRecipeHandler(help),
                 new SILEXDigammaRecipeHandler(help),
                 new RBMKFuelRecipeHandler(help),
-                new HadronRecipeHandler(help),
                 new DFCRecipeHandler(help),
                 new BookRecipeHandler(help));
+
+        customMachineHandlers.clear();
+        for (CustomMachineConfigJSON.MachineConfiguration conf : CustomMachineConfigJSON.niceList) {
+            CustomMachineRecipeHandler handler = new CustomMachineRecipeHandler(help, conf);
+            customMachineHandlers.add(handler);
+            registry.addRecipeCategories(handler);
+        }
     }
 
     private static final ISubtypeRegistry.ISubtypeInterpreter metadataFluidContainerInterpreter = stack -> {

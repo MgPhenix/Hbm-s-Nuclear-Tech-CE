@@ -120,6 +120,7 @@ public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider
 
     @Override
     public TileEntity createNewTileEntity(World worldIn, int meta) {
+        if (this == ModBlocks.barrel_corroded) return null;
         return new TileEntityBarrel(capacity);
     }
 
@@ -160,13 +161,6 @@ public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider
             list.add(TextFormatting.RED + I18nUtil.resolveKey("desc.leaky"));
         }
 
-        if (this == ModBlocks.barrel_iron) {
-            list.add(TextFormatting.AQUA + I18nUtil.resolveKey("desc.capacity", "8,000"));
-            list.add(TextFormatting.GREEN + I18nUtil.resolveKey("desc.canhot"));
-            list.add(TextFormatting.YELLOW + I18nUtil.resolveKey("desc.cannotcor1"));
-            list.add(TextFormatting.YELLOW + I18nUtil.resolveKey("desc.cannotam"));
-        }
-
         if (this == ModBlocks.barrel_steel) {
             list.add(TextFormatting.AQUA + I18nUtil.resolveKey("desc.capacity", "16,000"));
             list.add(TextFormatting.GREEN + I18nUtil.resolveKey("desc.canhot"));
@@ -192,6 +186,7 @@ public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider
 
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (this == ModBlocks.barrel_corroded) return false;
         if (world.isRemote) {
             return true;
 
@@ -225,6 +220,7 @@ public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
+        if (this == ModBlocks.barrel_corroded) return;
         if (!keepInventory)
             InventoryHelper.dropInventoryItems(worldIn, pos, worldIn.getTileEntity(pos));
         IPersistentNBT.breakBlock(worldIn, pos, state);

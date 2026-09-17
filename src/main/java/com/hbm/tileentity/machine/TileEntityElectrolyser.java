@@ -296,9 +296,13 @@ public class TileEntityElectrolyser extends TileEntityMachineBase implements IEn
         boolean right = buf.readBoolean();
         if(left) {
             this.leftStack = new Mats.MaterialStack(Mats.matById.get(buf.readInt()), buf.readInt());
+        } else {
+            this.leftStack = null;
         }
         if(right) {
             this.rightStack = new Mats.MaterialStack(Mats.matById.get(buf.readInt()), buf.readInt());
+        } else {
+            this.rightStack = null;
         }
         this.lastSelectedGUI = buf.readInt();
     }
@@ -547,9 +551,6 @@ public class TileEntityElectrolyser extends TileEntityMachineBase implements IEn
         if(ID == 0) return new GUIElectrolyserFluid(player.inventory, this);
         return new GUIElectrolyserMetal(player.inventory, this);
     }
-
-    @Override
-    public void receiveControl(NBTTagCompound data) { }
 
     @Override
     public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {

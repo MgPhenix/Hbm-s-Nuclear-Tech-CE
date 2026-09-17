@@ -7,6 +7,8 @@
   "target": "@env(DEFAULT)",
   "client": [
     "base.MixinBufferBuilder",
+    "betterfoliage.MixinRenderChunkBlockTrackVanilla",
+    "betterfoliage.MixinRenderChunkBlockTrackBetterFoliage",
     "MixinRenderGlobal",
     "celeritas.MixinRenderGlobal",
     "neonium.MixinBufferBuilder",

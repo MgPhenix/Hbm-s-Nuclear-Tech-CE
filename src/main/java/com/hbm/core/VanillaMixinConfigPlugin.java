@@ -50,6 +50,12 @@ public class VanillaMixinConfigPlugin implements IMixinConfigPlugin {
                 case "MixinBufferBuilder" -> BASE_BUFFER_BUILDER_PATH;
                 default -> true;
             };
+            //Fuck you better foliage
+            case "betterfoliage" -> switch (simpleName) {
+                case "MixinRenderChunkBlockTrackBetterFoliage" -> BETTER_FOLIAGE;
+                case "MixinRenderChunkBlockTrackVanilla" -> !BETTER_FOLIAGE;
+                default -> true;
+            };
             case "optifine" -> switch (simpleName) {
                 case "MixinBufferBuilder" -> OPTIFINE_BUFFER_BUILDER_PATH;
                 case "MixinRenderGlobal" -> OPTIFINE && VANILLA_TERRAIN_PATH;

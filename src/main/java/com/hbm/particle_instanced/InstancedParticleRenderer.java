@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;
 import net.minecraft.client.renderer.GlStateManager.SourceFactor;
 import net.minecraft.entity.Entity;
+import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -32,16 +33,28 @@ public class InstancedParticleRenderer {
 	
 	protected static ArrayDeque<ParticleInstanced> particles = new ArrayDeque<>();
 	private static final Queue<ParticleInstanced> queue = new ArrayDeque<>();
-	
+	private static World lastWorld;
+
 	public static void addParticle(ParticleInstanced p) {
 		if(p != null)
 			queue.add(p);
 	}
-	
+
+	public static void clear() {
+		particles.clear();
+		queue.clear();
+		faceCount = 0;
+	}
+
 	public static void updateParticles() {
 		Iterator<ParticleInstanced> itr = particles.iterator();
 		while(itr.hasNext()) {
 			ParticleInstanced p = itr.next();
+			if(!p.hasWorld() || !p.isAlive()) {
+				faceCount -= p.getFaceCount();
+				itr.remove();
+				continue;
+			}
 			p.onUpdate();
 			if(!p.isAlive()) {
 				faceCount -= p.getFaceCount();
@@ -151,7 +164,13 @@ public class InstancedParticleRenderer {
 	@SubscribeEvent
 	public static void clientTick(ClientTickEvent event) {
 		if(GeneralConfig.instancedParticles && event.phase == Phase.START) {
-			if(!Minecraft.getMinecraft().isGamePaused())
+			Minecraft mc = Minecraft.getMinecraft();
+			World world = mc.world;
+			if(world != lastWorld) {
+				clear();
+				lastWorld = world;
+			}
+			if(world != null && !mc.isGamePaused())
 				updateParticles();
 		}
 	}

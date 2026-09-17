@@ -1,6 +1,6 @@
 package com.hbm.tileentity.machine;
 
-import com.hbm.api.fluid.IFluidStandardTransceiver;
+import com.hbm.api.fluidmk2.IFluidStandardTransceiverMK2;
 import com.hbm.api.redstoneoverradio.IRORInteractive;
 import com.hbm.api.redstoneoverradio.IRORValueProvider;
 import com.hbm.blocks.BlockDummyable;
@@ -29,6 +29,8 @@ import com.hbm.main.AdvancementManager;
 import com.hbm.main.MainRegistry;
 import com.hbm.packet.toclient.AuxParticlePacketNT;
 import com.hbm.particle.helper.HbmEffectNT;
+import com.hbm.saveddata.satellites.SatelliteRayScan;
+import com.hbm.saveddata.satellites.SatelliteRayScan.RayEvent;
 import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
@@ -41,6 +43,7 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -48,6 +51,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Optional;
@@ -64,7 +68,7 @@ import static com.hbm.items.machine.ItemZirnoxRodDepleted.EnumZirnoxTypeDepleted
 
 @Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")})
 @AutoRegister
-public class TileEntityReactorZirnox extends TileEntityMachineBase implements ITickable, IControlReceiver, IFluidStandardTransceiver, SimpleComponent, IGUIProvider, CompatHandler.OCComponent, IRORValueProvider, IRORInteractive, IConnectionAnchors {
+public class TileEntityReactorZirnox extends TileEntityMachineBase implements ITickable, IControlReceiver, IFluidStandardTransceiverMK2, SimpleComponent, IGUIProvider, CompatHandler.OCComponent, IRORValueProvider, IRORInteractive, IConnectionAnchors {
 
     private AxisAlignedBB bb;
     public static final int maxHeat = 100000;
@@ -223,12 +227,14 @@ public class TileEntityReactorZirnox extends TileEntityMachineBase implements IT
     public void update() {
 
         if (!world.isRemote) {
+            this.checkTilt(TiltType.CONFIG, true);
+
             if (redstonePowered) {
                 isOn = true;
             }
             this.output = 0;
 
-            if (world.getTotalWorldTime() % 20 == 0) {
+            if (!tilted && world.getTotalWorldTime() % 20 == 0) {
                 this.updateConnections();
             }
 
@@ -259,10 +265,12 @@ public class TileEntityReactorZirnox extends TileEntityMachineBase implements IT
                     this.heat -= 10;
                 }
 
+                if (world.getTotalWorldTime() % 100 == 0)
+                    SatelliteRayScan.reportEvent(world, pos.getX(), pos.getY(), pos.getZ(), RayEvent.INFO_NUCLEAR, 200);
             }
 
-            for (DirPos pos : getConPos()) {
-                this.sendFluid(steam, world, pos.getPos().getX(), pos.getPos().getY(), pos.getPos().getZ(), pos.getDir());
+            if (!this.tilted) for (DirPos pos : getConPos()) {
+                this.tryProvide(steam, world, pos.getPos().getX(), pos.getPos().getY(), pos.getPos().getZ(), pos.getDir());
             }
 
             checkIfMeltdown();
@@ -276,7 +284,7 @@ public class TileEntityReactorZirnox extends TileEntityMachineBase implements IT
         // function of SHS produced per tick
         // (heat - 10256)/100000 * steamFill (max efficiency at 14b) * 25 * 5 (should get rid of any rounding errors)
         if (this.heat > 10256) {
-            int cycle = (int) ((((float) heat - 10256F) / (float) maxHeat) * Math.min(((float) carbonDioxide.getFill() / 14000F), 1F) * 25F * 5F);
+            int cycle = (int) ((((float) heat - 10256F) / (float) maxHeat) * Math.min(((float) carbonDioxide.getFill() / 14000F), 1F) * 25F * 7.5F);
             this.output = cycle;
 
             water.setFill(water.getFill() - cycle);
@@ -468,7 +476,7 @@ public class TileEntityReactorZirnox extends TileEntityMachineBase implements IT
     }
 
     @Override
-    public void receiveControl(NBTTagCompound data) {
+    public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
         if (data.hasKey("control") && !redstonePowered) {
             this.isOn = !this.isOn;
         }
@@ -647,4 +655,7 @@ public class TileEntityReactorZirnox extends TileEntityMachineBase implements IT
         }
         return null;
     }
+
+    @Override public int getFloorCount() { return 3 * 3; }
+    @Override public BlockPos getFloorPosFromIndex(int index) { return this.standardFloor5x5(index); }
 }

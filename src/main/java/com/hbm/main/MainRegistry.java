@@ -20,6 +20,7 @@ import com.hbm.entity.siege.SiegeTier;
 import com.hbm.explosion.ExplosionNukeGeneric;
 import com.hbm.handler.*;
 import com.hbm.handler.imc.IMCHandler;
+import com.hbm.handler.imc.IMCOutbound;
 import com.hbm.handler.pollution.PollutionHandler;
 import com.hbm.handler.radiation.RadiationSystemNT;
 import com.hbm.handler.threading.BombForkJoinPool;
@@ -148,9 +149,9 @@ public class MainRegistry {
         ToolConfig.loadFromConfig(config);
         WeaponConfig.loadFromConfig(config);
         MobConfig.loadFromConfig(config);
-        SpaceConfig.loadFromConfig(config);
         StructureConfig.loadFromConfig(config);
         reloadCompatConfig();
+        WorldConfig.loadFromConfig(config);
         BedrockOreJsonConfig.init();
         CassetteJsonConfig.init();
         config.save();
@@ -204,6 +205,8 @@ public class MainRegistry {
 
         if (!configHbmDir.exists()) configHbmDir.mkdir();
 
+        Identity.init(configDir);
+
         if (SharedMonsterAttributes.MAX_HEALTH.clampValue(Integer.MAX_VALUE) <= 2000) {
             ((RangedAttribute) SharedMonsterAttributes.MAX_HEALTH).maximumValue = Integer.MAX_VALUE;
         }
@@ -251,6 +254,7 @@ public class MainRegistry {
 
         MaterialRegistry.initFixMaterials();
         AutoRegistry.registerTileEntities();
+        com.hbm.integration.ae2.NTMCraftingMachineAE2Registration.registerIfPresent();
         AutoRegistry.loadAuxiliaryData();
         NetworkRegistry.INSTANCE.registerGuiHandler(instance, new GuiHandler());
 
@@ -290,6 +294,7 @@ public class MainRegistry {
         PacketDispatcher.registerPackets();
         PacketThreading.init();
         IMCHandler.init();
+        IMCOutbound.send();
     }
 
     @EventHandler
@@ -302,7 +307,6 @@ public class MainRegistry {
         DamageResistanceHandler.init();
         BlockCrate.setDrops();
         ExplosionNukeGeneric.loadSoliniumFromFile();
-        HadronRecipes.register();
         MagicRecipes.register();
         SILEXRecipes.register();
         GasCentrifugeRecipes.register();
@@ -320,7 +324,6 @@ public class MainRegistry {
         RBMKFuelRecipes.registerRecipes();
         DFCRecipes.register();
         StorageDrumRecipes.registerRecipes();
-        NuclearTransmutationRecipes.registerRecipes();
         EngineRecipes.registerEngineRecipes();
         FluidCombustionRecipes.registerFluidCombustionRecipes();
         HbmDetox.init();
@@ -365,6 +368,7 @@ public class MainRegistry {
         evt.registerServerCommand(new CommandLocate());
         evt.registerServerCommand(new CommandPacketInfo());
         evt.registerServerCommand(new CommandReloadServer());
+        evt.registerServerCommand(new CommandReapNetworks());
         AdvancementManager.init(evt.getServer());
         //MUST be initialized AFTER achievements!!
         BobmazonOfferFactory.init();

@@ -116,7 +116,7 @@ public final class RadiationSystemNT {
     static final ByteBuffer BUF = ByteBuffer.allocateDirect(65536 * 10 + 4);
 
     static final double RAD_EPSILON = 1.0e-5D;
-    static final double RAD_MAX = Double.MAX_VALUE / 2.0D;
+    public static double RAD_MAX = Double.MAX_VALUE / 2.0D;
     static final double[] TEMP_DENSITIES = new double[MAX_POCKETS];
     static final long DESTROY_PROB_U64 = Long.divideUnsigned(-1L, 100L);
 

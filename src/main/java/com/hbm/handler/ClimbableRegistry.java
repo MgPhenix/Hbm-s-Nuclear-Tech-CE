@@ -324,7 +324,9 @@ public final class ClimbableRegistry {
 
         @Override
         public boolean isEntityOnAny(World w, EntityLivingBase e, int minSectionY, int maxSectionY) {
-            for (IClimbable c : list) {
+
+            for (int i = 0; i < list.size(); i++) {
+                IClimbable c = list.get(i);
                 if (c == null) continue;
                 if (c.world() != w) continue;
                 if (c.isEntityInClimbAABB(e)) return true;
@@ -335,8 +337,9 @@ public final class ClimbableRegistry {
         @Override
         public void collectIntersecting(World w, AxisAlignedBB q, int minSectionY, int maxSectionY,
                                         ReferenceOpenHashSet<IClimbable> seen, ArrayList<IClimbable> out) {
-            for (IClimbable c : list) {
-                collectCandidate(w, q, seen, out, c);
+            for (int i = 0; i < list.size(); i++) {
+
+                collectCandidate(w, q, seen, out, list.get(i));
             }
         }
     }
@@ -412,7 +415,8 @@ public final class ClimbableRegistry {
             for (int sectionY = minSectionY; sectionY <= maxSectionY; sectionY++) {
                 ArrayList<IClimbable> list = bySection.get(Library.sectionToLong(chunkKey, sectionY));
                 if (list == null || list.isEmpty()) continue;
-                for (IClimbable c : list) {
+                for (int i = 0; i < list.size(); i++) {
+                    IClimbable c = list.get(i);
                     if (c == null) continue;
                     if (seen != null && !seen.add(c)) continue;
                     if (c.world() != w) continue;
@@ -428,8 +432,8 @@ public final class ClimbableRegistry {
             for (int sectionY = minSectionY; sectionY <= maxSectionY; sectionY++) {
                 ArrayList<IClimbable> list = bySection.get(Library.sectionToLong(chunkKey, sectionY));
                 if (list == null || list.isEmpty()) continue;
-                for (IClimbable c : list) {
-                    collectCandidate(w, q, seen, out, c);
+                for (int i = 0; i < list.size(); i++) {
+                    collectCandidate(w, q, seen, out, list.get(i));
                 }
             }
         }

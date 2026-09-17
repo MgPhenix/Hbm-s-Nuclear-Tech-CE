@@ -7,7 +7,6 @@ import com.hbm.world.gen.nbt.INBTBlockTransformable;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -70,7 +69,7 @@ public class BlockMachineBase extends BlockContainer implements INBTBlockTransfo
 	@Override
 	protected BlockStateContainer createBlockState() {
 		if(rotatable()){
-			return new BlockStateContainer(this, new IProperty[]{BlockHorizontal.FACING});
+			return new BlockStateContainer(this, BlockHorizontal.FACING);
 		}
 		return super.createBlockState();
 	}
@@ -79,7 +78,7 @@ public class BlockMachineBase extends BlockContainer implements INBTBlockTransfo
 	public int getMetaFromState(IBlockState state) {
 		if(!rotatable())
 			return 0;
-		return ((EnumFacing)state.getValue(BlockHorizontal.FACING)).getIndex();
+		return state.getValue(BlockHorizontal.FACING).getIndex();
 	}
 	
 	@Override

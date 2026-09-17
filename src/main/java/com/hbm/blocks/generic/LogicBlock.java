@@ -171,6 +171,8 @@ public class LogicBlock extends BlockContainerBakeable {
 
         public EnumFacing direction = EnumFacing.NORTH;
 
+        boolean disguised = false;
+
         @Override
         public void update() {
             if (!world.isRemote) {
@@ -194,6 +196,12 @@ public class LogicBlock extends BlockContainerBakeable {
                     timer = 0;
                 } else {
                     timer++;
+                }
+                if (!disguised) {
+                    markDirty();
+                    IBlockState state = world.getBlockState(pos);
+                    world.notifyBlockUpdate(pos, state, state, 3);
+                    disguised = true;
                 }
             }
         }
@@ -255,6 +263,8 @@ public class LogicBlock extends BlockContainerBakeable {
         @Override
         public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
             this.readFromNBT(pkt.getNbtCompound());
+            IBlockState state = world.getBlockState(pos);
+            world.notifyBlockUpdate(pos, state, state, 3);
         }
     }
 

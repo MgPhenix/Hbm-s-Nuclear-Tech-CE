@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -120,6 +121,13 @@ public abstract class BlockGasBase extends Block {
         return true;
     }
 
+    // Report as air so vanilla treats a gas cell like empty space: World.destroyBlock no-ops on air
+    // (no event 2001 break sound/particles when a fluid is poured into gas), matching vanilla air.
+    @Override
+    public boolean isAir(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return true;
+    }
+
     @Override
     public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
         if (!world.isRemote) {
@@ -141,7 +149,7 @@ public abstract class BlockGasBase extends Block {
 
         if (!world.isBlockLoaded(newPos)) {
             return false;
-        } else if (world.isAirBlock(newPos)) {
+        } else if (world.getBlockState(newPos).getBlock() == Blocks.AIR) {
             world.setBlockToAir(new BlockPos(x, y, z));
             world.setBlockState(newPos, this.getDefaultState());
             return true;

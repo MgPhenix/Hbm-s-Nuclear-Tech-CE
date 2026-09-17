@@ -66,6 +66,8 @@ public class ServerProxy {
 
 	public boolean getIsKeyPressed(EnumKeybind key) { return false; }
 
+	public String getLanguageCode() { return "en_us"; }
+
 	public EntityPlayer me() { return null; }
 	
 	public float partialTicks() { return 1; }

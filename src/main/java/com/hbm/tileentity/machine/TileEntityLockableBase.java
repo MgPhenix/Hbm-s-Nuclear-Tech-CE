@@ -20,6 +20,8 @@ public abstract class TileEntityLockableBase extends TileEntityLoadedBase {
     protected int lock;
     private boolean isLocked = false;
     protected double lockMod = 0.1D;
+    /** Whether a counterfeit lock can be made out of it*/
+    public boolean cheesable = true;
 
     public boolean isLocked() {
         return isLocked;
@@ -38,6 +40,11 @@ public abstract class TileEntityLockableBase extends TileEntityLoadedBase {
             dataChanged();
             markDirty();
         }
+    }
+
+    public void unlock() {
+        isLocked = false;
+        markDirty();
     }
 
     public void setPins(int pins) {
@@ -68,6 +75,7 @@ public abstract class TileEntityLockableBase extends TileEntityLoadedBase {
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         lock = compound.getInteger("lock");
+        cheesable = compound.getBoolean("cheesable");
         isLocked = compound.getBoolean("isLocked");
         lockMod = compound.getDouble("lockMod");
     }
@@ -75,6 +83,7 @@ public abstract class TileEntityLockableBase extends TileEntityLoadedBase {
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound compound) {
         compound.setInteger("lock", lock);
+        compound.setBoolean("cheesable", cheesable);
         compound.setBoolean("isLocked", isLocked);
         compound.setDouble("lockMod", lockMod);
         return super.writeToNBT(compound);
@@ -163,6 +172,7 @@ public abstract class TileEntityLockableBase extends TileEntityLoadedBase {
     public void serialize(ByteBuf buf) {
         super.serialize(buf);
         buf.writeInt(lock);
+        buf.writeBoolean(cheesable);
         buf.writeBoolean(isLocked);
         buf.writeDouble(lockMod);
     }
@@ -171,6 +181,7 @@ public abstract class TileEntityLockableBase extends TileEntityLoadedBase {
     public void deserialize(ByteBuf buf) {
         super.deserialize(buf);
         this.lock = buf.readInt();
+        this.cheesable = buf.readBoolean();
         this.isLocked = buf.readBoolean();
         this.lockMod = buf.readDouble();
     }

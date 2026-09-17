@@ -39,18 +39,6 @@ public class MachineDiesel extends BlockMachineBase implements ITooltipProvider 
     }
 
     @Override
-    public boolean onBlockActivated(World world, @NotNull BlockPos pos, @NotNull IBlockState state, @NotNull EntityPlayer player, @NotNull EnumHand hand, @NotNull EnumFacing facing, float hitX, float hitY, float hitZ) {
-        if (world.isRemote) {
-            return true;
-        } else if (!player.isSneaking()) {
-            FMLNetworkHandler.openGui(player, MainRegistry.instance, 0, world, pos.getX(), pos.getY(), pos.getZ());
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
     protected boolean rotatable() {
         return true;
     }
@@ -99,7 +87,7 @@ public class MachineDiesel extends BlockMachineBase implements ITooltipProvider 
 
             if (efficiency != null) {
                 int eff = (int) (efficiency * 100);
-                list.add(ChatFormatting.YELLOW + "-" + grade.getGrade() + ": " + ChatFormatting.RED + eff + "%");
+                list.add(ChatFormatting.YELLOW + "-" + I18n.format(grade.getGrade()) + ": " + ChatFormatting.RED + eff + "%");
             }
         }
 

@@ -21,7 +21,8 @@ public class FluidNetMK2 extends NodeNet<IFluidReceiverMK2, IFluidProviderMK2, F
     public long fluidTracker = 0L;
 
     protected static int timeout = 3_000;
-    protected static long currentTime = 0;
+    // Per-instance: net updates run in parallel when threaded nodespace updates are enabled, so a shared static
+    protected long currentTime = 0;
     protected FluidType type;
 
     public FluidNetMK2(FluidType type) {

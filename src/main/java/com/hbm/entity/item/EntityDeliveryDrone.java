@@ -99,7 +99,7 @@ public class EntityDeliveryDrone extends EntityDroneBase implements IInventory, 
         compound.setTag("Items", list);
 
         if(fluid != null) {
-            compound.setInteger("fluidType", fluid.type.getID());
+            Fluids.writeType(compound, "fluidType", fluid.type);
             compound.setInteger("fluidAmount", fluid.fill);
         }
 
@@ -124,12 +124,7 @@ public class EntityDeliveryDrone extends EntityDroneBase implements IInventory, 
         }
 
         if(nbt.hasKey("fluidType")) {
-            FluidType type = Fluids.fromNameCompat(nbt.getString("fluidType"));
-            if(type != Fluids.NONE) {
-                nbt.removeTag(nbt.getString("fluidType"));
-            } else
-                type = Fluids.fromID(nbt.getInteger("fluidType"));
-
+            FluidType type = Fluids.readType(nbt, "fluidType"); //name-based, with legacy numeric-ID fallback
             this.fluid = new FluidStack(type, nbt.getInteger("fluidAmount"));
         }
 

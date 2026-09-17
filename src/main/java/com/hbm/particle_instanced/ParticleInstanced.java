@@ -21,6 +21,10 @@ public class ParticleInstanced extends Particle {
 		super(worldIn, posXIn, posYIn, posZIn);
 	}
 
+	public boolean hasWorld() {
+		return this.world != null;
+	}
+
     protected final float getInterpX(float partialTicks) {
         return (float) (this.prevPosX + (this.posX - this.prevPosX) * (double) partialTicks - interpPosX);
     }

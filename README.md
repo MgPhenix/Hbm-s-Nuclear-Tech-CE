@@ -124,3 +124,8 @@ dependencies {
 
 Normally you should use unobfuscated jars for development.  
 If you are on Cleanroom and is using JDK 25 then both Java 8 and Java 25 variants are fine; otherwise the Java 8 ones are recommended.
+
+## Licensing
+
+Licensed under the GNU GPLv3 / LGPLv3 — see [`LICENSE`](LICENSE) and [`LICENSE.LESSER`](LICENSE.LESSER).  
+**Exception:** the [`processor/`](processor) directory is All Rights Reserved and *not* covered by the GPL/LGPL. See [`processor/LICENSE`](processor/LICENSE) and [`NOTICE`](NOTICE).

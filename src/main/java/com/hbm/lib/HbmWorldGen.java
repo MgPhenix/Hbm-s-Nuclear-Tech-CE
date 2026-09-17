@@ -1,6 +1,5 @@
 package com.hbm.lib;
 
-import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.BlockEnums;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.generic.BlockResourceStone;
@@ -11,7 +10,6 @@ import com.hbm.config.CompatibilityConfig;
 import com.hbm.config.GeneralConfig;
 import com.hbm.config.MobConfig;
 import com.hbm.config.WorldConfig;
-import com.hbm.handler.MultiblockHandlerXR;
 import com.hbm.handler.WeightedRandomChestContentFrom1710;
 import com.hbm.itempool.ItemPool;
 import com.hbm.itempool.ItemPoolsSingle;
@@ -19,10 +17,8 @@ import com.hbm.items.ModItems;
 import com.hbm.main.MainRegistry;
 import com.hbm.saveddata.TomSaveData;
 import com.hbm.tileentity.bomb.TileEntityLandmine;
-import com.hbm.tileentity.deco.TileEntityLanternBehemoth;
 import com.hbm.tileentity.machine.TileEntitySafe;
 import com.hbm.tileentity.machine.TileEntitySoyuzCapsule;
-import com.hbm.util.LootGenerator;
 import com.hbm.world.*;
 import com.hbm.world.dungeon.AncientTombStructure;
 import com.hbm.world.dungeon.ArcticVault;
@@ -34,7 +30,9 @@ import com.hbm.world.phased.AbstractPhasedStructure;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
+import com.hbm.world.Geyser;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -43,7 +41,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraftforge.fml.common.IWorldGenerator;
 
 import java.util.Random;
@@ -169,8 +166,8 @@ public class HbmWorldGen implements IWorldGenerator {
         }
 
         //Gneiss
-        DungeonToolbox.generateOre(world, rand, chunkMinX, chunkMinZ, dimID == 0 ? 25 : 0, 6, 30, 10, ModBlocks.ore_gneiss_iron, ModBlocks.stone_gneiss);
-        DungeonToolbox.generateOre(world, rand, chunkMinX, chunkMinZ, dimID == 0 ? 10 : 0, 6, 30, 10, ModBlocks.ore_gneiss_gold, ModBlocks.stone_gneiss);
+        DungeonToolbox.generateOre(world, rand, chunkMinX, chunkMinZ, parseInt(CompatibilityConfig.gneissIronSpawn.get(dimID)), 6, 30, 10, ModBlocks.ore_gneiss_iron, ModBlocks.stone_gneiss);
+        DungeonToolbox.generateOre(world, rand, chunkMinX, chunkMinZ, parseInt(CompatibilityConfig.gneissGoldSpawn.get(dimID)), 6, 30, 10, ModBlocks.ore_gneiss_gold, ModBlocks.stone_gneiss);
         DungeonToolbox.generateOre(world, rand, chunkMinX, chunkMinZ, parseInt(CompatibilityConfig.uraniumSpawn.get(dimID)) * 3, 6, 30, 10, ModBlocks.ore_gneiss_uranium, ModBlocks.stone_gneiss);
         DungeonToolbox.generateOre(world, rand, chunkMinX, chunkMinZ, parseInt(CompatibilityConfig.copperSpawn.get(dimID)) * 3, 6, 30, 10, ModBlocks.ore_gneiss_copper, ModBlocks.stone_gneiss);
         DungeonToolbox.generateOre(world, rand, chunkMinX, chunkMinZ, parseInt(CompatibilityConfig.asbestosSpawn.get(dimID)) * 3, 6, 30, 10, ModBlocks.ore_gneiss_asbestos, ModBlocks.stone_gneiss);
@@ -303,19 +300,12 @@ public class HbmWorldGen implements IWorldGenerator {
         return result / depth;
     }
 
-    private void generateAStructure(World world, Random rand, int chunkMinX, int chunkMinZ, WorldGenerator structure, int chance) {
+    private void generateAStructure(World world, Random rand, int chunkMinX, int chunkMinZ, AbstractPhasedStructure structure, int chance) {
         if (chance > 0 && rand.nextInt(chance) == 0) {
             int x = chunkMinX + rand.nextInt(16);
             int z = chunkMinZ + rand.nextInt(16);
 
-            if (structure instanceof AbstractPhasedStructure phased) {
-                phased.generate(world, rand, new BlockPos(x, 0, z));
-            } else {
-                int y = world.getHeight(x, z);
-                if (y > 0 && y < world.getHeight()) {
-                    structure.generate(world, rand, new BlockPos(x, y, z));
-                }
-            }
+            structure.generate(world, rand, new BlockPos(x, 0, z));
         }
     }
 
@@ -357,7 +347,7 @@ public class HbmWorldGen implements IWorldGenerator {
             if (MobConfig.enableHives && rand.nextInt(MobConfig.hiveSpawn) == 0 && world.provider.getDimension() == 0) {
                 int x = chunkMinX + rand.nextInt(16);
                 int z = chunkMinZ + rand.nextInt(16);
-                int y = world.getHeight(x, z);
+                int y = world.getTopSolidOrLiquidBlock(new BlockPos(x, 0, z)).getY() + 1;
 
                 for (int k = 3; k >= -1; k--) {
                     pos.setPos(x, y - 1 + k, z);
@@ -371,7 +361,7 @@ public class HbmWorldGen implements IWorldGenerator {
             if (biome.getDefaultTemperature() >= 0.8F && biome.getRainfall() > 0.7F) {
                 generateAStructure(world, rand, chunkMinX, chunkMinZ, Radio01.INSTANCE, parseInt(CompatibilityConfig.radioStructure.get(dimID)));
             }
-            if (biome.getDefaultTemperature() <= 0.5F) {
+            if (biome.getDefaultTemperature() >= 0.4F && biome.getRainfall() <= 0.6F) {
                 generateAStructure(world, rand, chunkMinX, chunkMinZ, Antenna.INSTANCE, parseInt(CompatibilityConfig.antennaStructure.get(dimID)));
             }
             if (!biome.canRain() && biome.getDefaultTemperature() >= 2F) {
@@ -386,7 +376,8 @@ public class HbmWorldGen implements IWorldGenerator {
 
             generateAStructure(world, rand, chunkMinX, chunkMinZ, Spaceship.INSTANCE, parseInt(CompatibilityConfig.spaceshipStructure.get(dimID)));
             generateAStructure(world, rand, chunkMinX, chunkMinZ, Bunker.INSTANCE, parseInt(CompatibilityConfig.bunkerStructure.get(dimID)));
-            generateAStructure(world, rand, chunkMinX, chunkMinZ, new Dud(), parseInt(CompatibilityConfig.dudStructure.get(dimID)));
+            generateAStructure(world, rand, chunkMinX, chunkMinZ, Dud.INSTANCE, parseInt(CompatibilityConfig.dudStructure.get(dimID)));
+            generateAStructure(world, rand, chunkMinX, chunkMinZ, MeteoriteStructure.INSTANCE, parseInt(CompatibilityConfig.meteoriteSpawn.get(dimID)));
 
             if (biome.getTempCategory() == Biome.TempCategory.WARM && biome.getTempCategory() != Biome.TempCategory.OCEAN) {
                 generateSellafieldPool(world, rand, chunkMinX, chunkMinZ, dimID);
@@ -413,34 +404,8 @@ public class HbmWorldGen implements IWorldGenerator {
                 }
             }
 
-            if (rand.nextInt(2000) == 0 && world.provider.getDimension() == 0) {
-                int x = chunkMinX + rand.nextInt(16);
-                int z = chunkMinZ + rand.nextInt(16);
-                int y = world.getHeight(x, z);
-
-                BlockPos below = pos.setPos(x, y - 1, z);
-                IBlockState belowState = world.getBlockState(below);
-                BlockPos basePos = pos.setPos(x, y, z);
-                IBlockState baseState = world.getBlockState(basePos);
-
-                if (belowState.getBlock().canPlaceTorchOnTop(belowState, world, pos.setPos(x, y - 1, z)) && baseState.getBlock()
-                                                                                                                     .isReplaceable(world, pos.setPos(x, y, z))) {
-                    pos.setPos(x, y, z);
-                    world.setBlockState(basePos, ModBlocks.lantern_behemoth.getDefaultState().withProperty(BlockDummyable.META, 12), 2 | 16);
-                    MultiblockHandlerXR.fillSpace(world, x, y, z, new int[]{4, 0, 0, 0, 0, 0}, ModBlocks.lantern_behemoth, ForgeDirection.NORTH);
-
-                    TileEntityLanternBehemoth lantern = (TileEntityLanternBehemoth) world.getTileEntity(basePos);
-                    if (lantern != null) lantern.isBroken = true;
-
-                    if (rand.nextInt(2) == 0) {
-                        LootGenerator.setBlock(world, x, y, z - 2);
-                        LootGenerator.lootBooklet(world, x, y, z - 2);
-                    }
-
-                    if (GeneralConfig.enableDebugMode) {
-                        MainRegistry.logger.info("[Debug] Successfully spawned lantern at {} {} {}", x, y, z);
-                    }
-                }
+            if (world.provider.getDimension() == 0) {
+                generateAStructure(world, rand, chunkMinX, chunkMinZ, LanternBehemoth.INSTANCE, 2000);
             }
 
             if (GeneralConfig.enable528 && GeneralConfig.enable528BosniaSimulator && world.provider.getDimension() == 0 && rand.nextInt(16) == 0) {
@@ -482,43 +447,14 @@ public class HbmWorldGen implements IWorldGenerator {
                 LibraryDungeon.INSTANCE.generate(world, rand, pos.setPos(x, y, z));
             }
 
-            if (biome.getRainfall() > 2F) {
-                int dimGeyserWater = parseInt(CompatibilityConfig.geyserWater.get(dimID));
-                if (dimGeyserWater > 0 && rand.nextInt(dimGeyserWater) == 0) {
-                    int x = chunkMinX + rand.nextInt(16);
-                    int z = chunkMinZ + rand.nextInt(16);
-                    int y = world.getHeight(x, z);
-
-                    pos.setPos(x, y - 1, z);
-                    if (world.getBlockState(pos).getBlock() == Blocks.GRASS) Geyser.INSTANCE.generate(world, rand, pos.setPos(x, y, z));
-                }
-            }
-
-            if (biome.getDefaultTemperature() > 1.8F && biome.getRainfall() < 1F) {
-                int dimGeyserChlorine = parseInt(CompatibilityConfig.geyserChlorine.get(dimID));
-                if (dimGeyserChlorine > 0 && rand.nextInt(dimGeyserChlorine) == 0) {
-                    int x = chunkMinX + rand.nextInt(16);
-                    int z = chunkMinZ + rand.nextInt(16);
-                    int y = world.getHeight(x, z);
-
-                    pos.setPos(x, y - 1, z);
-                    if (world.getBlockState(pos).getBlock() == Blocks.SAND) {
-                        GeyserLarge.INSTANCE.generate(world, rand, pos.setPos(x, y, z));
-                    }
-                }
-            }
-
-            // Geyser vapor – stone under air
-            int dimGeyserVapor = parseInt(CompatibilityConfig.geyserVapor.get(dimID));
-            if (dimGeyserVapor > 0 && rand.nextInt(dimGeyserVapor) == 0) {
+            int dimGeyserChlorine = parseInt(CompatibilityConfig.geyserChlorine.get(dimID));
+            if (dimGeyserChlorine > 0 && biome == Biomes.PLAINS && rand.nextInt(dimGeyserChlorine) == 0) {
                 int x = chunkMinX + rand.nextInt(16);
                 int z = chunkMinZ + rand.nextInt(16);
                 int y = world.getHeight(x, z);
 
-                BlockPos below = pos.setPos(x, y - 1, z);
-                if (world.getBlockState(below).getBlock() == Blocks.STONE) {
-                    world.setBlockState(below, ModBlocks.geysir_vapor.getDefaultState(), 2 | 16);
-                }
+                pos.setPos(x, y - 1, z);
+                if (world.getBlockState(pos).getBlock() == Blocks.GRASS) Geyser.INSTANCE.generate(world, rand, pos.setPos(x, y, z));
             }
 
             int dimGeyserNether = parseInt(CompatibilityConfig.geyserNether.get(dimID));

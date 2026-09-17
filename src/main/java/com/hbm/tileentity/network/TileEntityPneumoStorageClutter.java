@@ -1,44 +1,21 @@
 package com.hbm.tileentity.network;
 
-import com.hbm.api.fluidmk2.IFluidStandardReceiverMK2;
-import com.hbm.api.ntl.IPneumaticConnector;
-import com.hbm.api.ntl.ISlotMonitorProvider;
-import com.hbm.api.ntl.SlotMonitor;
 import com.hbm.interfaces.AutoRegister;
 import com.hbm.inventory.container.ContainerPneumoStorageClutter;
-import com.hbm.inventory.fluid.Fluids;
-import com.hbm.inventory.fluid.tank.FluidTankNTM;
 import com.hbm.inventory.gui.GUIPneumoStorageClutter;
-import com.hbm.lib.DirPos;
-import com.hbm.lib.Library;
-import com.hbm.tileentity.IGUIProvider;
-import com.hbm.tileentity.TileEntityMachineBase;
-import com.hbm.uninos.UniNodespace;
-import com.hbm.uninos.networkproviders.PneumaticNetwork;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @AutoRegister
-public class TileEntityPneumoStorageClutter extends TileEntityMachineBase implements ITickable, IFluidStandardReceiverMK2, ISlotMonitorProvider, IPneumaticConnector, IGUIProvider {
-
-    public final FluidTankNTM compair;
-    public final SlotMonitor[] monitors;
-
-    protected TileEntityPneumoTube.PneumaticNode node;
+public class TileEntityPneumoStorageClutter extends TileEntityPneumaticStorageBase {
 
     public TileEntityPneumoStorageClutter() {
         super(6 * 9);
-        this.compair = new FluidTankNTM(Fluids.AIR, 4_000).withOwner(this).withPressure(1);
-        this.monitors = new SlotMonitor[6 * 9];
-        for (int i = 0; i < this.monitors.length; i++) {
-            this.monitors[i] = new SlotMonitor(i, this);
-        }
     }
 
     @Override
@@ -46,80 +23,53 @@ public class TileEntityPneumoStorageClutter extends TileEntityMachineBase implem
         return "container.pneumoStorageClutter";
     }
 
-    @Override
-    public void update() {
-        if (!world.isRemote) {
-            if (this.node == null || this.node.expired) {
-                this.node = UniNodespace.getNode(world, pos, PneumaticNetwork.THE_PNEUMATIC_PROVIDER);
-                if (this.node == null || this.node.expired) {
-                    this.node = new TileEntityPneumoTube.PneumaticNode(pos).setConnections(
-                            new DirPos(pos.getX() + 1, pos.getY(), pos.getZ(), Library.POS_X),
-                            new DirPos(pos.getX() - 1, pos.getY(), pos.getZ(), Library.NEG_X),
-                            new DirPos(pos.getX(), pos.getY() + 1, pos.getZ(), Library.POS_Y),
-                            new DirPos(pos.getX(), pos.getY() - 1, pos.getZ(), Library.NEG_Y),
-                            new DirPos(pos.getX(), pos.getY(), pos.getZ() + 1, Library.POS_Z),
-                            new DirPos(pos.getX(), pos.getY(), pos.getZ() - 1, Library.NEG_Z)
-                    );
-                    UniNodespace.createNode(world, this.node);
-                }
-            }
+    @Override public boolean allowTypeSetting() { return true; }
 
-            if (this.node != null && !this.node.expired && this.node.hasValidNet()) {
-                this.node.net.storages.put(this, System.currentTimeMillis());
-            }
-        }
+    @Override
+    public long getAmountAt(int index) {
+        ItemStack stack = this.getSlotAt(index);
+        return stack.isEmpty() ? 0 : stack.getCount();
     }
 
     @Override
-    public void invalidate() {
-        super.invalidate();
-        if (!world.isRemote) {
-            if (this.node != null && !this.node.expired && this.node.hasValidNet()) {
-                this.node.net.storages.remove(this);
-            }
-            if (this.node != null) {
-                UniNodespace.destroyNode(world, pos, PneumaticNetwork.THE_PNEUMATIC_PROVIDER);
-                this.node = null;
-            }
-        }
+    public long useUpItem(int index, long amount) {
+        ItemStack stack = this.inventory.getStackInSlot(index);
+        if(stack.isEmpty()) return amount;
+
+        int toRemove = (int) Math.min(stack.getCount(), amount);
+        stack.shrink(toRemove);
+        if(stack.isEmpty()) this.inventory.setStackInSlot(index, ItemStack.EMPTY);
+        this.markDirty();
+
+        return amount - toRemove;
     }
 
     @Override
-    public void onChunkUnload() {
-        super.onChunkUnload();
-        if (!world.isRemote && this.node != null && !this.node.expired && this.node.hasValidNet()) {
-            this.node.net.storages.remove(this);
-        }
+    public long addItem(int index, long amount) {
+        ItemStack stack = this.inventory.getStackInSlot(index);
+        if(stack.isEmpty()) return amount;
+
+        int capacity = Math.min(stack.getMaxStackSize(), this.inventory.getSlotLimit(index));
+        int toAdd = (int) Math.min(amount, capacity - stack.getCount());
+        if(toAdd <= 0) return amount;
+
+        stack.grow(toAdd);
+        this.markDirty();
+
+        return amount - toAdd;
     }
 
     @Override
-    public boolean isItemValidForSlot(int slot, ItemStack stack) {
-        return true;
-    }
+    public long setupType(int index, ItemStack zeroStack, long amount) {
+        int capacity = Math.min(zeroStack.getMaxStackSize(), this.inventory.getSlotLimit(index));
+        int finalSize = (int) Math.min(amount, capacity);
 
-    @Override
-    public FluidTankNTM[] getReceivingTanks() {
-        return new FluidTankNTM[] { this.compair };
-    }
+        ItemStack placed = zeroStack.copy();
+        placed.setCount(finalSize);
+        this.inventory.setStackInSlot(index, placed);
+        this.markDirty();
 
-    @Override
-    public FluidTankNTM[] getAllTanks() {
-        return new FluidTankNTM[] { this.compair };
-    }
-
-    @Override
-    public SlotMonitor[] getMonitors() {
-        return this.monitors;
-    }
-
-    @Override
-    public ItemStack getSlotAt(int index) {
-        return this.inventory.getStackInSlot(index);
-    }
-
-    @Override
-    public boolean isAvailableToTerminal(int termX, int termY, int termZ) {
-        return true;
+        return amount - finalSize;
     }
 
     @Override

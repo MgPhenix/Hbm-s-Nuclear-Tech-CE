@@ -26,6 +26,7 @@ import java.util.*;
 
 import static com.hbm.inventory.OreDictManager.*;
 
+@Deprecated
 public class BlastFurnaceRecipes extends SerializableRecipe {
 
     public static final ArrayList<Tuple.Triplet<Object, Object, ItemStack>> blastFurnaceRecipes = new ArrayList<>();
@@ -276,7 +277,6 @@ public class BlastFurnaceRecipes extends SerializableRecipe {
         addRecipe(IRON.ore(), new RecipesCommon.ComparableStack(ModItems.powder_flux), new ItemStack(ModItems.ingot_steel, 3));
 
         addRecipe(CU, REDSTONE, new ItemStack(ModItems.ingot_red_copper, 2));
-        addRecipe(STEEL, MINGRADE, new ItemStack(ModItems.ingot_advanced_alloy, 2));
         addRecipe(W, COAL, new ItemStack(ModItems.neutron_reflector, 2));
         addRecipe(W, ANY_COKE, new ItemStack(ModItems.neutron_reflector, 2));
         addRecipe(new RecipesCommon.ComparableStack(ModItems.canister_full, 1, Fluids.GASOLINE.getID()), "slimeball", new ItemStack(ModItems.canister_napalm));
@@ -303,7 +303,7 @@ public class BlastFurnaceRecipes extends SerializableRecipe {
 
     @Override
     public String getFileName() {
-        return "hbmBlastFurnace.json";
+        return "hbmBlastFurnaceLegacy.json";
     }
 
     @Override

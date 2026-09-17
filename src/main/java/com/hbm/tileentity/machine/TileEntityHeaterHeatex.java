@@ -1,6 +1,7 @@
 package com.hbm.tileentity.machine;
 
 import com.hbm.api.fluid.IFluidStandardTransceiver;
+import com.hbm.api.redstoneoverradio.IRORValueProvider;
 import com.hbm.api.tile.IHeatSource;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.forgefluid.FFUtils;
@@ -22,6 +23,7 @@ import com.hbm.tileentity.TileEntityMachineBase;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
@@ -38,7 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 
 @AutoRegister
-public class TileEntityHeaterHeatex extends TileEntityMachineBase implements IHeatSource, IControlReceiver, IGUIProvider, IFluidStandardTransceiver, ITickable, IFFtoNTMF, IFluidCopiable, IConnectionAnchors {
+public class TileEntityHeaterHeatex extends TileEntityMachineBase implements IHeatSource, IControlReceiver, IGUIProvider, IFluidStandardTransceiver, ITickable, IFFtoNTMF, IFluidCopiable, IConnectionAnchors, IRORValueProvider {
 
     public FluidTankNTM[] tanksNew;
     public FluidTank[] tanks;
@@ -274,10 +276,27 @@ public class TileEntityHeaterHeatex extends TileEntityMachineBase implements IHe
     }
 
     @Override
-    public void receiveControl(NBTTagCompound data) {
+    public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
         if(data.hasKey("toCool")) this.amountToCool = MathHelper.clamp(data.getInteger("toCool"), 1, tanksNew[0].getMaxFill());
         if(data.hasKey("delay")) this.tickDelay = Math.max(data.getInteger("delay"), 1);
 
         this.markDirty();
+    }
+
+    @Override
+    public String[] getFunctionInfo() {
+        return new String[]{
+                PREFIX_VALUE + "hotfluid",
+                PREFIX_VALUE + "coldfluid",
+                PREFIX_VALUE + "heat"
+        };
+    }
+
+    @Override
+    public String provideRORValue(String name) {
+        if((PREFIX_VALUE + "hotfluid").equals(name)) return "" + tanksNew[0].getFill();
+        if((PREFIX_VALUE + "coldfluid").equals(name)) return "" + tanksNew[1].getFill();
+        if((PREFIX_VALUE + "heat").equals(name)) return "" + heatEnergy;
+        return null;
     }
 }

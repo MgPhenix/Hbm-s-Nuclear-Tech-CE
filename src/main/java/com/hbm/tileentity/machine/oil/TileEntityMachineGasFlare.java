@@ -32,6 +32,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
@@ -41,6 +42,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
@@ -121,6 +123,7 @@ public class TileEntityMachineGasFlare extends TileEntityMachineBase
     public void update() {
 
         if (!world.isRemote) {
+            this.checkTilt(TiltType.CONFIG, false);
 
             this.fluidUsed = 0;
             this.output = 0;
@@ -136,7 +139,7 @@ public class TileEntityMachineGasFlare extends TileEntityMachineBase
             int maxVent = 50;
             int maxBurn = 10;
 
-            if (isOn && tank.getFill() > 0) {
+            if (isOn && tank.getFill() > 0 && !this.tilted) {
                 upgradeManager.checkSlots(inventory, 4, 5);
 
                 int burn = upgradeManager.getLevel(UpgradeType.SPEED);
@@ -319,7 +322,7 @@ public class TileEntityMachineGasFlare extends TileEntityMachineBase
     }
 
     @Override
-    public void receiveControl(NBTTagCompound data) {
+    public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
         if (data.hasKey("valve")) this.isOn = !this.isOn;
         if (data.hasKey("dial")) this.doesBurn = !this.doesBurn;
         markDirty();
@@ -377,4 +380,7 @@ public class TileEntityMachineGasFlare extends TileEntityMachineBase
     public double getMaxRenderDistanceSquared() {
         return 65536.0D;
     }
+
+    @Override public int getFloorCount() { return 2 * 2; }
+    @Override public BlockPos getFloorPosFromIndex(int index) { return this.standardFloor3x3(index); }
 }

@@ -40,6 +40,8 @@ public class ModMixinConfigPlugin implements IMixinConfigPlugin {
             case "nothirium" -> NOTHIRIUM;
             case "optifine" -> OPTIFINE;
             case "celeritas" -> CELERITAS;
+            case "potioncore" -> POTIONCORE;
+            case "ae2" -> AE2;
             default -> true;
         };
     }

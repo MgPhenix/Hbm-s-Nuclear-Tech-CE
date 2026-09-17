@@ -30,6 +30,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Random;
 
+@Deprecated
 public class MachineDiFurnace extends BlockContainer {
 
 	public static final PropertyDirection FACING = BlockHorizontal.FACING;

@@ -7,27 +7,21 @@ import com.hbm.animloader.ColladaLoader;
 import com.hbm.config.GeneralConfig;
 import com.hbm.handler.HbmShaderManager2;
 import com.hbm.handler.HbmShaderManager2.Shader;
-import com.hbm.lib.internal.MethodHandleHelper;
 import com.hbm.main.client.NTMClientRegistry;
 import com.hbm.render.GLCompat;
-import com.hbm.render.WavefrontObjDisplayList;
 import com.hbm.render.anim.sedna.AnimationLoader;
 import com.hbm.render.anim.sedna.BusAnimationSedna;
 import com.hbm.render.loader.HFRWavefrontObject;
 import com.hbm.render.loader.WaveFrontObjectVAO;
 import com.hbm.render.misc.LensVisibilityHandler;
-import com.hbm.util.Compat;
 import com.hbm.util.KeypadClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.SplashProgress;
-import net.minecraftforge.fml.common.Loader;
 import org.lwjgl.opengl.GL11;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodType;
 import java.util.HashMap;
 
 public class ResourceManager {
@@ -49,6 +43,9 @@ public class ResourceManager {
 
     //Annihilator
     public static final WaveFrontObjectVAO annihilator = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/annihilator.obj")).asVBO();
+
+    //Rock Mill
+    public static final WaveFrontObjectVAO rock_mill = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/rockmill.obj")).asVBO();
 
     public static final WaveFrontObjectVAO bm_box_lever = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/bm_box_lever.obj")).asVBO();
 
@@ -74,8 +71,7 @@ public class ResourceManager {
     //Breeder
     public static final WaveFrontObjectVAO breeder = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/reactors/breeder.obj")).asVBO();
 
-    //ITER
-    public static final WaveFrontObjectVAO iter = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/reactors/iter.obj")).asVBO();
+    //Fusion Reactor
     public static final WaveFrontObjectVAO fusion_torus = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/fusion/torus.obj")).asVBO();
     public static final WaveFrontObjectVAO fusion_klystron = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/fusion/klystron.obj")).asVBO();
     public static final WaveFrontObjectVAO fusion_mhdt = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/fusion/mhdt.obj")).asVBO();
@@ -140,6 +136,17 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO dfc_injector = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/core_injector.obj")).asVBO();
     //Fan
     public static final WaveFrontObjectVAO fan = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/fan.obj")).asVBO();
+    public static final WaveFrontObjectVAO supercomputer = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/supercomputer.obj")).asVBO();
+    public static final WaveFrontObjectVAO satlink = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/satlink.obj")).asVBO();
+    public static final WaveFrontObjectVAO tape_drive = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/tape_drive.obj")).asVBO();
+    public static final WaveFrontObjectVAO thresher = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/thresher.obj")).asVBO();
+    public static final WaveFrontObjectVAO piston_inserter = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/piston_inserter.obj")).asVBO();
+    public static final WaveFrontObjectVAO launchpad_soyuz = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/launchpad_soyuz.obj")).asVBO();
+    public static final WaveFrontObjectVAO launchpad_lambda = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/launchpad_lambda.obj")).asVBO();
+    public static final WaveFrontObjectVAO lambda_rocket = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/lambda_rocket.obj")).asVBO();
+    public static final WaveFrontObjectVAO dropship = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/dropship.obj")).asVBO();
+    public static final WaveFrontObjectVAO lpw2 = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/lpw2.obj")).asVBO();
+    public static final WaveFrontObjectVAO igen = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/igen.obj")).asVBO();
     //Sphere
     public static final WaveFrontObjectVAO sphere_ruv = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/sphere_ruv.obj")).asVBO();
     public static final WaveFrontObjectVAO sphere_uv_anim = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/sphere_uv.hmf")).asVBO();
@@ -164,10 +171,12 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO am180 = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/am180.obj")).asVBO();
     public static final WaveFrontObjectVAO liberator = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/liberator.obj")).asVBO();
     public static final WaveFrontObjectVAO congolake = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/congolake.obj")).asVBO();
+    public static final WaveFrontObjectVAO mk108 = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/mk108.obj")).asVBO();
     public static final WaveFrontObjectVAO flamethrower = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/flamethrower.obj")).asVBO();
     public static final WaveFrontObjectVAO lilmac = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/lilmac.obj")).asVBO();
     public static final WaveFrontObjectVAO carbine = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/carbine.obj")).asVBO();
     public static final WaveFrontObjectVAO uzi = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/uzi.obj")).asVBO();
+    public static final WaveFrontObjectVAO star_f = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/star_f.obj")).asVBO();
     public static final WaveFrontObjectVAO spas_12 = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/spas-12.obj")).asVBO();
     public static final WaveFrontObjectVAO panzerschreck = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/panzerschreck.obj")).asVBO();
     public static final WaveFrontObjectVAO g3 = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/g3.obj")).asVBO();
@@ -238,6 +247,9 @@ public class ResourceManager {
     //Big Cables
     public static final WaveFrontObjectVAO connector = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/network/connector.obj")).asVBO();
     public static final WaveFrontObjectVAO connector_super = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/network/connector_super.obj")).asVBO();
+    public static final WaveFrontObjectVAO blockspider = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/mobs/blockspider.obj")).asVBO();
+    public static final WaveFrontObjectVAO plasticbag = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/mobs/plasticbag.obj")).asVBO();
+    public static final WaveFrontObjectVAO pylon = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/network/pylon.obj")).asVBO();
     public static final WaveFrontObjectVAO pylon_large = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/network/pylon_large.obj")).asVBO();
     public static final WaveFrontObjectVAO pylon_medium = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/network/pylon_medium.obj")).asVBO();
     public static final WaveFrontObjectVAO substation = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/network/substation.obj")).asVBO();
@@ -269,8 +281,8 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO blast_door_tooth = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blast_door_tooth.obj")).asVBO();
     public static final WaveFrontObjectVAO blast_door_slider = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blast_door_slider.obj")).asVBO();
     public static final WaveFrontObjectVAO blast_door_block = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blast_door_block.obj")).asVBO();
-    //Lights
-    //public static final IModelCustom lantern = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/trinkets/lantern.obj"));
+    //Vending Machine
+    public static final WaveFrontObjectVAO vending_machine = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/vending_machine.obj")).asVBO();
     //Tesla Coil
     public static final WaveFrontObjectVAO tesla = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/tesla.obj")).asVBO();
     public static final WaveFrontObjectVAO teslacrab = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/mobs/teslacrab.obj")).asVBO();
@@ -297,6 +309,8 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO arrow = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blocks/arrow.obj")).asVBO();
     //RotaryFurnace
     public static final WaveFrontObjectVAO rotary_furnace = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/rotary_furnace.obj")).asVBO();
+    //BlastFurnace
+    public static final WaveFrontObjectVAO blast_furnace = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/blast_furnace.obj")).asVBO();
     //Charging Station
     public static final WaveFrontObjectVAO charger = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blocks/charger.obj")).asVBO();
     public static final WaveFrontObjectVAO refueler = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blocks/refueler.obj")).asVBO();
@@ -315,6 +329,7 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO fluidtank = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/fluidtank.obj")).asVBO();
     public static final WaveFrontObjectVAO fluidtank_exploded = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/fluidtank_exploded.obj")).asVBO();
     public static final WaveFrontObjectVAO bat9000 = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/bat9000.obj")).asVBO();
+    public static final WaveFrontObjectVAO bigasstank = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/bigasstank.obj")).asVBO();
     public static final WaveFrontObjectVAO orbus = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/orbus.obj")).asVBO();
     //Turbofan
     public static final WaveFrontObjectVAO turbofan = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/turbofan.obj")).asVBO();
@@ -358,7 +373,7 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO mine_ap = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/bombs/ap_mine.obj")).asVBO();
     public static final WaveFrontObjectVAO mine_he = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/mine_he.obj")).asVBO();
     public static final WaveFrontObjectVAO mine_marelet = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/bombs/marelet.obj")).asVBO();
-    public static final WaveFrontObjectVAO mine_fat = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/mine_fat.obj")).asVBO();
+    public static final WaveFrontObjectVAO mine_fat = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/bombs/mine_fat.obj")).asVBO();
     public static final WaveFrontObjectVAO mine_naval = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/bombs/naval_mine.obj")).asVBO();
     //Missile Parts
     public static final WaveFrontObjectVAO missile_pad = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/weapons/launch_pad_silo.obj")).asVBO();
@@ -397,6 +412,7 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO mp_s_15_flat = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/missile_parts/mp_s_15_flat.obj")).asVBO();
     public static final WaveFrontObjectVAO mp_s_15_thin = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/missile_parts/mp_s_15_thin.obj")).asVBO();
     public static final WaveFrontObjectVAO mp_s_15_soyuz = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/missile_parts/mp_s_15_soyuz.obj")).asVBO();
+    public static final WaveFrontObjectVAO mp_s_20 = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/missile_parts/mp_s_20.obj")).asVBO();
     public static final WaveFrontObjectVAO mp_f_10_kerosene = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/missile_parts/mp_f_10_kerosene.obj")).asVBO();
     public static final WaveFrontObjectVAO mp_f_10_long_kerosene = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/missile_parts/mp_f_10_long_kerosene.obj")).asVBO();
     public static final WaveFrontObjectVAO mp_f_10_15_kerosene = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/missile_parts/mp_f_10_15_kerosene.obj")).asVBO();
@@ -442,7 +458,8 @@ public class ResourceManager {
     public static final ResourceLocation rbmk_autoloader_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/rbmk_autoloader.png");
     public static final ResourceLocation mini_nuke_tex = new ResourceLocation(Tags.MODID, "textures/models/projectiles/mini_nuke.png");
     public static final HFRWavefrontObject rbmk_element = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/rbmk_element.obj"), true);
-    public static final WaveFrontObjectVAO rbmk_element_rods_vbo = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/rbmk_element_rods.obj")).asVBO();
+    public static final HFRWavefrontObject rbmk_element_rods = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/rbmk_element_rods.obj"));
+    public static final WaveFrontObjectVAO rbmk_element_rods_vbo = rbmk_element_rods.asVBO();
     public static final WaveFrontObjectVAO rbmk_reflector = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/rbmk_reflector.obj")).asVBO();
     public static final HFRWavefrontObject rbmk_rods = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/rbmk_rods.obj"));
     public static final WaveFrontObjectVAO rbmk_rods_vbo = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/rbmk_rods.obj")).asVBO();
@@ -474,19 +491,7 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO radar = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/radar.obj")).asVBO();
     public static final WaveFrontObjectVAO radar_large = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/radar_large.obj")).asVBO();
     public static final WaveFrontObjectVAO radar_screen = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/radar_screen.obj")).asVBO();
-    //ITER
-    public static final ResourceLocation iter_glass = new ResourceLocation(Tags.MODID, "textures/models/iter/glass.png");
-    public static final ResourceLocation iter_microwave = new ResourceLocation(Tags.MODID, "textures/models/iter/microwave.png");
-    public static final ResourceLocation iter_motor = new ResourceLocation(Tags.MODID, "textures/models/iter/motor.png");
-    public static final ResourceLocation iter_plasma = new ResourceLocation(Tags.MODID, "textures/models/iter/plasma.png");
-    public static final ResourceLocation iter_rails = new ResourceLocation(Tags.MODID, "textures/models/iter/rails.png");
-    public static final ResourceLocation iter_solenoid = new ResourceLocation(Tags.MODID, "textures/models/iter/solenoid.png");
-    public static final ResourceLocation iter_toroidal = new ResourceLocation(Tags.MODID, "textures/models/iter/toroidal.png");
-    public static final ResourceLocation iter_torus = new ResourceLocation(Tags.MODID, "textures/models/iter/torus.png");
-    public static final ResourceLocation iter_torus_tungsten = new ResourceLocation(Tags.MODID, "textures/models/iter/torus_tungsten.png");
-    public static final ResourceLocation iter_torus_desh = new ResourceLocation(Tags.MODID, "textures/models/iter/torus_desh.png");
-    public static final ResourceLocation iter_torus_chlorophyte = new ResourceLocation(Tags.MODID, "textures/models/iter/torus_chlorophyte.png");
-    public static final ResourceLocation iter_torus_vaporwave = new ResourceLocation(Tags.MODID, "textures/models/iter/torus_vaporwave.png");
+    //Fusion Reactor
     public static final ResourceLocation fusion_torus_tex = new ResourceLocation(Tags.MODID, "textures/models/fusion/torus.png");
     public static final ResourceLocation fusion_plasma_tex = new ResourceLocation(Tags.MODID, "textures/models/fusion/plasma.png");
     public static final ResourceLocation fusion_plasma_glow_tex = new ResourceLocation(Tags.MODID, "textures/models/fusion/plasma_glow.png");
@@ -521,8 +526,6 @@ public class ResourceManager {
             new ResourceLocation(Tags.MODID, "textures/models/machines/fensus/fensu_red.png"),
             new ResourceLocation(Tags.MODID, "textures/models/machines/fensus/fensu_black.png")
     };
-    public static final ResourceLocation jshotgun_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/jade_shotgun.png");
-    public static final ResourceLocation jshotgun_lmap = new ResourceLocation(Tags.MODID, "textures/models/weapons/jade_shotgun_lmap.png");
     //Forcefield
     public static final WaveFrontObjectVAO forcefield_top = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/machines/forcefield_top.obj")).asVBO();
     //Shimmer Sledge
@@ -618,7 +621,7 @@ public class ResourceManager {
     public static final ResourceLocation mine_ap_stone_tex = new ResourceLocation(Tags.MODID, "textures/models/bombs/mine_ap_stone.png");
     public static final ResourceLocation mine_marelet_tex = new ResourceLocation(Tags.MODID, "textures/models/explosion/mine_marelet.png");
     public static final ResourceLocation mine_shrap_tex = new ResourceLocation(Tags.MODID, "textures/models/bombs/mine_shrapnel.png");
-    public static final ResourceLocation mine_fat_tex = new ResourceLocation(Tags.MODID, "textures/models/explosion/mine_fat.png");
+    public static final ResourceLocation mine_fat_tex = new ResourceLocation(Tags.MODID, "textures/models/bombs/mine_fat.png");
     public static final ResourceLocation mine_naval_tex = new ResourceLocation(Tags.MODID, "textures/models/bombs/nmine.png");
     //Pumpjack
     public static final ResourceLocation pumpjack_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/pumpjack.png");
@@ -633,12 +636,15 @@ public class ResourceManager {
     public static final ResourceLocation tank_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/tank.png");
     public static final ResourceLocation tank_inner_tex = new ResourceLocation(Tags.MODID, "textures/models/tank/tank_inner.png");
     public static final ResourceLocation bat9000_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/bat9000.png");
+    public static final ResourceLocation bigasstank_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/bigasstank.png");
     public static final ResourceLocation orbus_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/orbus.png");
     //ZIRNOX
     public static final ResourceLocation zirnox_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/zirnox.png");
     public static final ResourceLocation zirnox_destroyed_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/zirnox_destroyed.png");
     //Rotary Furnace
     public static final ResourceLocation rotary_furnace_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/rotary_furnace.png");
+    //Blast Furnace
+    public static final ResourceLocation blast_furnace_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/blast_furnace.png");
     //Charger
     public static final ResourceLocation charger_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/charger.png");
     public static final ResourceLocation refueler_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/refueler.png");
@@ -655,6 +661,9 @@ public class ResourceManager {
 
     public static final ResourceLocation pylon_medium_tex = new ResourceLocation(Tags.MODID, "textures/models/network/pylon_medium.png");
     public static final ResourceLocation pylon_medium_steel_tex = new ResourceLocation(Tags.MODID, "textures/models/network/pylon_medium_steel.png");
+    public static final ResourceLocation spider_tex = new ResourceLocation(Tags.MODID, "textures/entity/blockspider.png");
+    public static final ResourceLocation plasticbag_tex = new ResourceLocation(Tags.MODID, "textures/entity/plasticbag.png");
+    public static final ResourceLocation pylon_steel_tex = new ResourceLocation(Tags.MODID, "textures/models/network/pylon_steel.png");
     public static final ResourceLocation connector_tex = new ResourceLocation(Tags.MODID, "textures/models/network/connector.png");
     public static final ResourceLocation connector_super_tex = new ResourceLocation(Tags.MODID, "textures/models/network/connector_super.png");
     //Turbofan
@@ -702,6 +711,9 @@ public class ResourceManager {
     //Annihilator
     public static final ResourceLocation annihilator_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/annihilator.png");
     public static final ResourceLocation annihilator_belt_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/annihilator_belt.png");
+
+    //Rock Mill
+    public static final ResourceLocation rock_mill_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/rockmill.png");
 
     public static final ResourceLocation coin_tex = new ResourceLocation(Tags.MODID, "textures/models/trinkets/chip_gold.png");
 
@@ -771,6 +783,20 @@ public class ResourceManager {
     public static final ResourceLocation dfc_stabilizer_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/core_stabilizer.png");
     //Fan
     public static final ResourceLocation fan_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/fan.png");
+    public static final ResourceLocation supercomputer_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/supercomputer.png");
+    public static final ResourceLocation supercomputer_scan_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/supercomputer_scan.png");
+    public static final ResourceLocation satlink_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/satlink.png");
+    public static final ResourceLocation tape_drive_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/tape_drive.png");
+    public static final ResourceLocation thresher_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/thresher.png");
+    public static final ResourceLocation piston_inserter_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/piston_inserter.png");
+    public static final ResourceLocation launchpad_soyuz_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/launchpad_soyuz.png");
+    public static final ResourceLocation launchpad_lambda_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/launchpad_lambda.png");
+    public static final ResourceLocation lambda_rocket_tex = new ResourceLocation(Tags.MODID, "textures/models/lambda_rocket.png");
+    public static final ResourceLocation dropship_tex = new ResourceLocation(Tags.MODID, "textures/entity/dropship.png");
+    public static final ResourceLocation lpw2_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/lpw2.png");
+    public static final ResourceLocation lpw2_term_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/lpw2_term.png");
+    public static final ResourceLocation lpw2_error_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/lpw2_term_error.png");
+    public static final ResourceLocation igen_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/igen.png");
     //Radgen
     public static final ResourceLocation radgen_body_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/rad_gen_body.png");
     //Small Reactor
@@ -817,6 +843,8 @@ public class ResourceManager {
     public static final ResourceLocation sliding_seal_door_tex = new ResourceLocation(Tags.MODID, "textures/models/doors/sliding_seal_door.png");
     public static final ResourceLocation sliding_gate_door_tex = new ResourceLocation(Tags.MODID, "textures/models/doors/sliding_gate_door.png");
 
+    public static final ResourceLocation vending_machine_tex = new ResourceLocation(Tags.MODID, "textures/models/machines/vending_machine.png");
+
     //PheoDoors
     public static WaveFrontObjectVAO pheo_fire_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/fire_door.obj")).asVBO();
     public static WaveFrontObjectVAO pheo_airlock_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/airlock_door.obj")).asVBO();
@@ -825,6 +853,7 @@ public class ResourceManager {
     public static WaveFrontObjectVAO pheo_seal_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/seal_door.obj")).asVBO();
     public static WaveFrontObjectVAO pheo_secure_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/secure_door.obj")).asVBO();
     public static WaveFrontObjectVAO pheo_sliding_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/sliding_door.obj")).asVBO();
+    public static WaveFrontObjectVAO pheo_cargo_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/cargo_door.obj")).asVBO();
     public static WaveFrontObjectVAO pheo_vehicle_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/vehicle_door.obj")).asVBO();
     public static WaveFrontObjectVAO pheo_water_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/water_door.obj")).asVBO();
     public static WaveFrontObjectVAO pheo_vault_door = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pheodoors/vault_door.obj")).asVBO();
@@ -879,6 +908,7 @@ public class ResourceManager {
     public static final ResourceLocation m2_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/m2_browning.png");
     public static final ResourceLocation coilgun_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/coilgun.png");
     public static final ResourceLocation congolake_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/congolake.png");
+    public static final ResourceLocation mk108_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/mk108.png");
     public static final ResourceLocation debug_gun_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/debug_gun.png");
     public static final ResourceLocation pepperbox_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/pepperbox.png");
     public static final ResourceLocation bio_revolver_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/bio_revolver.png");
@@ -905,6 +935,8 @@ public class ResourceManager {
     public static final ResourceLocation flamethrower_daybreaker_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/flamethrower_daybreaker.png");
     public static final ResourceLocation mike_hawk_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/lag.png");
     public static final ResourceLocation uzi_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/uzi.png");
+    public static final ResourceLocation star_f_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/star_f.png");
+    public static final ResourceLocation star_f_elite_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/star_f_elite.png");
     public static final ResourceLocation uzi_saturnite_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/uzi_saturnite.png");
     public static final ResourceLocation panzerschreck_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/panzerschreck.png");
     public static final ResourceLocation g3_tex = new ResourceLocation(Tags.MODID, "textures/models/weapons/g3.png");
@@ -1131,8 +1163,6 @@ public class ResourceManager {
     public static final ResourceLocation missileDoomsday_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missile_atlas_doomsday.png");
     public static final ResourceLocation missileDoomsdayRusted_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missile_atlas_doomsday_weathered.png");
     public static final ResourceLocation missileN2_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missileN2.png");
-    public static final ResourceLocation missileEndo_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missileEndo.png");
-    public static final ResourceLocation missileExo_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missileExo.png");
     public static final ResourceLocation missileShuttle_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missile_shuttle.png");
     public static final ResourceLocation missileTaint_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missile_micro_taint.png");
     public static final ResourceLocation missileMicro_tex = new ResourceLocation(Tags.MODID, "textures/models/missiles/missile_micro.png");
@@ -1322,6 +1352,7 @@ public class ResourceManager {
     public static final ResourceLocation mp_w_15_incendiary_tex = new ResourceLocation(Tags.MODID, "textures/models/missile_parts/warheads/mp_w_15_incendiary.png");
     public static final ResourceLocation mp_w_15_nuclear_tex = new ResourceLocation(Tags.MODID, "textures/models/missile_parts/warheads/mp_w_15_nuclear.png");
     public static final ResourceLocation mp_w_15_nuclear_shark_tex = new ResourceLocation(Tags.MODID, "textures/models/missile_parts/warheads/mp_w_15_nuclear_shark.png");
+    public static final ResourceLocation mp_w_15_nuclear_mimi_tex = new ResourceLocation(Tags.MODID, "textures/models/missile_parts/warheads/mp_w_15_nuclear_mimi.png");
     public static final ResourceLocation mp_w_15_thermo_tex = new ResourceLocation(Tags.MODID, "textures/models/missile_parts/warheads/mp_w_15_thermo.png");
     public static final ResourceLocation mp_w_15_n2_tex = new ResourceLocation(Tags.MODID, "textures/models/missile_parts/warheads/mp_w_15_n2.png");
     public static final ResourceLocation mp_w_15_balefire_tex = new ResourceLocation(Tags.MODID, "textures/models/missile_parts/warheads/mp_w_15_balefire.png");
@@ -1345,6 +1376,33 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO railgun_base = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/railgun_base.obj")).asVBO();
     public static final WaveFrontObjectVAO railgun_rotor = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/railgun_rotor.obj")).asVBO();
     public static final WaveFrontObjectVAO railgun_main = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/railgun_main.obj")).asVBO();
+
+    public static final WaveFrontObjectVAO cart = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/vehicles/cart.obj")).asVBO();
+    public static final WaveFrontObjectVAO cart_destroyer = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/vehicles/cart_destroyer.obj")).asVBO();
+    public static final WaveFrontObjectVAO cart_powder = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/vehicles/cart_powder.obj")).asVBO();
+    public static final WaveFrontObjectVAO train_cargo_tram = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/vehicles/tram.obj")).asVBO();
+    public static final WaveFrontObjectVAO train_cargo_tram_trailer = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/vehicles/tram_trailer.obj")).asVBO();
+    public static final ResourceLocation cart_metal = new ResourceLocation(Tags.MODID, "textures/entity/cart_metal.png");
+    public static final ResourceLocation cart_blank = new ResourceLocation(Tags.MODID, "textures/entity/cart_metal_naked.png");
+    public static final ResourceLocation cart_wood = new ResourceLocation(Tags.MODID, "textures/entity/cart_wood.png");
+    public static final ResourceLocation cart_destroyer_tex = new ResourceLocation(Tags.MODID, "textures/entity/cart_destroyer.png");
+    public static final ResourceLocation cart_powder_tex = new ResourceLocation(Tags.MODID, "textures/blocks/block_gunpowder.png");
+    public static final ResourceLocation cart_semtex_side = new ResourceLocation(Tags.MODID, "textures/blocks/semtex_side.png");
+    public static final ResourceLocation cart_semtex_top = new ResourceLocation(Tags.MODID, "textures/blocks/semtex_bottom.png");
+    public static final WaveFrontObjectVAO rail_standard_switch = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blocks/rail_standard_switch.obj")).asVBO();
+    public static final WaveFrontObjectVAO rail_standard_switch_flipped = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blocks/rail_standard_switch_flipped.obj")).asVBO();
+    public static final ResourceLocation rail_standard_tex = new ResourceLocation(Tags.MODID, "textures/blocks/rail_standard_straight.png");
+    public static final ResourceLocation rail_switch_sign_tex = new ResourceLocation(Tags.MODID, "textures/blocks/rail_switch_sign.png");
+    public static final ResourceLocation rail_switch_sign_flipped_tex = new ResourceLocation(Tags.MODID, "textures/blocks/rail_switch_sign_flipped.png");
+    public static final ResourceLocation tram_tex = new ResourceLocation(Tags.MODID, "textures/models/trains/tram.png");
+    public static final ResourceLocation tram_trailer_tex = new ResourceLocation(Tags.MODID, "textures/models/trains/tram_trailer.png");
+    // Chicago Pile
+    public static final WaveFrontObjectVAO pile_loader = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pile/pile_loader.obj")).asVBO();
+    public static final WaveFrontObjectVAO pile_vent = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pile/pile_vent.obj")).asVBO();
+    public static final WaveFrontObjectVAO pile_control = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/pile/pile_control.obj")).asVBO();
+    public static final ResourceLocation pile_loader_tex = new ResourceLocation(Tags.MODID, "textures/models/pile/pile_loader.png");
+    public static final ResourceLocation pile_vent_tex = new ResourceLocation(Tags.MODID, "textures/models/pile/pile_vent.png");
+    public static final ResourceLocation pile_control_tex = new ResourceLocation(Tags.MODID, "textures/models/pile/pile_control.png");
     // Dud
     public static final WaveFrontObjectVAO dud_balefire = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/bombs/dud_balefire.obj")).asVBO();
     public static final WaveFrontObjectVAO dud_conventional = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/bombs/dud_conventional.obj")).asVBO();
@@ -1385,10 +1443,6 @@ public class ResourceManager {
     public static final WaveFrontObjectVAO silo_hatch = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/doors/silo_hatch.obj")).asVBO();
     public static final ResourceLocation silo_hatch_large_tex = new ResourceLocation(Tags.MODID, "textures/models/doors/silo_hatch_large.png");
     public static final WaveFrontObjectVAO silo_hatch_large = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/doors/silo_hatch_large.obj")).asVBO();
-    private static final MethodHandle splashThreadGetter;
-    private static final MethodHandle splashEnabledGetter;
-    private static final MethodHandle splashPauseHandle;
-    private static final MethodHandle splashResumeHandle;
     public static WaveFrontObjectVAO soyuz = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/soyuz.obj")).asVBO();
     public static WaveFrontObjectVAO soyuz_launcher_legs = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/launch_table/soyuz_launcher_legs.obj")).asVBO();
     public static WaveFrontObjectVAO soyuz_launcher_table = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/launch_table/soyuz_launcher_table.obj")).asVBO();
@@ -1433,9 +1487,6 @@ public class ResourceManager {
     public static AnimatedModel lightning_fp;
     public static Animation lightning_fp_anim;
     public static AnimatedModel arm_rig;
-    public static AnimatedModel jshotgun;
-    public static Animation jshotgun_anim0;
-    public static Animation jshotgun_anim1;
     public static AnimatedModel crucible_anim;
     public static Animation crucible_equip;
     //SHADERS
@@ -1581,23 +1632,6 @@ public class ResourceManager {
         shader.uniform1i("particleData2", 4);
     });
 
-    static {
-        Class<?> splash;
-        if (Loader.isModLoaded(Compat.ModIds.MODERN_SPLASH)) {
-            try {
-                splash = Class.forName("gkappa.modernsplash.CustomSplash");
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("ModernSplash loaded but failed to find gkappa.modernsplash.CustomSplash", e);
-            }
-        } else {
-            splash = SplashProgress.class;
-        }
-        splashThreadGetter = MethodHandleHelper.findStaticGetter(splash, "thread", Thread.class);
-        splashEnabledGetter = MethodHandleHelper.findStaticGetter(splash, "enabled", boolean.class);
-        splashPauseHandle = MethodHandleHelper.findStatic(splash, "pause", MethodType.methodType(void.class));
-        splashResumeHandle = MethodHandleHelper.findStatic(splash, "resume", MethodType.methodType(void.class));
-    }
-
     public static void loadAnimatedModels() {
         supershotgun = ColladaLoader.load(new ResourceLocation(Tags.MODID, "models/anim/ssg_reload_mk2_2_newmodel.dae"));
         ssg_reload = ColladaLoader.loadAnim(1300, new ResourceLocation(Tags.MODID, "models/anim/ssg_reload_mk2_2_newmodel.dae"));
@@ -1620,77 +1654,30 @@ public class ResourceManager {
         crucible_anim = ColladaLoader.load(new ResourceLocation(Tags.MODID, "models/anim/crucible_equip.dae"), true);
         crucible_equip = ColladaLoader.loadAnim(1060, new ResourceLocation(Tags.MODID, "models/anim/crucible_equip.dae"));
 
-        jshotgun = ColladaLoader.load(new ResourceLocation(Tags.MODID, "models/anim/jshotgun_anim1.dae"), true);
-        jshotgun_anim0 = ColladaLoader.loadAnim(1500, new ResourceLocation(Tags.MODID, "models/anim/jshotgun_anim0.dae"));
-        jshotgun_anim1 = ColladaLoader.loadAnim(3000, new ResourceLocation(Tags.MODID, "models/anim/jshotgun_anim1.dae"));
-
         transition_seal = ColladaLoader.load(new ResourceLocation(Tags.MODID, "models/doors/seal.dae"), true);
         transition_seal_anim = ColladaLoader.loadAnim(24040, new ResourceLocation(Tags.MODID, "models/doors/seal.dae"));
     }
 
     // this method is called at ModelBakeEvent, which is guaranteed to be posted on client main thread!
     public static void init() {
-        LensVisibilityHandler.checkSphere = new WavefrontObjDisplayList(new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/diffractionspikechecker.obj"))).getListForName("sphere");
+        LensVisibilityHandler.checkSphere = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/diffractionspikechecker.obj")).getGroup("sphere");
         Minecraft.getMinecraft().getTextureManager().bindTexture(fresnel_ms);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         Minecraft.getMinecraft().getTextureManager().bindTexture(noise_1);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         Minecraft.getMinecraft().getTextureManager().bindTexture(noise_2);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        GlStateManager.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 
-        //Drillgon discovered that it messes with GL context
-        pauseSplash();
         if (!WaveFrontObjectVAO.uploaded) {
+            //Drillgon discovered that it messes with GL context
+            //mlbv: this is valid for Modern Splash 1.5.0+
+            SplashProgress.pause();
             for (WaveFrontObjectVAO allVBO : WaveFrontObjectVAO.allVBOs) {
                 allVBO.uploadModels();
             }
             WaveFrontObjectVAO.uploaded = true;
+            SplashProgress.resume();
         }
-        resumeSplash();
         KeypadClient.load();
     }
-
-    private static void pauseSplash() {
-        if (splashNotTerminated()) {
-            try {
-                splashPauseHandle.invokeExact();
-                MainRegistry.logger.debug("[ResourceManager] successfully paused Splashscreen");
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
-        }
-    }
-
-    private static void resumeSplash() {
-        if (splashNotTerminated()) {
-            try {
-                splashResumeHandle.invokeExact();
-                MainRegistry.logger.debug("[ResourceManager] successfully resumed Splashscreen");
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
-        }
-    }
-
-    private static boolean splashNotTerminated() {
-        try {
-            boolean enabled = (boolean) splashEnabledGetter.invokeExact();
-            if (!enabled) {
-                MainRegistry.logger.debug("[ResourceManager] Splashscreen is currently disabled");
-                return false;
-            }
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
-        Thread splashThread;
-        try {
-            splashThread = (Thread) splashThreadGetter.invokeExact();
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
-        // this line is expected throw NullPointerException
-        return splashThread.getState() != Thread.State.TERMINATED;
-    }
-
-
 }

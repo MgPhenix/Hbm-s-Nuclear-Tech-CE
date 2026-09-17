@@ -1,7 +1,6 @@
 package com.hbm.blocks.generic;
 
 import com.hbm.api.block.IToolable;
-import com.hbm.api.block.IToolable.ToolType;
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.handler.MultiblockHandlerXR;
 import com.hbm.handler.radiation.RadiationSystemNT;
@@ -141,7 +140,7 @@ public class BlockDoorGeneric extends BlockDummyable implements IRadResistantBlo
 
         if (!player.isSneaking()) {
             if (door.canAccess(player)) {
-				return door.tryToggle(player);
+				return door.tryToggle();
 			}
 		}
 		return false;
@@ -269,7 +268,7 @@ public class BlockDoorGeneric extends BlockDummyable implements IRadResistantBlo
         if(!(te instanceof TileEntityDoorGeneric door)) return BombReturnCode.ERROR_INCOMPATIBLE;
         DoorDecl decl = door.getDoorType();
         if(!decl.remoteControllable()) return BombReturnCode.ERROR_INCOMPATIBLE;
-        if(door.tryToggle(null)) {
+        if(door.tryToggle()) {
             return BombReturnCode.TRIGGERED;
         }
 

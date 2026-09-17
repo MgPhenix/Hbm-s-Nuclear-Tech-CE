@@ -73,6 +73,10 @@ public class BlockRBMKSlab extends BlockBase implements ICustomBlockItem {
 	public boolean isFullCube(IBlockState state) {
 		return false;
 	}
+	@Override
+	public boolean isReplaceable(IBlockAccess world, BlockPos pos) {
+		return true;
+	}
 	@SideOnly(Side.CLIENT)
 	public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
 	{

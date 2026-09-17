@@ -3,7 +3,6 @@ package com.hbm.inventory.gui;
 import com.hbm.Tags;
 import com.hbm.api.redstoneoverradio.IRORInfo;
 import com.hbm.api.redstoneoverradio.IRORValueProvider;
-import com.hbm.lib.ForgeDirection;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.toserver.NBTControlPacket;
 import com.hbm.tileentity.network.TileEntityRadioTorchController;
@@ -17,6 +16,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.input.Keyboard;
 
@@ -84,8 +84,9 @@ public class GUIScreenRadioTorchController extends GuiScreen {
         drawCustomInfoStat(x, y, guiLeft + 209, guiTop + 17, 18, 18, x, y, new String[]{"Save Settings"});
 
         if (guiLeft + 137 <= x && guiLeft + 137 + 18 > x && guiTop + 17 < y && guiTop + 17 + 18 >= y) {
-            ForgeDirection dir = ForgeDirection.getOrientation(controller.getBlockMetadata()).getOpposite();
-            TileEntity tile = Compat.getTileStandard(controller.getWorld(), controller.getPos().getX() + dir.offsetX, controller.getPos().getY() + dir.offsetY, controller.getPos().getZ() + dir.offsetZ);
+            // mlbv: we packed LIT state into meta so can't use ForgeDirection.getOrientation(controller.getBlockMetadata()) directly
+            EnumFacing dir = controller.getTorchFacing().getOpposite();
+            TileEntity tile = Compat.getTileStandard(controller.getWorld(), controller.getPos().getX() + dir.getXOffset(), controller.getPos().getY() + dir.getYOffset(), controller.getPos().getZ() + dir.getZOffset());
             if (tile instanceof IRORInfo prov) {
                 String[] info = prov.getFunctionInfo();
                 List<String> lines = new ArrayList<>();

@@ -24,6 +24,7 @@ public final class HBMSoundHandler {
     public static SoundEvent sparkShoot;
     public static SoundEvent leverStart;
     public static SoundEvent leverStop;
+    public static SoundEvent metalImpact;
     public static SoundEvent spark;
     public static SoundEvent b92Reload;
     public static SoundEvent techBleep;
@@ -219,10 +220,6 @@ public final class HBMSoundHandler {
     public static SoundEvent rocketEngine;
     public static SoundEvent ballsLaser;
     public static SoundEvent dartShoot;
-    public static SoundEvent gluonStart;
-    public static SoundEvent gluonLoop;
-    public static SoundEvent gluonEnd;
-    public static SoundEvent gluonHit;
     public static SoundEvent jetpack;
     public static SoundEvent switchmode1;
     public static SoundEvent switchmode2;
@@ -328,6 +325,7 @@ public final class HBMSoundHandler {
     public static SoundEvent fireSilenced;
     public static SoundEvent fireGreaseGun;
     public static SoundEvent firePistol;
+    public static SoundEvent firePistolLight;
     public static SoundEvent fireBlackPowder;
     public static SoundEvent fireUzi;
     public static SoundEvent fireAberrator;
@@ -343,6 +341,7 @@ public final class HBMSoundHandler {
     public static SoundEvent fireShotgunAuto;
     public static SoundEvent fireShotgunAlt;
     public static SoundEvent glShoot;
+    public static SoundEvent mk108Shoot;
     public static SoundEvent fireLaserGatling;
     public static SoundEvent fireRifleHeavy;
     public static SoundEvent fireAssault;
@@ -428,6 +427,7 @@ public final class HBMSoundHandler {
         sparkShoot = register("weapon.sparkShoot");
         leverStart = register("block.leverStart");
         leverStop = register("block.leverStop");
+        metalImpact = register("block.metalImpact");
         spark = register("block.spark");
         b92Reload = register("weapon.b92Reload");
         techBleep = register("item.techBleep");
@@ -499,7 +499,7 @@ public final class HBMSoundHandler {
         alarmGambit = register("alarm.gambit");
         revolverShoot = register("weapon.revolverShoot");
         heavyShoot = register("weapon.heavyShoot");
-        schrabidiumShoot = register("weapon.schrabidiumShoot");
+        schrabidiumShoot = register("weapon.schrabidiumshoot");
         revolverShootAlt = register("weapon.revolverShootAlt");
         hkShoot = register("weapon.hkShoot");
         shotgunShoot = register("weapon.shotgunShoot");
@@ -619,10 +619,6 @@ public final class HBMSoundHandler {
         rocketEngine = register("entity.rocketEngine");
         ballsLaser = register("weapon.ballsLaser");
         dartShoot = register("weapon.dartShoot");
-        gluonStart = register("weapon.gluonstart");
-        gluonLoop = register("weapon.gluonloop");
-        gluonEnd = register("weapon.gluonend");
-        gluonHit = register("weapon.gluonhit");
         jetpack = register("weapon.jetpack");
         mukeExplosion = register("weapon.mukeExplosion");
         explosion_medium = register("weapon.explosion_medium");
@@ -666,7 +662,7 @@ public final class HBMSoundHandler {
         groan = register("player.groan");
         ufoBeam = register("entity.ufoBeam");
         ufoBlast = register("entity.ufoBlast");
-        iGeneratorOperate = register("block.igeneratoroperate");
+        iGeneratorOperate = register("block.igeneratorOperate");
         transitionSealOpen = register("block.door.transitionseal");
         siloopen = register("block.door.siloopen");
         siloclose = register("block.door.siloclose");
@@ -726,6 +722,7 @@ public final class HBMSoundHandler {
         motor = register("block.motor");
         fireSilenced = register("weapon.fire.silenced");
         firePistol = register("weapon.fire.pistol");
+        firePistolLight = register("weapon.fire.pistollight");
         fireBlackPowder = register("weapon.fire.blackPowder");
         fireUzi = register("weapon.fire.uzi");
         fireGreaseGun = register("weapon.fire.greaseGun");
@@ -742,6 +739,7 @@ public final class HBMSoundHandler {
         fireShotgunAuto = register("weapon.fire.shotgunAlt");
         fireShotgunAlt = register("weapon.fire.shotgunAuto");
         glShoot = register("weapon.glShoot");
+        mk108Shoot = register("weapon.fire.mk108");
         fireLaserGatling = register("weapon.fire.laserGatling");
         fireRifleHeavy = register("weapon.fire.rifleHeavy");
         fireAssault = register("weapon.fire.assault");

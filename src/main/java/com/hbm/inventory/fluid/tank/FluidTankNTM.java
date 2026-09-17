@@ -2,6 +2,7 @@ package com.hbm.inventory.fluid.tank;
 
 import com.hbm.capability.NTMFluidCapabilityHandler;
 import com.hbm.inventory.fluid.FluidType;
+import com.hbm.inventory.gui.element.GUIElements;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.gui.GuiInfoContainer;
 import com.hbm.items.ModItems;
@@ -134,7 +135,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
     }
 
     public void setFill(int i) {
-        fluid = i;
+        fluid = Math.max(0, Math.min(i, maxFluid));
     }
 
     public int getMaxFill() {
@@ -314,7 +315,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
             }
 
             type.addInfo(list);
-            gui.drawFluidInfo(list.toArray(new String[0]), mouseX, mouseY);
+            GUIElements.drawHoveringTextFluid(list, mouseX, mouseY, gui.getFontRenderer(), gui.getItemRenderer(), gui.width, gui.height, this.type);
         }
     }
 
@@ -322,7 +323,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
     public void writeToNBT(NBTTagCompound nbt, String s) {
         nbt.setInteger(s, fluid);
         nbt.setInteger(s + "_max", maxFluid);
-        nbt.setInteger(s + "_type", type.getID());
+        Fluids.writeType(nbt, s + "_type", type); //stored by name, IDs shift when fluids are added/removed
         nbt.setShort(s + "_p", (short) pressure);
     }
 
@@ -334,8 +335,7 @@ public class FluidTankNTM implements IFluidHandler, IFluidTank, Cloneable {
 
         fluid = MathHelper.clamp(fluid, 0, max);
 
-        type = Fluids.fromNameCompat(nbt.getString(s + "_type")); //compat
-        if (type == Fluids.NONE) type = Fluids.fromID(nbt.getInteger(s + "_type"));
+        type = Fluids.readType(nbt, s + "_type"); //name-based, with legacy numeric-ID fallback
 
         this.pressure = nbt.getShort(s + "_p");
     }

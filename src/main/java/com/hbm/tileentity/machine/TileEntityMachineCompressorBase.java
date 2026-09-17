@@ -22,6 +22,7 @@ import com.hbm.util.Tuple.Pair;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -179,7 +180,7 @@ public abstract class TileEntityMachineCompressorBase extends TileEntityMachineB
             return tanks[0].getFill() >= 1000 && tanks[1].getFill() + 1000 <= tanks[1].getMaxFill();
         }
 
-        return tanks[0].getFill() > recipe.inputAmount && tanks[1].getFill() + recipe.output.fill <= tanks[1].getMaxFill();
+        return tanks[0].getFill() >= recipe.inputAmount && tanks[1].getFill() + recipe.output.fill <= tanks[1].getMaxFill();
     }
 
     public void process() {
@@ -242,7 +243,7 @@ public abstract class TileEntityMachineCompressorBase extends TileEntityMachineB
     }
 
     @Override
-    public void receiveControl(NBTTagCompound data) {
+    public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
         int compression = data.getInteger("compression");
 
         if(compression != tanks[0].getPressure()) {

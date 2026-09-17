@@ -4,7 +4,6 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.generic.BlockGeysir;
 import com.hbm.entity.particle.EntityModFXShadow;
 import com.hbm.entity.projectile.EntityShrapnel;
-import com.hbm.entity.projectile.EntityWaterSplash;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.interfaces.AutoRegister;
 import com.hbm.packet.threading.ThreadedPacket;
@@ -13,17 +12,13 @@ import com.hbm.particle.helper.HbmEffectNT;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.MobEffects;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.potion.PotionEffect;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-import java.util.List;
 import java.util.Random;
 
 @AutoRegister
@@ -60,19 +55,6 @@ public class TileEntityGeysir extends TileEntity implements ITickable {
 		}
 	}
 
-	private void water() {
-		
-		int particleCount = world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5).grow(range, range, range)).size();
-		if(particleCount < 25){
-			EntityWaterSplash fx = new EntityWaterSplash(world, pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5);
-
-			fx.motionX = world.rand.nextGaussian() * 0.35;
-			fx.motionZ = world.rand.nextGaussian() * 0.35;
-			fx.motionY = 2;
-			
-			world.spawnEntity(fx);
-		}
-	}
 	
 	private void chlorine() {
 
@@ -97,18 +79,6 @@ public class TileEntityGeysir extends TileEntity implements ITickable {
 		}
 	}
 	
-	private void vapor() {
-
-		List<Entity> entities = this.world.getEntitiesWithinAABB(Entity.class, new AxisAlignedBB(pos.getX() - 0.5, pos.getY() + 0.5, pos.getZ() - 0.5, pos.getX() + 1.5, pos.getY() + 2, pos.getZ() + 1.5));
-		
-		if (!entities.isEmpty()) {
-			for (Entity e : entities) {
-
-				if(e instanceof EntityLivingBase)
-				((EntityLivingBase)e).addPotionEffect(new PotionEffect(MobEffects.REGENERATION, 20, 0));
-			}
-		}
-	}
 	
 	private void fire() {
 
@@ -147,22 +117,10 @@ public class TileEntityGeysir extends TileEntity implements ITickable {
 		boolean active = state.getValue(BlockGeysir.ACTIVE);
 		Random rand = world.rand;
 		
-		if(b == ModBlocks.geysir_water) {
-			
-			return (!active ? 30 : 100 + rand.nextInt(40));
-			
-		} else if(b == ModBlocks.geysir_chlorine) {
-			
+		if(b == ModBlocks.geysir_chlorine) {
 			return (!active ? 20 : 400 + rand.nextInt(100));
-			
-		} else if(b == ModBlocks.geysir_vapor) {
-			
-			return (!active ? 20 : 30 + rand.nextInt(20));
-			
 		} else if(b == ModBlocks.geysir_nether) {
-
 			return (!active ? (rand.nextBoolean() ? 300 : 450) : 80 + rand.nextInt(60));
-
 		}
 		
 		return 0;
@@ -170,20 +128,8 @@ public class TileEntityGeysir extends TileEntity implements ITickable {
 	
 	private void perform() {
 		Block b = world.getBlockState(pos).getBlock();
-		
-		if(b == ModBlocks.geysir_water) {
-			
-			water();
-			
-		} else if(b == ModBlocks.geysir_chlorine) {
-			
-			chlorine();
-			
-		} else if(b == ModBlocks.geysir_vapor) {
-			
-			vapor();
-			
-		}
+		if(b == ModBlocks.geysir_chlorine) chlorine();
+		else if(b == ModBlocks.geysir_nether) fire();
 	}
 	
 }

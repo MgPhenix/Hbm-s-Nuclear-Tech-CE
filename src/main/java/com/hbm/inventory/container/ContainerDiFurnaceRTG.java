@@ -31,12 +31,12 @@ public class ContainerDiFurnaceRTG extends Container {
 		// Output
 		this.addSlotToContainer(SlotFiltered.takeOnly(teIn.inventory, 2, 134, 36));
 		// RTG pellets
-		this.addSlotToContainer(new SlotItemHandler(teIn.inventory, 3, 22, 18));
-		this.addSlotToContainer(new SlotItemHandler(teIn.inventory, 4, 40, 18));
-		this.addSlotToContainer(new SlotItemHandler(teIn.inventory, 5, 22, 36));
-		this.addSlotToContainer(new SlotItemHandler(teIn.inventory, 6, 40, 36));
-		this.addSlotToContainer(new SlotItemHandler(teIn.inventory, 7, 22, 54));
-		this.addSlotToContainer(new SlotItemHandler(teIn.inventory, 8, 40, 54));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(teIn.inventory, 3, 22, 18, s -> s.getItem() instanceof ItemRTGPellet));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(teIn.inventory, 4, 40, 18, s -> s.getItem() instanceof ItemRTGPellet));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(teIn.inventory, 5, 22, 36, s -> s.getItem() instanceof ItemRTGPellet));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(teIn.inventory, 6, 40, 36, s -> s.getItem() instanceof ItemRTGPellet));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(teIn.inventory, 7, 22, 54, s -> s.getItem() instanceof ItemRTGPellet));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(teIn.inventory, 8, 40, 54, s -> s.getItem() instanceof ItemRTGPellet));
 
 		for(int i = 0; i < 3; i++) {
 			for(int j = 0; j < 9; j++) {

@@ -255,13 +255,15 @@ public class ItemToolAbility extends ItemTool implements IDepthRockTool, IGUIPro
 
 			preset.harvestAbility.preHarvestAll(preset.harvestAbilityLevel, world, player);
 
-			boolean skipRef = preset.areaAbility.onDig(preset.areaAbilityLevel, world, pos, player, this);
+			try {
+				boolean skipRef = preset.areaAbility.onDig(preset.areaAbilityLevel, world, pos, player, this);
 
-			if(!skipRef) {
-				breakExtraBlock(world, pos.getX(), pos.getY(), pos.getZ(), player, pos.getX(), pos.getY(), pos.getZ());
+				if(!skipRef) {
+					breakExtraBlock(world, pos.getX(), pos.getY(), pos.getZ(), player, pos.getX(), pos.getY(), pos.getZ());
+				}
+			} finally {
+				preset.harvestAbility.postHarvestAll(preset.harvestAbilityLevel, world, player);
 			}
-
-			preset.harvestAbility.postHarvestAll(preset.harvestAbilityLevel, world, player);
 
 			return true;
 		}
@@ -414,17 +416,17 @@ public class ItemToolAbility extends ItemTool implements IDepthRockTool, IGUIPro
 
 	@SuppressWarnings("unchecked")
 	public static NonNullList<ItemStack> harvestAndCapture(World world, BlockPos pos, EntityPlayerMP player) {
+		Block block = world.getBlockState(pos).getBlock();
 		try {
-            Block block = world.getBlockState(pos).getBlock();
-            NonNullList<ItemStack> drops;
             bypassStartBreak.set(Boolean.TRUE);
             NonNullList<ItemStack> ignored = (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, true);
             player.interactionManager.tryHarvestBlock(pos);
-            drops = (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, false);
-            bypassStartBreak.set(Boolean.FALSE);
-            return drops;
+            return (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, false);
         } catch (Throwable t) {
             throw new RuntimeException(t);
+        } finally {
+            bypassStartBreak.set(Boolean.FALSE);
+            try { NonNullList<ItemStack> reset = (NonNullList<ItemStack>) blockCaptureDrops.invokeExact(block, false); } catch (Throwable ignored) {}
         }
 	}
 

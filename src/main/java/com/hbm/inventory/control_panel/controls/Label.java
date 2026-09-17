@@ -107,10 +107,10 @@ public class Label extends Control {
         height = font.FONT_HEIGHT;
 
         float s = scale/500F;
+        GlStateManager.translate(0, .03F, 0);
         GlStateManager.scale(s, -s, s);
         GlStateManager.color(0.0F, 0.0F, -1.0F);
         GlStateManager.rotate(90, 1, 0, 0);
-        GlStateManager.translate(0, 0, .1F);
 
         int r = (int) (color[0]*255);
         int g = (int) (color[1]*255);

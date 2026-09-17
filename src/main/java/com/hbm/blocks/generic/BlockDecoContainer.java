@@ -105,7 +105,9 @@ public class BlockDecoContainer<E extends Enum<E>, T extends TileEntity> extends
 
     @Override
     public @NotNull EnumBlockRenderType getRenderType(@NotNull IBlockState state) {
-        return EnumBlockRenderType.INVISIBLE;
+        // ENTITYBLOCK_ANIMATED (not INVISIBLE) so the TESR-rendered block still spawns hit/break
+        // particles; ParticleManager.addBlockHitEffects skips blocks whose render type is INVISIBLE.
+        return EnumBlockRenderType.ENTITYBLOCK_ANIMATED;
     }
 
     @Override

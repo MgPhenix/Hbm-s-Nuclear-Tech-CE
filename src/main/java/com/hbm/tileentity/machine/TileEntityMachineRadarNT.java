@@ -23,6 +23,10 @@ import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
 import com.hbm.saveddata.satellites.*;
+import com.hbm.saveddata.satellites.SatelliteDetector;
+import com.hbm.saveddata.satellites.SatelliteDetector.BurstIntensity;
+import com.hbm.saveddata.satellites.SatelliteRayScan;
+import com.hbm.saveddata.satellites.SatelliteRayScan.RayEvent;
 import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IConfigurableMachine;
 import com.hbm.tileentity.IGUIProvider;
@@ -443,6 +447,11 @@ public class TileEntityMachineRadarNT extends TileEntityMachineBase implements I
                 }
             }
         }
+
+        if (world.getTotalWorldTime() % 20 == 0) {
+            SatelliteDetector.reportEvent(world, SatelliteDetector.DURATION_MEDIUM, BurstIntensity.MEDIUM, pos.getX(), pos.getZ());
+            SatelliteRayScan.reportEvent(world, pos.getX(), pos.getY(), pos.getZ(), RayEvent.INFO_RADAR, 200);
+        }
     }
 
     public int getRedPower() {
@@ -504,10 +513,6 @@ public class TileEntityMachineRadarNT extends TileEntityMachineBase implements I
     @Override
     public boolean hasPermission(EntityPlayer player) {
         return this.isUseableByPlayer(player);
-    }
-
-    @Override
-    public void receiveControl(NBTTagCompound data) {
     }
 
     @Override

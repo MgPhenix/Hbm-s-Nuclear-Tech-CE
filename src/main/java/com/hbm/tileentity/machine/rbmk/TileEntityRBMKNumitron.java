@@ -16,6 +16,7 @@ import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.SimpleComponent;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
@@ -102,6 +103,14 @@ public class TileEntityRBMKNumitron extends TileEntityLoadedBase implements ITic
          * Whether this display is visible on the panel
          */
         public boolean active;
+        /**
+         * Whether large values are abbreviated (e.g. 12.3k) instead of shown in full
+         */
+        public boolean shorten_number = true;
+        /**
+         * Whether the value is left-padded with zeroes to fill the display
+         */
+        public boolean leading_zeroes = true;
 
         public DisplayUnit(int initialIndex) {
             label = "Display " + (initialIndex + 1);
@@ -132,6 +141,8 @@ public class TileEntityRBMKNumitron extends TileEntityLoadedBase implements ITic
         public void serialize(ByteBuf buf) {
             buf.writeBoolean(active);
             buf.writeBoolean(polling);
+            buf.writeBoolean(shorten_number);
+            buf.writeBoolean(leading_zeroes);
             BufferUtil.writeString(buf, label);
             BufferUtil.writeString(buf, rtty);
             buf.writeLong(value);
@@ -140,6 +151,8 @@ public class TileEntityRBMKNumitron extends TileEntityLoadedBase implements ITic
         public void deserialize(ByteBuf buf) {
             active = buf.readBoolean();
             polling = buf.readBoolean();
+            shorten_number = buf.readBoolean();
+            leading_zeroes = buf.readBoolean();
             label = BufferUtil.readString(buf);
             rtty = BufferUtil.readString(buf);
             value = buf.readLong();
@@ -148,6 +161,9 @@ public class TileEntityRBMKNumitron extends TileEntityLoadedBase implements ITic
         public void readFromNBT(NBTTagCompound nbt, int index) {
             this.active = nbt.getBoolean("active" + index);
             this.polling = nbt.getBoolean("polling" + index);
+            // Default to true for pre-existing displays so their numbers keep their abbreviated/zero-padded look.
+            this.shorten_number = !nbt.hasKey("shorten_number" + index) || nbt.getBoolean("shorten_number" + index);
+            this.leading_zeroes = !nbt.hasKey("leading_zeroes" + index) || nbt.getBoolean("leading_zeroes" + index);
             this.label = nbt.getString("label" + index);
             this.rtty = nbt.getString("rtty" + index);
             this.value = nbt.getLong("value" + index);
@@ -156,6 +172,8 @@ public class TileEntityRBMKNumitron extends TileEntityLoadedBase implements ITic
         public void writeToNBT(NBTTagCompound nbt, int index) {
             nbt.setBoolean("active" + index, active);
             nbt.setBoolean("polling" + index, polling);
+            nbt.setBoolean("shorten_number" + index, shorten_number);
+            nbt.setBoolean("leading_zeroes" + index, leading_zeroes);
             nbt.setString("label" + index, label);
             nbt.setString("rtty" + index, rtty);
             nbt.setLong("value" + index, value);
@@ -179,13 +197,17 @@ public class TileEntityRBMKNumitron extends TileEntityLoadedBase implements ITic
     }
 
     @Override
-    public void receiveControl(NBTTagCompound data) {
+    public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
 
         int active = data.getByte("active");
         int polling = data.getByte("polling");
+        int shorten = data.getByte("shorten_number");
+        int leading = data.getByte("leading_zeroes");
         for (int i = 0; i < 2; i++) {
             this.displays[i].active = (active & (1 << i)) != 0;
             this.displays[i].polling = (polling & (1 << i)) != 0;
+            this.displays[i].shorten_number = (shorten & (1 << i)) != 0;
+            this.displays[i].leading_zeroes = (leading & (1 << i)) != 0;
         }
 
         for (int i = 0; i < 2; i++) {
@@ -210,6 +232,8 @@ public class TileEntityRBMKNumitron extends TileEntityLoadedBase implements ITic
         java.util.LinkedHashMap<String, Object> map = new java.util.LinkedHashMap<>();
         map.put("active", displays[idx].active);
         map.put("polling", displays[idx].polling);
+        map.put("shorten_number", displays[idx].shorten_number);
+        map.put("leading_zeroes", displays[idx].leading_zeroes);
         map.put("label", displays[idx].label);
         map.put("channel", displays[idx].rtty);
         map.put("value", displays[idx].value);

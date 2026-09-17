@@ -14,14 +14,70 @@
 > change(major API bump).  
 >   - Changes, New Features correspond to a minor bump.  
 >   - Fixes/Performance/Misc correspond to a minor or patch bump.
-> - Previous public release: 2.5.0.1
-> - Next release: at least 2.5.0.2
+> - Previous public release: 2.6.0.0
+> - Next release: 2.6.1.0
 
-### SUBSTANTIAL CHANGES
 ### Breaking Changes
+- Removed the unused Mini RTG and Polonium RTG blocks; any placed in existing worlds will disappear.
+- Addon API: machine control packets now always pass the sending player; the old player-less `IControlReceiver#receiveControl` overload has been removed.
 ### Fixes
-- 2.5 regression that caused boilers crashing the game on load
+- Tilted machines now appear tilted on clients; large fluid tanks in particular stayed upright for everyone but the server.
+- Conveyors, chutes and lifts built with the conveyor wand now face the same way as hand-placed ones; dragging a run downwards produced a tower that spat items out backwards.
+- The conveyor ejector now drops its installed upgrades when broken.
+- Lethal radiation no longer bypasses effects that prevent death, such as the totem of undying.
+- The industrial drill's area mining no longer floods the client with full block-break effects for every block in range.
+- Satellite cooldowns and science sensor progress now survive a world reload.
+- Machine control panels now respect block protection, so claim and region mods can deny them like any other right-click.
+- Rocket flame particles now honour their size setting; debris, explosion clouds and missile contrails were all drawing at the default scale.
+- The Soyuz capsule and its landing pod no longer land one block off when coming down at negative coordinates.
+- The Soyuz capsule no longer crashes the game if it lands somewhere its cargo container cannot be placed.
+- The satellite frequency linker no longer lets automation pull an unprogrammed chip out or feed it items that are not chips.
+- The Soyuz capsule's contents can now be pulled out by hoppers and pipes from any side, not just the top slot.
+- Fixed a crash when an inserter pushed items into a steel furnace the moment it was placed. (PR #1657 by znibsss)
+- Machines with several output slots, such as the rock mill, now actually use all of them instead of stalling once the first slot fills.
+- Hoppers, pipes and AE2 buses attached to different ports of the same multiblock machine no longer all behave like whichever port was used first, and item insertion now respects each side's slot rules.
+- Chicago Pile blocks no longer lose their stored data when their block state changes.
+- Oil derricks and pumpjacks can reach oil deposits further away from the drill pipe again.
+- Sneak-right-clicking a multiblock machine now lets you place blocks against it instead of doing nothing.
+- Players no longer suffocate while standing inside a multiblock machine's bounds.
+- Pneumatic storage fixes:
+  - The clutter storage now accepts compressed air.
+  - The bulk storage now works with the pneumatic storage network at all, and its type filter can be set from its interface.
+  - Shift-clicking items into the exporter's filter no longer consumes them.
+  - Fixed misaligned slots and several rendering issues in the access terminal and other pneumatic storage interfaces.
+  - The storage access terminal now has a proper 3D item model, and the importer and exporter are no longer invisible when placed.
+- Chicago Pile fixes:
+  - Vents now accept compressed air.
+  - Hoppers no longer void items into loaders that cannot currently take them.
+  - Connected textures on the pile structure work again with CTM installed.
+  - Old pile rods now state in their tooltip that they are legacy items that do not work with the new Chicago Pile.
+- Semtex and C4 blocks now drop as items when broken instead of glitching out.
+- The inserter's destroy-overflow toggle now updates visually right away instead of only after a chunk reload.
+- Cigarettes and crack pipes are now held properly in hand.
+- The RTG block no longer renders on top of its own animated model.
+- The Welded BSCCO Coils and Fusion Reactor Blanket names were swapped; each now shows its correct name.
+- The charge thrower's rope is now drawn correctly between the gun and its projectile.
+- Fixed the rubber boat's texture.
+- Broken items now have a proper name.
+- Fixed rendering issues in the Soyuz and Lambda launch pad interfaces, and the launch pads now show proper item models.
 ### Changes
+- The Soyuz rocket's skin tooltip is now translatable instead of hardcoded English.
+- Asteroid and lunar mining satellites no longer need the sat dock to send a rocket up on a timer; they now mine continuously and hold their haul in orbit until a dock calls it down, and report their progress in the satellite interface.
+- The Soyuz rocket and lander now need flight simulation drives to build, cost considerably more power to assemble, and are gated behind the 528 blueprint pool rather than a discovery.
+- Building a Soyuz launch pad now claims a service area beside the pad instead of behind it, and cables, pipes and hoppers can be attached anywhere on the pad's structure rather than only the core block.
+- Taint no longer spreads in dimensions where world destruction is disabled.
+- The health bar HUD is now enabled by default. (PR #1653 by Shibva)
+- Remnant power armor is now built in the precision assembly machine behind a blueprint discovery instead of the crafting table, and its damage resistances have been raised.
+- Refreshed the RBMK meltdown fire, steam jet and mushroom cloud particle textures.
+- Updated the RTG and radiolysis generator interfaces, and refreshed the energy bars in several other machine interfaces.
 ### New Features
+- Added the Lambda launch pad and the Lambda-98 rocket: a silo-style pad that erects the rocket from underground, fuelled with leaded gasoline and peroxide, with an auto-launch toggle and a launch countdown. Ported from 1.7.
+- Added Aviation Grade Sheeting, an assembly machine part with two recipes (aluminium/copper and titanium/plastic).
+- The Soyuz launch pad finally has a recipe; it had none before.
+- The Soyuz launch pad can now actually launch. Its interface gained a cargo/satellite mode switch, fuel, oxidiser and power indicators, an orbital module warning and a launch button with a ten second countdown, and the pad retracts its gantry and lifts off on its own.
+- Added cargo delivery pods: orbiting satellites now drop their cargo to a sat dock in a landing pod that touches down on its legs, unloads, and flies back up. Pods show up on radar and explode if shot down.
+- Added the zero-gravity assembler satellite and orbital assembly kits. Send an assembly kit up to an orbiting space laboratory and it will build the recipe in orbit, then send the result down by delivery pod. The first recipe produces the new Crystal Circuit Board.
+- The Soyuz launch pad has been retextured, and gained sounds for its gantry, carriage and launch countdown.
+- AE2 autocrafting of NTM machine recipes now handles fluid ingredients: JEI exposes them to fluid pattern-encoding addons, and fluid packets from AE2 Fluid Crafting are fed straight into the machine without a Fluid Packet Decoder.
 ### Performance
 ### Misc

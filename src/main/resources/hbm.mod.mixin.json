@@ -23,7 +23,10 @@
     "nothirium.MixinVisibilitySet",
     "optifine.MixinRenderItem"
   ],
-  "mixins": [],
+  "mixins": [
+    "potioncore.MixinPotionCoreEventHandler",
+    "ae2.MixinPartFluidImportBus"
+  ],
   "server": [],
   "setSourceFile": true,
   "minVersion": "0.8.7"

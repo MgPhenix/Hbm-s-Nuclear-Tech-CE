@@ -8,6 +8,7 @@ import com.hbm.util.BufferUtil;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -76,7 +77,7 @@ public class TileEntityRadioTorchLogic extends TileEntityLoadedBase implements I
                     this.lastUpdate = world.getTotalWorldTime();
                     int nextState = 0; //if no remap apply, default to 0
 
-                    if (chan.timeStamp < this.lastUpdate - 2 && this.polling) {
+                    if (chan.timeStamp < this.lastUpdate - 1 && this.polling) {
                         /* the vast majority use-case for this is going to be inequalities, NOT parsing, and the input is undefined - not the output
                          * if no signal => 0 for polling, advanced users parsing strings can easily accommodate this fact instead of breaking numerical torches */
                         msg = "0";
@@ -199,7 +200,7 @@ public class TileEntityRadioTorchLogic extends TileEntityLoadedBase implements I
     }
 
     @Override
-    public void receiveControl(NBTTagCompound data) {
+    public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
         if (data.hasKey("polling")) this.polling = data.getBoolean("polling");
         if (data.hasKey("channel")) this.channel = data.getString("channel");
         if (data.hasKey("descending")) this.descending = data.getBoolean("descending");

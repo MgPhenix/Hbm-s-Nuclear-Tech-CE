@@ -11,6 +11,8 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -32,7 +34,7 @@ public class ItemCounterfeitKeys extends Item {
 
 			TileEntityLockableBase locked = (TileEntityLockableBase) te;
 
-			if(locked.isLocked()) {
+			if(locked.isLocked() && locked.cheesable) {
 				ItemStack st = new ItemStack(ModItems.key_fake);
 				ItemKeyPin.setPins(st, locked.getPins());
 
@@ -47,6 +49,11 @@ public class ItemCounterfeitKeys extends Item {
 				player.swingArm(hand);
 
 				return EnumActionResult.SUCCESS;
+			} else if(!locked.cheesable) {
+				player.sendMessage(new TextComponentString(
+					TextFormatting.LIGHT_PURPLE + "This lock is too elaborate for a counterfeit key to be made"));
+				player.sendMessage(new TextComponentString(
+					TextFormatting.LIGHT_PURPLE + "Perhaps there is another way around here to unlock it"));
 			}
 		}
 

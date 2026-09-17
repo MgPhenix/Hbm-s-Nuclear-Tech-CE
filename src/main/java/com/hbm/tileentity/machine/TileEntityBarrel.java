@@ -13,7 +13,6 @@ import com.hbm.inventory.container.ContainerBarrel;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
-import com.hbm.inventory.fluid.trait.FT_Corrosive;
 import com.hbm.inventory.gui.GUIBarrel;
 import com.hbm.items.machine.IItemFluidIdentifier;
 import com.hbm.lib.DirPos;
@@ -119,6 +118,16 @@ public class TileEntityBarrel extends TileEntityMachineBase implements ITickable
                     public FluidStack drain(int maxDrain, boolean doDrain) {
                         return null;
                     }
+
+                    @Override
+                    protected boolean canFillExternally() {
+                        return mode == 0 || mode == 1;
+                    }
+
+                    @Override
+                    protected boolean canDrainExternally() {
+                        return false; // the up face never drains, see drain() above
+                    }
                 });
 
             } else if (facing == EnumFacing.DOWN) {
@@ -140,6 +149,16 @@ public class TileEntityBarrel extends TileEntityMachineBase implements ITickable
                     public FluidStack drain(int maxDrain, boolean doDrain) {
                         if (mode == 2 || mode == 1) return super.drain(maxDrain, doDrain);
                         return null;
+                    }
+
+                    @Override
+                    protected boolean canFillExternally() {
+                        return false; // the down face never fills, see fill() above
+                    }
+
+                    @Override
+                    protected boolean canDrainExternally() {
+                        return mode == 2 || mode == 1;
                     }
                 });
 
@@ -164,6 +183,16 @@ public class TileEntityBarrel extends TileEntityMachineBase implements ITickable
                         if (mode == 2 || mode == 1) return super.drain(maxDrain, doDrain);
                         return null;
                     }
+
+                    @Override
+                    protected boolean canFillExternally() {
+                        return mode == 0 || mode == 1;
+                    }
+
+                    @Override
+                    protected boolean canDrainExternally() {
+                        return mode == 2 || mode == 1;
+                    }
                 });
 
             }
@@ -176,6 +205,7 @@ public class TileEntityBarrel extends TileEntityMachineBase implements ITickable
 
     @Override
     public long getDemand(FluidType type, int pressure) {
+        if (this.tilted) return 0;
         if (this.mode == 2 || this.mode == 3) return 0;
 
         if (tankNew.getPressure() != pressure) return 0;
@@ -238,7 +268,7 @@ public class TileEntityBarrel extends TileEntityMachineBase implements ITickable
                     this.node = null;
                 }
 
-                for (DirPos pos : getConPos()) {
+                if (!this.tilted) for (DirPos pos : getConPos()) {
                     FluidNode dirNode = (FluidNode) UniNodespace.getNode(world, pos.getPos(), tankNew.getTankType().getNetworkProvider());
 
                     if (mode == 2) {
@@ -313,28 +343,6 @@ public class TileEntityBarrel extends TileEntityMachineBase implements ITickable
             shouldDrop = false;
             world.destroyBlock(pos, false);
             world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.BLOCK_LAVA_EXTINGUISH, SoundCategory.BLOCKS, 1.0F, 1.0F);
-        }
-
-        //for when you fill corrosive liquid into an iron tank
-        if ((b == ModBlocks.barrel_iron && tankNew.getTankType().isCorrosive()) || (b == ModBlocks.barrel_steel && tankNew.getTankType().hasTrait(FT_Corrosive.class) && tankNew.getTankType().getTrait(FT_Corrosive.class).getRating() > 50)) {
-
-            world.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.BLOCK_LAVA_EXTINGUISH, SoundCategory.BLOCKS, 1.0F, 1.0F);
-            ItemStackHandler copy = new ItemStackHandler(this.inventory.getSlots());
-            for (int i = 0; i < this.inventory.getSlots(); i++) {
-                copy.setStackInSlot(i, this.inventory.getStackInSlot(i).copy());
-            }
-
-            this.inventory = new ItemStackHandler(6);
-            shouldDrop = false;
-            world.setBlockState(pos, ModBlocks.barrel_corroded.getDefaultState());
-
-            TileEntityBarrel barrel = (TileEntityBarrel) world.getTileEntity(pos);
-
-            if (barrel != null) {
-                barrel.tankNew.setTankType(tankNew.getTankType());
-                barrel.tankNew.setFill(Math.min(barrel.tankNew.getMaxFill(), tankNew.getFill()));
-                barrel.inventory = copy;
-            }
         }
 
         if (b == ModBlocks.barrel_corroded) {

@@ -1,7 +1,6 @@
 package com.hbm.tileentity.network;
 
 import com.hbm.interfaces.AutoRegister;
-import com.hbm.inventory.container.ContainerRadioTorchSender;
 import com.hbm.inventory.gui.GUIScreenRadioTorch;
 import com.hbm.tileentity.IGUIProvider;
 import net.minecraft.block.state.IBlockState;
@@ -53,7 +52,8 @@ public class TileEntityRadioTorchSender extends TileEntityRadioTorchBase impleme
             }
 
             if (shouldSend && !this.channel.isEmpty()) {
-                RTTYSystem.broadcast(world, this.channel, this.customMap ? this.mapping[input] : (input + ""));
+                String toSend = this.customMap ? this.mapping[input] : (input + "");
+                if (toSend != null && !toSend.isEmpty()) RTTYSystem.broadcast(world, this.channel, toSend);
             }
         }
 
@@ -62,7 +62,7 @@ public class TileEntityRadioTorchSender extends TileEntityRadioTorchBase impleme
 
     @Override
     public Container provideContainer(int ID, EntityPlayer player, World world, int x, int y, int z) {
-        return new ContainerRadioTorchSender();
+        return null;
     }
 
     @Override

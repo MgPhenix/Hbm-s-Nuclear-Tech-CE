@@ -929,10 +929,10 @@ public class BunkerComponents {
 				setBlockState(world, ModBlocks.deco_computer.getStateFromMeta(getDecoModelMeta(2)), 10, 3, 2, box);
 				fillWithMetadataBlocks(world, box, 10, 2, 3, 10, 3, 3, ModBlocks.tape_recorder, decoMetaW);
 				fillWithMetadataBlocks(world, box, 9, 1, 2, 9, 1, 3, ModBlocks.steel_grate, 7);
-				fillWithBlocks(world, box, 9, 1, 5, 10, 1, 5, ModBlocks.barrel_iron);
-				setBlockState(world, ModBlocks.barrel_iron.getStateFromMeta(0), 10, 2, 5, box);
-				fillWithBlocks(world, box, 6, 1, 5, 6, 2, 5, ModBlocks.barrel_iron);
-				setBlockState(world, ModBlocks.barrel_iron.getStateFromMeta(0), 6, 1, 2, box);
+				fillWithBlocks(world, box, 9, 1, 5, 10, 1, 5, ModBlocks.barrel_corroded);
+				setBlockState(world, ModBlocks.barrel_corroded.getStateFromMeta(0), 10, 2, 5, box);
+				fillWithBlocks(world, box, 6, 1, 5, 6, 2, 5, ModBlocks.barrel_corroded);
+				setBlockState(world, ModBlocks.barrel_corroded.getStateFromMeta(0), 6, 1, 2, box);
 				break;
 			case 2:
 				for(int i = 7; i <= 9; i += 2) {

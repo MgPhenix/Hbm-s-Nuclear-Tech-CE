@@ -25,7 +25,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Random;
 
 public class BedrockOre extends AbstractPhasedStructure {
-    public static final BedrockOre OVERWORLD = new BedrockOre(new ItemStack(ModItems.bedrock_ore_base), null, 0xD78A16, 1, ModBlocks.stone_depth);
+    /** Indexed by tier 1..4; index 0 unused. Each entry is registered with PhasedStructureRegistry. */
+    public static final BedrockOre[] OVERWORLD_BY_TIER = {
+            null,
+            new BedrockOre(new ItemStack(ModItems.bedrock_ore_base), null,                                       0xD78A16, 1, ModBlocks.stone_depth),
+            new BedrockOre(new ItemStack(ModItems.bedrock_ore_base), new FluidStack(Fluids.WATER, 1_000),         0xD78A16, 2, ModBlocks.stone_depth),
+            new BedrockOre(new ItemStack(ModItems.bedrock_ore_base), new FluidStack(Fluids.SULFURIC_ACID, 1_000), 0xD78A16, 3, ModBlocks.stone_depth),
+            new BedrockOre(new ItemStack(ModItems.bedrock_ore_base), new FluidStack(Fluids.SOLVENT, 2_000),       0xD78A16, 4, ModBlocks.stone_depth),
+    };
     public static final BedrockOre NETHER_GLOWSTONE = new BedrockOre(new ItemStack(Items.GLOWSTONE_DUST, 4), null, 0xF9FF4D, 1, ModBlocks.stone_depth_nether);
     public static final BedrockOre NETHER_POWDER_FIRE = new BedrockOre(new ItemStack(ModItems.powder_fire, 4), null, 0xD7341F, 1, ModBlocks.stone_depth_nether);
     public static final BedrockOre NETHER_QUARTZ = new BedrockOre(new ItemStack(Items.QUARTZ, 4), null, 0xF0EFDD, 1, ModBlocks.stone_depth_nether);
@@ -72,8 +79,7 @@ public class BedrockOre extends AbstractPhasedStructure {
         }
 
         totalLevel /= BedrockOreType.VALUES.length;
-        BedrockOre oreTask = new BedrockOre(new ItemStack(ModItems.bedrock_ore_base), getBoreFluid(totalLevel), 0xD78A16, getTier(totalLevel), ModBlocks.stone_depth);
-        oreTask.generate(world, world.rand, new BlockPos(x, 0, z));
+        OVERWORLD_BY_TIER[getTier(totalLevel)].generate(world, world.rand, new BlockPos(x, 0, z));
     }
 
     public static final FluidStack BORE_TIER_1 = null;

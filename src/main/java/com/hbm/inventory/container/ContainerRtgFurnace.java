@@ -30,9 +30,9 @@ public class ContainerRtgFurnace extends Container {
 		//Ore
 		this.addSlotToContainer(new SlotItemHandler(tedf.inventory, 0, 56, 17));
 		//RTG
-		this.addSlotToContainer(new SlotItemHandler(tedf.inventory, 1, 38, 53));
-		this.addSlotToContainer(new SlotItemHandler(tedf.inventory, 2, 56, 53));
-		this.addSlotToContainer(new SlotItemHandler(tedf.inventory, 3, 74, 53));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(tedf.inventory, 1, 38, 53, s -> s.getItem() instanceof ItemRTGPellet));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(tedf.inventory, 2, 56, 53, s -> s.getItem() instanceof ItemRTGPellet));
+		this.addSlotToContainer(SlotFiltered.withWhitelist(tedf.inventory, 3, 74, 53, s -> s.getItem() instanceof ItemRTGPellet));
 		//Output
 		this.addSlotToContainer(SlotFiltered.takeOnly(tedf.inventory, 4, 116, 35));
 

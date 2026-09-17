@@ -2,6 +2,7 @@ package com.hbm.inventory.gui;
 
 import com.hbm.Tags;
 import com.hbm.inventory.container.ContainerCrucible;
+import com.hbm.inventory.gui.element.GUIElements;
 import com.hbm.inventory.material.Mats;
 import com.hbm.inventory.material.NTMMaterial;
 import com.hbm.inventory.recipes.CrucibleRecipe;
@@ -51,7 +52,7 @@ public class GUICrucible extends GuiInfoContainer {
         if(guiLeft + 106 <= x && guiLeft + 106 + 18 > x && guiTop + 80 < y && guiTop + 80 + 18 >= y) {
             if(this.crucible.recipe != null && CrucibleRecipes.INSTANCE.recipeNameMap.containsKey(this.crucible.recipe)) {
                 CrucibleRecipe recipe = CrucibleRecipes.INSTANCE.recipeNameMap.get(this.crucible.recipe);
-                this.drawHoveringText(recipe.print(), x, y);
+                GUIElements.drawHoveringTextRecipe(recipe.print(), x, y, this.fontRenderer, itemRender, this.width, this.height);
             } else {
                 this.drawHoveringText(TextFormatting.YELLOW + I18nUtil.resolveKey("gui.recipe.setRecipe"), x, y);
             }

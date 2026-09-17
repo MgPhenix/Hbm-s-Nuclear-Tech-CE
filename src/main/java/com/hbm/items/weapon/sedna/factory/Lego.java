@@ -218,8 +218,11 @@ public class Lego {
 		heightOffset = -0.125;
 		sideOffset = -0.25D;*/
 
-        int projectiles = config.projectilesMin;
-        if(config.projectilesMax > config.projectilesMin) projectiles += entity.getRNG().nextInt(config.projectilesMax - config.projectilesMin + 1);
+        float split = primary.getSplitProjectiles(stack);
+        int projMin = (int) (config.projectilesMin * split);
+        int projMax = (int) (config.projectilesMax * split);
+        int projectiles = projMin;
+        if(projMax > projMin) projectiles += entity.getRNG().nextInt(projMax - projMin + 1);
         World world = entity.world;
         int finalProjectiles = projectiles;
         spawnBullet(world, () -> {

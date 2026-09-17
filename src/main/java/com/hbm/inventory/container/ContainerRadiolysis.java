@@ -15,7 +15,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.items.SlotItemHandler;
-
 import java.util.function.Predicate;
 
 public class ContainerRadiolysis extends Container {
@@ -35,7 +34,7 @@ public class ContainerRadiolysis extends Container {
         //RTG
         for(byte i = 0; i < 2; i++) {
             for(byte j = 0; j < 5; j++) {
-                this.addSlotToContainer(new SlotItemHandler(tile.inventory, j + i * 5, 188 + i * 18, 8 + j * 18));
+                this.addSlotToContainer(SlotFiltered.withWhitelist(tile.inventory, j + i * 5, 188 + i * 18, 8 + j * 18, s -> s.getItem() instanceof ItemRTGPellet));
             }
         }
 

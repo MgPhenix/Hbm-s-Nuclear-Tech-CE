@@ -53,6 +53,7 @@ public class OreDictManager {
     public static final String KEY_LEAVES = "treeLeaves";
     public static final String KEY_SAPLING = "treeSapling";
     public static final String KEY_SAND = "sand";
+    public static final String KEY_STONE = "stone";
     public static final String KEY_COBBLESTONE = "cobblestone";
     public static final String KEY_GRAVEL = "gravel";
     public static final String KEY_BLACK = "dyeBlack";
@@ -155,11 +156,11 @@ public class OreDictManager {
      */
     public static final DictFrame CU = new DictFrame("Copper");
     public static final DictFrame MINGRADE = new DictFrame("Mingrade");
-    public static final DictFrame ALLOY = new DictFrame("AdvancedAlloy");
     /**
      * TUNGSTEN
      */
     public static final DictFrame W = new DictFrame("Tungsten");
+    public static final DictFrame WC = new DictFrame("TungstenCarbide");
     /**
      * ALUMINUM
      */
@@ -399,7 +400,7 @@ public class OreDictManager {
     /**
      * Any special psot-RBMK gating material, namely bismuth and arsenic
      */
-    public static final DictFrame ANY_BISMOID = new DictFrame("AnyBismoid");
+    public static final DictGroup ANY_BISMOID = new DictGroup("AnyBismoid", BI, AS);
     public static final DictFrame ANY_ASH = new DictFrame("Ash");
     /**
      * Alternate, additional names for ore dict registration. Used mostly for DictGroups
@@ -460,8 +461,8 @@ public class OreDictManager {
         TI.ingot(ingot_titanium).crystal(crystal_titanium).dust(powder_titanium).plate(plate_titanium).block(block_titanium).ore(ore_titanium);
         CU.ingot(ingot_copper).crystal(crystal_copper).dust(powder_copper).plate(plate_copper).block(block_copper).ore(ore_copper, ore_gneiss_copper);
         MINGRADE.ingot(ingot_red_copper).dust(powder_red_copper).block(block_red_copper);
-        ALLOY.ingot(ingot_advanced_alloy).dust(powder_advanced_alloy).plate(plate_advanced_alloy).block(block_advanced_alloy);
         W.ingot(ingot_tungsten).dust(powder_tungsten).crystal(crystal_tungsten).block(block_tungsten).ore(ore_tungsten, ore_nether_tungsten).oreNether(ore_nether_tungsten);
+        WC.ingot(ingot_tungsten_carbide);
         AL.ingot(ingot_aluminium).dust(powder_aluminium).crystal(crystal_aluminium).plate(plate_aluminium).block(block_aluminium).ore(ore_aluminium);
         STEEL.ingot(ingot_steel).dustSmall(powder_steel_tiny).dust(powder_steel).plate(plate_steel).block(block_steel);
         TCALLOY.ingot(ingot_tcalloy).dust(powder_tcalloy).block(block_tcalloy);
@@ -589,7 +590,6 @@ public class OreDictManager {
         for(int i = 0; i < 16; i++) { ANY_CONCRETE.any(new ItemStack(ModBlocks.concrete_colored, 1, i)); }
         for(int i = 0; i < 8; i++) { ANY_CONCRETE.any(new ItemStack(ModBlocks.concrete_colored_ext, 1, i)); }
         ANY_COKE.gem(fromAll(coke, EnumCokeType.VALUES)).block(fromAll(block_coke, EnumCokeType.VALUES));
-        ANY_BISMOID.ingot(ingot_bismuth, ingot_arsenic).nugget(nugget_bismuth, nugget_arsenic).block(block_bismuth);
         ANY_ASH.any(fromOne(ModItems.powder_ash, EnumAshType.WOOD), fromOne(ModItems.powder_ash, EnumAshType.COAL), fromOne(ModItems.powder_ash, EnumAshType.MISC), fromOne(ModItems.powder_ash, EnumAshType.FLY), fromOne(ModItems.powder_ash, EnumAshType.SOOT));
 
 
@@ -752,6 +752,7 @@ public class OreDictManager {
         OreDictionary.registerOre("blockGlassBlack", glass_ash);
 
 		OreDictionary.registerOre("container1000lubricant", bdcl);
+        OreDictionary.registerOre("container1000water", Items.WATER_BUCKET);
         OreDictionary.registerOre("itemSilicon", billet_silicon);
 
 		for(NTMMaterial mat : Mats.orderedList) {
@@ -781,6 +782,7 @@ public class OreDictManager {
         ANY_RESISTANTALLOY.addPrefix(INGOT, true).addPrefix(DUST, true).addPrefix(CASTPLATE, true).addPrefix(WELDEDPLATE, true).addPrefix(HEAVY_COMPONENT, true).addPrefix(BLOCK, true)
                 .addPrefix(LIGHTBARREL, true).addPrefix(HEAVYBARREL, true).addPrefix(LIGHTRECEIVER, true).addPrefix(HEAVYRECEIVER, true);
         ANY_BISMOIDBRONZE.addPrefix(INGOT, true).addPrefix(CASTPLATE, true).addPrefix(LIGHTBARREL, true).addPrefix(HEAVYBARREL, true).addPrefix(LIGHTRECEIVER, true).addPrefix(HEAVYRECEIVER, true);
+        ANY_BISMOID.addPrefix(NUGGET, true).addPrefix(INGOT, true).addPrefix(BLOCK, true);
         ANY_TAR.addPrefix(ANY, false);
     }
 

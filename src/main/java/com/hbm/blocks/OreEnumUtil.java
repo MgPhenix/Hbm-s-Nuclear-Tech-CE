@@ -70,7 +70,7 @@ public class OreEnumUtil {
         PHOSPHORUS_NETHER(OreEnumUtil::phosphorusNetherDrop, OreEnumUtil::vanillaFortune),
         LIGNITE(() -> new ItemStack(lignite), OreEnumUtil::vanillaFortune),
         RARE_EARTHS(() -> new ItemStack(chunk_ore, 1, ItemEnums.EnumChunkType.RARE.ordinal()), OreEnumUtil::vanillaFortune),
-        BLOCK_METEOR(OreEnumUtil::blockMeteorDrop, OreEnumUtil::vanillaFortune),
+        BLOCK_METEOR(OreEnumUtil::blockMeteorDrop, OreEnumUtil::const1),
         CINNABAR(() -> new ItemStack(cinnabar), OreEnumUtil::base1Rand2Fortune),
         ALEXANDRITE(() -> new ItemStack(gem_alexandrite), OreEnumUtil::alexandriteAmount),
         COLTAN(() -> new ItemStack(fragment_coltan), OreEnumUtil::vanillaFortune),

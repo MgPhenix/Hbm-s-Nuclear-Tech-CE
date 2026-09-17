@@ -72,8 +72,7 @@ public class ItemMold extends Item implements IModelRegister, IClaimedModelLocat
 
         registerMold(new MoldMulti(6, S, "blades", MaterialShapes.INGOT.q(4),
                 Mats.MAT_STEEL,         (Supplier<ItemStack>) () -> new ItemStack(ModItems.blades_steel),
-                Mats.MAT_TITANIUM,      (Supplier<ItemStack>) () -> new ItemStack(ModItems.blades_titanium),
-                Mats.MAT_ALLOY,         (Supplier<ItemStack>) () -> new ItemStack(ModItems.blades_advanced_alloy)));
+                Mats.MAT_TITANIUM,      (Supplier<ItemStack>) () -> new ItemStack(ModItems.blades_titanium)));
 
         registerMold(new MoldMulti(7, S, "stamp", MaterialShapes.INGOT.q(4),
                 Mats.MAT_STONE,         (Supplier<ItemStack>) () -> new ItemStack(ModItems.stamp_stone_flat),
@@ -238,7 +237,9 @@ public class ItemMold extends Item implements IModelRegister, IClaimedModelLocat
                 if(!ores.isEmpty()) {
                     //prioritize NTM items
                     for(ItemStack ore : ores) {
-                        if(Item.REGISTRY.getNameForObject(ore.getItem()).toString().startsWith(Tags.MODID)) {
+                        String registry = Item.REGISTRY.getNameForObject(ore.getItem()).toString();
+                        if(registry.contains("fragment")) continue;
+                        if(registry.startsWith(Tags.MODID)) {
                             ItemStack copy = ore.copy();
                             copy.setCount(this.amount);
                             return copy;

@@ -353,10 +353,11 @@ public class EntityArtilleryShell extends EntityThrowableNT implements IChunkLoa
     @Override
     public boolean processInitialInteract(EntityPlayer player, EnumHand hand) {
 
-        if(!world.isRemote) {
+        if(!world.isRemote && !this.isDead) {
             if(this.cargo != null) {
                 player.inventory.addItemStackToInventory(this.cargo.copy());
                 player.inventoryContainer.detectAndSendChanges();
+                this.cargo = null;
             }
             this.setDead();
         }

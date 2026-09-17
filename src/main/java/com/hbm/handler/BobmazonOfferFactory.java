@@ -43,6 +43,9 @@ public class BobmazonOfferFactory {
 		//blueprints
 		standard.add(new Offer(new ItemStack(ModItems.blueprint_folder, 1, 0), Requirement.ASSEMBLY, 64));
 		standard.add(new Offer(new ItemStack(ModItems.blueprint_folder, 1, 1), Requirement.OIL, 256));
+        // vending machines
+        standard.add(new Offer(new ItemStack(ModBlocks.vending_machine, 1, 0), Requirement.CHEMICS, 64));
+        standard.add(new Offer(new ItemStack(ModBlocks.vending_machine, 1, 1), Requirement.CHEMICS, 64));
 		//plants
 		standard.add(new Offer(new ItemStack(Blocks.SAPLING, 1, 3), Requirement.STEEL, 12, 9));
 		standard.add(new Offer(new ItemStack(ModBlocks.plant_flower, 1, PlantEnums.EnumFlowerPlantType.FOXGLOVE.ordinal()), Requirement.STEEL, 16, 5));

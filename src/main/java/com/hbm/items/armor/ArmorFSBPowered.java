@@ -172,11 +172,11 @@ public class ArmorFSBPowered extends ArmorFSB implements IBatteryItem {
 
 	@Override
 	public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-		return false;
+		return super.canApplyAtEnchantingTable(stack, enchantment);
 	}
 
 	@Override
 	public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-		return false;
+		return true;
 	}
 }

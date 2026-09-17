@@ -2,13 +2,14 @@ package com.hbm.tileentity;
 
 import com.hbm.blocks.BlockDummyable;
 import com.hbm.blocks.generic.BlockDoorGeneric;
+import com.hbm.config.MachineConfig;
 import com.hbm.handler.radiation.RadiationSystemNT;
 import com.hbm.interfaces.AutoRegister;
 import com.hbm.interfaces.IAnimatedDoor;
 import com.hbm.inventory.control_panel.ControlEvent;
 import com.hbm.inventory.control_panel.ControlEventSystem;
-import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.inventory.control_panel.IControllable;
+import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
@@ -20,7 +21,6 @@ import it.unimi.dsi.fastutil.longs.LongIterable;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.block.BlockAir;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -186,10 +186,10 @@ public class TileEntityDoorGeneric extends TileEntityLockableBase implements ITi
 
     @Override
     public void onLoad() {
-        if(!(this.getBlockType() instanceof BlockAir)) setDoorType(((BlockDoorGeneric) this.getBlockType()).type);
+        if(this.getBlockType() instanceof BlockDoorGeneric door) setDoorType(door.type);
     }
 
-    public boolean tryToggle(EntityPlayer player) {
+    public boolean tryToggle() {
         if (state == DoorState.CLOSED) {
             if (!world.isRemote) {
                 open();
@@ -525,6 +525,10 @@ public class TileEntityDoorGeneric extends TileEntityLockableBase implements ITi
             activatedBlocks.add(pos);
             if (redstonePower == -1) {
                 redstonePower = 0;
+
+                if(MachineConfig.holdDoorRedstone) {
+                    tryToggle();
+                }
             }
             redstonePower++;
         } else if (contained && !powered) {
@@ -532,6 +536,10 @@ public class TileEntityDoorGeneric extends TileEntityLockableBase implements ITi
             redstonePower--;
             if (redstonePower == 0) {
                 redstonePower = -1;
+
+                if(MachineConfig.holdDoorRedstone) {
+                    tryToggle();
+                }
             }
         }
     }

@@ -37,6 +37,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
@@ -113,6 +114,7 @@ public class TileEntityMachineRefinery extends TileEntityMachineBase implements 
     @Override
     public void update() {
         if (!world.isRemote) {
+            this.checkTilt(TiltType.CONFIG, false);
 
             this.isOn = false;
 
@@ -461,4 +463,7 @@ public class TileEntityMachineRefinery extends TileEntityMachineBase implements 
     public double getMaxRenderDistanceSquared() {
         return 65536.0D;
     }
+
+    @Override public int getFloorCount() { return 2 * 2; }
+    @Override public BlockPos getFloorPosFromIndex(int index) { return this.standardFloor3x3(index); }
 }

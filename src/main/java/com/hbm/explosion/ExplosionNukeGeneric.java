@@ -6,6 +6,7 @@ import com.hbm.blocks.ModBlocks;
 import com.hbm.blocks.generic.WasteLog;
 import com.hbm.config.CompatibilityConfig;
 import com.hbm.config.VersatileConfig;
+import com.hbm.util.CompatDynamicTrees;
 import com.hbm.entity.effect.EntityBlackHole;
 import com.hbm.entity.grenade.EntityGrenadeUniversal;
 import com.hbm.entity.projectile.EntityBulletBaseMK4;
@@ -103,7 +104,7 @@ public class ExplosionNukeGeneric {
                 double entY = e.posY + e.getEyeHeight();
                 double entZ = e.posZ;
 
-                if (!isExplosionExempt(e) && !Library.isObstructed(world, x, y, z, entX, entY, entZ)) {
+                if (!isExplosionExempt(e) && !Library.isObstructedFar(world, x, y, z, entX, entY, entZ)) {
 
                     boolean doKnockback = true;
                     double damage = maxDamage * (radius - dist) / radius;
@@ -198,6 +199,7 @@ public class ExplosionNukeGeneric {
     public static int destruction(World world, BlockPos pos) {
         int rand;
         if (!world.isRemote) {
+            if (CompatDynamicTrees.destroyTreeAt(world, pos)) return 0;
             IBlockState b = world.getBlockState(pos);
             if (b.getBlock().getExplosionResistance(null) >= 200f) {    //500 is the resistance of liquids
                 //blocks to be spared
@@ -239,6 +241,7 @@ public class ExplosionNukeGeneric {
     @SuppressWarnings("deprecation")
     public static int vaporDest(World world, BlockPos pos) {
         if (!world.isRemote) {
+            if (CompatDynamicTrees.destroyTreeAt(world, pos)) return 0;
             IBlockState b = world.getBlockState(pos);
             if (b.getBlock().getExplosionResistance(null) < 0.5f //most light things
                     || b.getBlock() == Blocks.WEB || b.getBlock() == ModBlocks.red_cable || b.getBlock() instanceof BlockLiquid) {
@@ -328,13 +331,6 @@ public class ExplosionNukeGeneric {
                 } else {
                     world.setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
                 }
-            } else if (b instanceof BlockBush) {
-                world.setBlockState(pos, Blocks.DEADBUSH.getDefaultState());
-            } else if (b == Blocks.STONE) {
-                world.setBlockState(pos,
-						ModBlocks.sellafield_slaked.getDefaultState());
-            } else if (b == Blocks.BEDROCK) {
-                world.setBlockState(pos, ModBlocks.sellafield_bedrock.getDefaultState());
             } else if (b == Blocks.RED_MUSHROOM_BLOCK) {
                 if (bs.getValue(BlockHugeMushroom.VARIANT) == BlockHugeMushroom.EnumType.STEM) {
                     world.setBlockState(pos, ModBlocks.waste_log.getDefaultState());
@@ -419,22 +415,15 @@ public class ExplosionNukeGeneric {
                 }
             } else if (b == Blocks.CLAY) {
                 world.setBlockState(pos, Blocks.HARDENED_CLAY.getDefaultState());
-            } else if (b instanceof BlockBush) {
-                world.setBlockState(pos, Blocks.DEADBUSH.getDefaultState());
-            } else if (b == Blocks.STONE) {
-                world.setBlockState(pos,
-						ModBlocks.sellafield_slaked.getDefaultState());
-            } else if (b == Blocks.BEDROCK) {
-                world.setBlockState(pos, ModBlocks.sellafield_bedrock.getDefaultState());
             } else if (b == Blocks.MOSSY_COBBLESTONE) {
                 world.setBlockState(pos, Blocks.COAL_ORE.getDefaultState());
             } else if (b == Blocks.COAL_ORE) {
                 rand = random.nextInt(30);
                 if (rand == 1 || rand == 2 || rand == 3) {
-                    world.setBlockState(pos, ModBlocks.ore_sellafield_diamond.getDefaultState(), 3);
+                    world.setBlockState(pos, Blocks.DIAMOND_ORE.getDefaultState());
                 }
                 if (rand == 29) {
-                    world.setBlockState(pos, ModBlocks.ore_sellafield_emerald.getDefaultState(), 3);
+                    world.setBlockState(pos, Blocks.EMERALD_ORE.getDefaultState());
                 }
             } else if (b == Blocks.LOG || b == Blocks.LOG2) {
                 world.setBlockState(pos, ModBlocks.waste_log.getDefaultState());

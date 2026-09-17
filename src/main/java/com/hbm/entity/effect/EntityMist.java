@@ -262,13 +262,13 @@ public class EntityMist extends Entity {
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound nbt) {
-        setType(Fluids.fromID(nbt.getInteger("type")));
+        setType(Fluids.readType(nbt, "type"));
         setArea(nbt.getFloat("width"), nbt.getFloat("height"));
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound nbt) {
-        nbt.setInteger("type", getType().getID());
+        Fluids.writeType(nbt, "type", getType());
         nbt.setFloat("width", dataManager.get(WIDTH));
         nbt.setFloat("height", dataManager.get(HEIGHT));
     }

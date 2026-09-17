@@ -6,7 +6,6 @@ import com.hbm.render.model.BakedModelTransforms;
 import com.hbm.render.util.NTMImmediate;
 import com.hbm.render.util.RenderMiscEffects;
 import com.hbm.util.RenderUtil;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -42,7 +41,7 @@ public class ItemRendererMeteorSword extends TEISRBase {
 
     @Override
     public ModelBinding createModelBinding(Item item) {
-        return ModelBinding.inventoryModel(item, BakedModelTransforms.defaultItemTransforms(), new ResourceLocation(Tags.MODID, "items/meteorite_sword"));
+        return ModelBinding.inventoryModel(item, BakedModelTransforms.meteorSwordTransforms(), new ResourceLocation(Tags.MODID, "items/meteorite_sword"));
     }
 
     @Override
@@ -76,7 +75,7 @@ public class ItemRendererMeteorSword extends TEISRBase {
 
             GlStateManager.matrixMode(GL11.GL_TEXTURE);
             GlStateManager.pushMatrix();
-            GL11.glScaled(8, 8, 8);
+            GlStateManager.scale(8, 8, 8);
             GlStateManager.translate(f2, 0, 0);
             GlStateManager.rotate(-50.0F, 0.0F, 0.0F, 1.0F);
             GlStateManager.matrixMode(GL11.GL_MODELVIEW);
@@ -89,10 +88,10 @@ public class ItemRendererMeteorSword extends TEISRBase {
             int color = (0xFF << 24) | ((byte) ((r * in) * 255) << 16) | ((byte) ((g * in) * 255) << 8) | ((byte) ((b * in) * 255));
 
             for (EnumFacing enumfacing : EnumFacing.VALUES) {
-                Minecraft.getMinecraft().getRenderItem().renderQuads(bufferbuilder, itemModel.getQuads((IBlockState) null, enumfacing, 0L), color, stack);
+                Minecraft.getMinecraft().getRenderItem().renderQuads(bufferbuilder, itemModel.getQuads(null, enumfacing, 0L), color, stack);
             }
 
-            Minecraft.getMinecraft().getRenderItem().renderQuads(bufferbuilder, itemModel.getQuads((IBlockState) null, (EnumFacing) null, 0L), color, stack);
+            Minecraft.getMinecraft().getRenderItem().renderQuads(bufferbuilder, itemModel.getQuads(null, null, 0L), color, stack);
             NTMImmediate.INSTANCE.draw();
 
             GlStateManager.popMatrix();

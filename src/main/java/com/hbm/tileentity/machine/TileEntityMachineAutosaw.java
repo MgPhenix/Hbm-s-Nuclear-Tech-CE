@@ -2,7 +2,7 @@ package com.hbm.tileentity.machine;
 
 import com.hbm.api.fluid.IFluidStandardReceiver;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.blocks.generic.BlockTallPlant.EnumTallFlower;
+import com.hbm.blocks.PlantEnums.EnumTallPlantType;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.interfaces.AutoRegister;
 import com.hbm.inventory.fluid.FluidType;
@@ -253,7 +253,8 @@ public class TileEntityMachineAutosaw extends TileEntityLoadedBase implements IB
      */
     private static boolean shouldIgnore(World world, BlockPos pos, IBlockState state, Block block, int meta) {
         if (block == ModBlocks.plant_tall) {
-            return meta == EnumTallFlower.CD2.ordinal() + 8 || meta == EnumTallFlower.CD3.ordinal() + 8;
+            return meta >= EnumTallPlantType.MUSTARD_WILLOW_2_LOWER.ordinal()
+                    && meta <= EnumTallPlantType.MUSTARD_WILLOW_3_UPPER.ordinal();
         }
 
         if (block instanceof IGrowable growable) {

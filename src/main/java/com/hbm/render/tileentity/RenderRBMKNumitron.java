@@ -60,13 +60,14 @@ public class RenderRBMKNumitron extends TileEntitySpecialRenderer<TileEntityRBMK
 			float h = 13F / scale;
 			float yOffset = 0.5625F;
 
-			String value = BobMathUtil.getShortNumber(unit.value);
-			while(value.length() < 7) value = "0" + value;
+			String value = unit.shorten_number ? BobMathUtil.getShortNumber(unit.value) : Long.toString(unit.value);
+			char pad = unit.leading_zeroes ? '0' : ' ';
+			while(value.length() < 7) value = pad + value;
 
 			NTMBufferBuilder buf = NTMImmediate.INSTANCE.beginPositionTexNormalQuads(7);
 			for(int j = 0; j < 7; j++) {
 				float zOffset = (j - 3F) * 0.1F;
-				char c = value.charAt(j);
+				char c = value.charAt(j); if(c == ' ') continue; // blank position when leading zeroes are disabled
 				float u = -1F;
                 float v = 0F;
 				if(c == '.') {u = 0.9F; v = 0.5F;}
