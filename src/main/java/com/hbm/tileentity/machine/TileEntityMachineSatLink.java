@@ -24,8 +24,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @AutoRegister(name = "tileentity_satlink")
-@Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")})
-public class TileEntityMachineSatLink extends TileEntityTickingBase implements ITickable, IRORValueProvider, IRORInteractive, SimpleComponent, CompatHandler.OCComponent {
+//@Optional.InterfaceList({@Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")})
+public class TileEntityMachineSatLink extends TileEntityTickingBase implements ITickable, IRORValueProvider, IRORInteractive {
 
 	public boolean connected;
 	public int freq;
@@ -197,75 +197,76 @@ public class TileEntityMachineSatLink extends TileEntityTickingBase implements I
 	public double getMaxRenderDistanceSquared() {
 		return 65536.0D;
 	}
-
-    @Override
-    @Optional.Method(modid = "opencomputers")
-    public String getComponentName() {
-        return "ntm_satlink";
-    }
-
-    @Callback(direct = true, doc = "function():boolean -- Returns connection state")
-    @Optional.Method(modid = "opencomputers")
-    public Object[] isConnected(Context context, Arguments args) {
-        return new Object[] { connected };
-    }
-
-    @Callback(direct = true, limit = 4, doc = "function(freq: number) -- Sets satellite frequency")
-    @Optional.Method(modid = "opencomputers")
-    public Object[] setFreq(Context context, Arguments args) {
-        freq = args.checkInteger(0);
-        return new Object[] {};
-    }
-
-    @Callback(direct = true, doc = "function():number -- Gets satellite frequency")
-    @Optional.Method(modid = "opencomputers")
-    public Object[] getFreq(Context context, Arguments args) {
-        return new Object[] { freq };
-    }
-
-    @Callback(direct = true, doc = "function():string -- Gets satellite type")
-    @Optional.Method(modid = "opencomputers")
-    public Object[] getType(Context context, Arguments args) {
-        return new Object[] { provideRORValue(PREFIX_VALUE + "type") };
-    }
-
-    @Callback(direct = true, limit = 4, doc = "function(command: string) -- Transmits a command to the satellite")
-    @Optional.Method(modid = "opencomputers")
-    public Object[] send(Context context, Arguments args) {
-        runRORFunction(PREFIX_FUNCTION + "tx", new String[]{args.checkString(0)});
-        return new Object[] {};
-    }
-
-    @Callback(direct = true, limit = 4, doc = "function():string -- Gets received command from the satellite")
-    @Optional.Method(modid = "opencomputers")
-    public Object[] read(Context context, Arguments args) {
-        return new Object[] { provideRORValue(PREFIX_VALUE + "rx") };
-    }
-
-    @Override
-    @Optional.Method(modid = "opencomputers")
-    public String[] methods() {
-        return new String[] {
-            "isConnected",
-            "setFreq",
-            "getFreq",
-            "getType",
-            "send",
-            "read"
-        };
-    }
-
-    @Override
-    @Optional.Method(modid = "opencomputers")
-    public Object[] invoke(String method, Context context, Arguments args) throws Exception {
-        switch (method) {
-            case "isConnected": return isConnected(context, args);
-            case "setFreq": return setFreq(context, args);
-            case "getFreq": return getFreq(context, args);
-            case "getType": return getType(context, args);
-            case "send": return send(context, args);
-            case "read": return read(context, args);
-        }
-        throw new NoSuchMethodException();
-    }
 }
+
+//    @Override
+//    @Optional.Method(modid = "opencomputers")
+//    public String getComponentName() {
+//        return "ntm_satlink";
+//    }
+//
+//    @Callback(direct = true, doc = "function():boolean -- Returns connection state")
+//    @Optional.Method(modid = "opencomputers")
+//    public Object[] isConnected(Context context, Arguments args) {
+//        return new Object[] { connected };
+//    }
+//
+//    @Callback(direct = true, limit = 4, doc = "function(freq: number) -- Sets satellite frequency")
+//    @Optional.Method(modid = "opencomputers")
+//    public Object[] setFreq(Context context, Arguments args) {
+//        freq = args.checkInteger(0);
+//        return new Object[] {};
+//    }
+//
+//    @Callback(direct = true, doc = "function():number -- Gets satellite frequency")
+//    @Optional.Method(modid = "opencomputers")
+//    public Object[] getFreq(Context context, Arguments args) {
+//        return new Object[] { freq };
+//    }
+//
+//    @Callback(direct = true, doc = "function():string -- Gets satellite type")
+//    @Optional.Method(modid = "opencomputers")
+//    public Object[] getType(Context context, Arguments args) {
+//        return new Object[] { provideRORValue(PREFIX_VALUE + "type") };
+//    }
+//
+//    @Callback(direct = true, limit = 4, doc = "function(command: string) -- Transmits a command to the satellite")
+//    @Optional.Method(modid = "opencomputers")
+//    public Object[] send(Context context, Arguments args) {
+//        runRORFunction(PREFIX_FUNCTION + "tx", new String[]{args.checkString(0)});
+//        return new Object[] {};
+//    }
+//
+//    @Callback(direct = true, limit = 4, doc = "function():string -- Gets received command from the satellite")
+//    @Optional.Method(modid = "opencomputers")
+//    public Object[] read(Context context, Arguments args) {
+//        return new Object[] { provideRORValue(PREFIX_VALUE + "rx") };
+//    }
+//
+//    @Override
+//    @Optional.Method(modid = "opencomputers")
+//    public String[] methods() {
+//        return new String[] {
+//            "isConnected",
+//            "setFreq",
+//            "getFreq",
+//            "getType",
+//            "send",
+//            "read"
+//        };
+//    }
+//
+//    @Override
+//    @Optional.Method(modid = "opencomputers")
+//    public Object[] invoke(String method, Context context, Arguments args) throws Exception {
+//        switch (method) {
+//            case "isConnected": return isConnected(context, args);
+//            case "setFreq": return setFreq(context, args);
+//            case "getFreq": return getFreq(context, args);
+//            case "getType": return getType(context, args);
+//            case "send": return send(context, args);
+//            case "read": return read(context, args);
+//        }
+//        throw new NoSuchMethodException();
+//    }
+//}
