@@ -99,7 +99,9 @@ public class TileEntityCustomMachine extends TileEntityMachinePolluting implemen
 			smoke_poison.changeTankSize(config.maxPollutionCap);
 
 		} else if (world != null) {
-			world.destroyBlock(pos, false);
+			if(!world.isRemote) {
+				world.destroyBlock(pos, false);
+			}
 		}
 	}
 
