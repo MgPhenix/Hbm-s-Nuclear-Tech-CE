@@ -8,6 +8,7 @@ import com.hbm.saveddata.satellites.Satellite;
 import com.hbm.saveddata.satellites.SatelliteRayScan;
 import com.hbm.saveddata.satellites.SatelliteSavedData;
 import com.hbm.tileentity.TileEntityTickingBase;
+import com.hbm.tileentity.network.RTTYSystem;
 import io.netty.buffer.ByteBuf;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -110,7 +111,8 @@ public class TileEntityMachineSatLink extends TileEntityTickingBase implements I
 		this.info = new ITextComponent[buf.readInt()];
 		for(int i = 0; i < info.length; i++) {
 			ITextComponent comp = ITextComponent.Serializer.jsonToComponent(ByteBufUtils.readUTF8String(buf));
-			this.info[i] = comp != null ? comp : new TextComponentString("");
+			if(comp != null) this.info[i] = comp;
+			else this.info[i] = new TextComponentString("");
 		}
 	}
 
@@ -134,7 +136,8 @@ public class TileEntityMachineSatLink extends TileEntityTickingBase implements I
 				PREFIX_VALUE + "rx",
 				PREFIX_VALUE + "type",
 				PREFIX_FUNCTION + "setfreq" + NAME_SEPARATOR + "freq",
-				PREFIX_FUNCTION + "tx" + NAME_SEPARATOR + "payload"
+				PREFIX_FUNCTION + "tx" + NAME_SEPARATOR + "payload",
+				PREFIX_FUNCTION + "txrx" + NAME_SEPARATOR + "return freq" + PARAM_SEPARATOR + "payload"
 		};
 	}
 
@@ -172,12 +175,29 @@ public class TileEntityMachineSatLink extends TileEntityTickingBase implements I
 			this.markChanged();
 		}
 
-		if(name.equals(PREFIX_FUNCTION + "tx")) {
+		if(name.equals(PREFIX_FUNCTION + "tx") && params.length > 0) {
 			SatelliteSavedData dat = SatelliteSavedData.getData(world);
 			Satellite sat = dat.getSatFromFreq(this.freq);
 			String[] cmd = String.join(IRORInteractive.PARAM_SEPARATOR, params).split(" ");
 			if(sat != null) {
 				sat.onCommand(world, cmd);
+				dat.markDirty();
+			}
+			SatelliteRayScan.reportEvent(world, pos.getX(), pos.getY(), pos.getZ(), SatelliteRayScan.RayEvent.INFO_RADIO, 300);
+			this.markChanged();
+		}
+
+		if(name.equals(PREFIX_FUNCTION + "txrx") && params.length > 1) {
+			SatelliteSavedData dat = SatelliteSavedData.getData(world);
+			Satellite sat = dat.getSatFromFreq(this.freq);
+
+			String[] args = new String[params.length - 1];
+			System.arraycopy(params, 1, args, 0, args.length);
+			String[] cmd = String.join(IRORInteractive.PARAM_SEPARATOR, args).split(" ");
+
+			if(sat != null) {
+				sat.onCommand(world, cmd);
+				RTTYSystem.broadcast(world, params[0], sat.tx);
 				dat.markDirty();
 			}
 			SatelliteRayScan.reportEvent(world, pos.getX(), pos.getY(), pos.getZ(), SatelliteRayScan.RayEvent.INFO_RADIO, 300);

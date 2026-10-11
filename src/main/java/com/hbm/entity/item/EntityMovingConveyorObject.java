@@ -171,8 +171,9 @@ public abstract class EntityMovingConveyorObject extends Entity {
         this.velocityZ = this.motionZ = motionZ;
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
-    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int theNumberThree) {
+    public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch, int theNumberThree, boolean teleport) {
         this.syncPosX = x;
         this.syncPosY = y;
         this.syncPosZ = z;

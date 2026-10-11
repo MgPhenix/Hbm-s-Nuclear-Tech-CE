@@ -1,23 +1,40 @@
 package com.hbm.blocks.machine.rbmk;
 
+import com.google.common.collect.ImmutableSet;
+import com.hbm.Tags;
 import com.hbm.api.block.IToolable;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
-import org.lwjgl.opengl.GL11;
-
 import com.hbm.main.MainRegistry;
-import com.hbm.main.ResourceManager;
-import com.hbm.render.tileentity.RenderArcFurnace;
+import com.hbm.render.icon.PaddedSpriteUtil;
+import com.hbm.render.loader.HFRWavefrontObject;
+import com.hbm.render.model.BakedModelMatrixUtil;
+import com.hbm.render.model.RBMKMiniPanelItemBakedModel;
+import com.hbm.render.model.RBMKMiniPanelItemBakedModel.Layer;
 import com.hbm.tileentity.machine.rbmk.TileEntityRBMKGauge;
 
-import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Arrays;
 
 public class RBMKGauge extends RBMKMiniPanelBase implements IToolable {
+
+	private static final ResourceLocation PART_SPRITE = new ResourceLocation(Tags.MODID, "models/network/gauge");
+	private static final float[][] ITEM_UNIT_OFFSETS = {
+			{-0.25F, 0.25F, 0.25F},
+			{0.25F, 0.25F, 0.25F},
+			{-0.25F, -0.25F, 0.25F},
+			{0.25F, -0.25F, 0.25F},
+	};
 
 	public RBMKGauge(String s) {
 		super(s);
@@ -35,38 +52,24 @@ public class RBMKGauge extends RBMKMiniPanelBase implements IToolable {
 		return true;
 	}
 
-	/*@Override
-	public void renderInventoryBlock(Block block, int meta, int modelId, Object renderBlocks) {
-		super.renderInventoryBlock(block, meta, modelId, renderBlocks);
-		
-		GL11.glPushMatrix();
-		GL11.glTranslated(0, -0.5, 0);
-		GL11.glRotated(-90, 0, 1, 0);
-		
-		for(int i = 0; i < 4; i++) {
-			
-			GL11.glPushMatrix();
-			GL11.glTranslated(0.25, (i / 2) * -0.5 + 0.25, (i % 2) * -0.5 + 0.25);
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerSprite(TextureMap map) {
+		super.registerSprite(map);
+		PaddedSpriteUtil.register(map, PaddedSpriteUtil.inspectTexture(PART_SPRITE));
+	}
 
-			GL11.glColor3f(1F, 1F, 1F);
-			Minecraft.getMinecraft().getTextureManager().bindTexture(ResourceManager.rbmk_gauge_tex);
-			ResourceManager.rbmk_gauge.renderPart("Gauge");
-			
-			GL11.glColor3f(0.5F, 0F, 0F);
-			GL11.glTranslated(0, 0.4375, -0.125);
-			GL11.glRotated(85, 1, 0, 0);
-			GL11.glTranslated(0, -0.4375, 0.125);
-			
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			RenderArcFurnace.fullbright(true);
-			GL11.glEnable(GL11.GL_LIGHTING);
-			ResourceManager.rbmk_gauge.renderPart("Needle");
-			RenderArcFurnace.fullbright(false);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
-			
-			GL11.glPopMatrix();
-		}
-		
-		GL11.glPopMatrix();
-	}*/
+	@Override
+	@SideOnly(Side.CLIENT)
+	protected IBakedModel createItemModel() {
+		HFRWavefrontObject model = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/gauge.obj"));
+		return new RBMKMiniPanelItemBakedModel(this.sprite, Arrays.asList(
+				texturedLayer(model, ImmutableSet.of("Gauge"), PART_SPRITE, 0xFFFFFF, null, ITEM_UNIT_OFFSETS),
+				new Layer(model, ImmutableSet.of("Needle"), ModelLoader.White.INSTANCE, 1.0F, 1.0F, 0x800000,
+						BakedModelMatrixUtil.compose(
+								BakedModelMatrixUtil.translate(0, 0.4375, -0.125),
+								BakedModelMatrixUtil.rotateX(85),
+								BakedModelMatrixUtil.translate(0, -0.4375, 0.125)),
+						ITEM_UNIT_OFFSETS)));
+	}
 }

@@ -12,6 +12,7 @@ import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.sound.AudioWrapper;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
@@ -266,7 +267,9 @@ public class TileEntityFEL extends TileEntityMachineBase implements ITickable, I
 		this.mode = EnumWavelengths.valueOf(BufferUtil.readString(buf));
 		this.isOn = buf.readBoolean();
 		this.missingValidSilex = buf.readBoolean();
+		int prevDistance = distance;
 		this.distance = buf.readInt();
+		if (distance != prevDistance) SectionGeometry.renderBoundsChanged(this);
 	}
 
 	@Override

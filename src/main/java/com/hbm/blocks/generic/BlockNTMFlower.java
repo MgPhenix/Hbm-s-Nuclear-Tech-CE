@@ -28,6 +28,11 @@ public class BlockNTMFlower extends BlockPlantEnumMeta<EnumFlowerPlantType> impl
     }
 
 
+    @Override
+    protected boolean isBiomeTinted(EnumFlowerPlantType type) {
+        return type == HEMP || type == TOBACCO;
+    }
+
     public static void initPlacables() {
         PLANTABLE_BLOCKS.add(ModBlocks.dirt_dead);
         PLANTABLE_BLOCKS.add(ModBlocks.dirt_oily);

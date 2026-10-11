@@ -147,9 +147,7 @@ public class BlockNTMTrapdoor extends BlockTrapDoor implements IDynamicModels {
         }
         IBlockState toggledState = state.cycleProperty(OPEN);
         world.setBlockState(pos, toggledState, 2);
-        world.playEvent(null, 1003, pos, 0);
-        boolean nowOpen = toggledState.getValue(OPEN);
-        SoundEvent sound = (nowOpen ? SoundEvents.BLOCK_WOODEN_TRAPDOOR_OPEN : SoundEvents.BLOCK_WOODEN_TRAPDOOR_CLOSE);
+        SoundEvent sound = toggledState.getValue(OPEN) ? SoundEvents.BLOCK_WOODEN_TRAPDOOR_OPEN : SoundEvents.BLOCK_WOODEN_TRAPDOOR_CLOSE;
         world.playSound(null, pos, sound, SoundCategory.BLOCKS, 1.0F, world.rand.nextFloat() * 0.1F + 0.9F);
         return true;
     }

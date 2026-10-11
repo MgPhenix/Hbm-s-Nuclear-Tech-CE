@@ -98,7 +98,7 @@ public class GenericRecipe {
     public GenericRecipe setIconToFirstIngredient() {
         if(this.inputItem != null) {
             List<ItemStack> stacks = this.inputItem[0].extractForJEI();
-            if(!stacks.isEmpty()) this.icon = stacks.getFirst();
+            if(!stacks.isEmpty()) this.setIcon(stacks.getFirst());
         }
         return this;
     }

@@ -22,6 +22,7 @@ import com.hbm.lib.DirPos;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.Library;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.IUpgradeInfoProvider;
@@ -239,6 +240,7 @@ public class TileEntityMachineMiningLaser extends TileEntityMachineBase implemen
     @Override
     public void deserialize(ByteBuf buf) {
         super.deserialize(buf);
+        AxisAlignedBB previous = getRenderBoundingBox();
         this.power = buf.readLong();
         this.lastTargetX = buf.readInt();
         this.lastTargetY = buf.readInt();
@@ -251,6 +253,7 @@ public class TileEntityMachineMiningLaser extends TileEntityMachineBase implemen
         this.redstonePowered = buf.readBoolean();
         this.breakProgress = buf.readDouble();
         tankNew.deserialize(buf);
+        if (!getRenderBoundingBox().equals(previous)) SectionGeometry.renderBoundsChanged(this);
     }
 
     private void buildDam() {

@@ -2,9 +2,12 @@ package com.hbm.items.special;
 
 import com.hbm.blocks.ModBlocks;
 import com.hbm.handler.ArmorUtil;
+import com.hbm.inventory.OreDictManager;
 import com.hbm.inventory.fluid.Fluids;
+import com.hbm.items.ItemEnums;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemBattery;
+import com.hbm.items.machine.ItemBatteryPack;
 import com.hbm.items.machine.ItemBreedingRod;
 import com.hbm.items.weapon.grenade.ItemGrenadeExtra.EnumGrenadeExtra;
 import com.hbm.items.weapon.grenade.ItemGrenadeFilling.EnumGrenadeFilling;
@@ -198,6 +201,35 @@ public class ItemStarterKit extends Item {
             for (EnumGrenadeExtra extra : EnumGrenadeExtra.values()) {
                 player.inventory.addItemStackToInventory(new ItemStack(ModItems.grenade_extra, 16, extra.ordinal()));
             }
+        }
+
+        if(this == ModItems.nuke_electric_kit)
+        {
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.coil_copper, 16));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.coil_gold, 8));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.coil_tungsten, 8));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.motor, 4));
+            player.inventory.addItemStackToInventory(OreDictManager.DictFrame.fromOne(ModItems.circuit, ItemEnums.EnumCircuitType.VACUUM_TUBE, 16));
+            player.inventory.addItemStackToInventory(OreDictManager.DictFrame.fromOne(ModItems.circuit, ItemEnums.EnumCircuitType.CAPACITOR, 16));
+            player.inventory.addItemStackToInventory(OreDictManager.DictFrame.fromOne(ModItems.circuit, ItemEnums.EnumCircuitType.BASIC, 16));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.wiring_red_copper, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.magnetron, 5));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.piston_selenium, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.piston_selenium, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.piston_selenium, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.canister_full, 16, Fluids.DIESEL.getID()));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.canister_full, 16, Fluids.BIOFUEL.getID()));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.battery_potato, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.screwdriver, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.machine_excavator, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.machine_diesel, 2));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.red_cable, 64));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.red_wire_coated, 16));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.red_pylon, 8));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.machine_battery_socket, 4));
+            player.inventory.addItemStackToInventory(new ItemStack(ModItems.battery_pack, 4, ItemBatteryPack.EnumBatteryPack.BATTERY_LEAD.ordinal()));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.machine_converter_he_rf, 1));
+            player.inventory.addItemStackToInventory(new ItemStack(ModBlocks.machine_converter_rf_he, 1));
         }
 
         if(this == ModItems.gadget_kit)

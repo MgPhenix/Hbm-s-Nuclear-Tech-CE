@@ -16,11 +16,13 @@ import com.hbm.lib.maps.NonBlockingHashMapLong;
 import com.hbm.lib.maps.NonBlockingLong2LongHashMap;
 import com.hbm.lib.queues.MpmcUnboundedXaddArrayLongQueue;
 import com.hbm.lib.queues.MpscUnboundedXaddArrayLongQueue;
+import com.hbm.main.MainRegistry;
 import com.hbm.util.ChunkUtil;
 import com.hbm.util.CompatDynamicTrees;
 import com.hbm.world.WorldUtil;
 import com.hbm.world.biome.BiomeGenCraterBase;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -52,7 +54,6 @@ import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.hbm.config.BombConfig.safeCommit;
 import static com.hbm.lib.internal.UnsafeHolder.*;
 
 @AutoRegister(name = "entity_fallout_rain", trackingRange = 1000)
@@ -89,6 +90,7 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
     MpmcUnboundedXaddArrayLongQueue qOuter;
     MpscUnboundedXaddArrayLongQueue chunkLoadQueue;
     MpscUnboundedXaddArrayQueue<Runnable> mainTasks;
+    MpscUnboundedXaddArrayQueue<ChunkWork> captures;
     NonBlockingLong2LongHashMap waitingRoom;
     Long2IntOpenHashMap sectionMaskByChunk;
     MainScratch mainScratch;
@@ -102,6 +104,7 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
     int workerInnerSize;
     int workerOuterSize;
     int workerTarget;
+    int snapshotsInFlight;
     int jobDimension = Integer.MIN_VALUE;
 
     int tickDelay = BombConfig.falloutDelay;
@@ -178,6 +181,7 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
         qOuter = new MpmcUnboundedXaddArrayLongQueue(csRetryOuter, pooledLong);
         chunkLoadQueue = new MpscUnboundedXaddArrayLongQueue(csLoad, pooledLong);
         mainTasks = new MpscUnboundedXaddArrayQueue<>(csTasks);
+        captures = new MpscUnboundedXaddArrayQueue<>(csTasks);
         waitingRoom = new NonBlockingLong2LongHashMap(ceilPow2(Math.max(1024, total * 2)));
         sectionMaskByChunk = new Long2IntOpenHashMap(Math.max(1024, total));
         sectionMaskByChunk.defaultReturnValue(0);
@@ -207,13 +211,30 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
     }
 
     void runServerThreadBudget(int timeBudgetMs) {
-        if (mainTasks == null || chunkLoadQueue == null) return;
+        if (finished != 0 || mainTasks == null || chunkLoadQueue == null) return;
 
         long deadline = System.nanoTime() + (long) timeBudgetMs * 1_000_000L;
+        long idleDeadline = 0;
         while (System.nanoTime() < deadline) {
+            if (finished != 0) break;
             Runnable r = mainTasks.relaxedPoll();
-            if (r == null) break;
-            r.run();
+            if (r != null) {
+                r.run();
+                idleDeadline = 0;
+                continue;
+            }
+            if (snapshotsInFlight < workerTarget * 8) {
+                ChunkWork work = captures.relaxedPoll();
+                if (work != null) {
+                    captureChunk(work);
+                    idleDeadline = 0;
+                    continue;
+                }
+            }
+            if (snapshotsInFlight == 0) break;
+            if (idleDeadline == 0) idleDeadline = Math.min(deadline, System.nanoTime() + 4_000_000L);
+            if (System.nanoTime() >= idleDeadline) break;
+            java.util.concurrent.locks.LockSupport.parkNanos(100_000L);
         }
         loadMissingChunksUntil(deadline);
     }
@@ -358,7 +379,8 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
 
             int cx = Library.getChunkPosX(ck);
             int cz = Library.getChunkPosZ(ck);
-            world.getChunk(cx, cz);
+            Chunk chunk = world.getChunk(cx, cz);
+            mirror.put(ck, chunk);
 
             long wait = waitingRoom.remove(ck);
             if (wait > 0) enqueueWork(ck, wait == WAIT_OUTER);
@@ -367,14 +389,71 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
 
     void processChunkOffThread(long cpLong, int scale, boolean clampToRadius) {
         if (finished != 0) return;
+        captures.offer(new ChunkWork(cpLong, scale, clampToRadius, ThreadLocalRandom.current().nextLong()));
+    }
 
-        ExtendedBlockStorage[] ebs = ChunkUtil.getLoadedEBS(mirror, cpLong);
-        if (ebs == null) {
-            long v = clampToRadius ? WAIT_OUTER : WAIT_INNER;
-            long prev = waitingRoom.putIfAbsent(cpLong, v);
-            if (prev <= 0) chunkLoadQueue.offer(cpLong);
+    void captureChunk(ChunkWork work) {
+        long cpLong = work.chunkPos();
+        Chunk chunk = ((WorldServer) world).getChunkProvider().loadedChunks.get(cpLong);
+        if (chunk == null) {
+            long wait = work.clampToRadius() ? WAIT_OUTER : WAIT_INNER;
+            long previous = waitingRoom.putIfAbsent(cpLong, wait);
+            if (previous <= 0) chunkLoadQueue.offer(cpLong);
             return;
         }
+        ExtendedBlockStorage[] live = chunk.getBlockStorageArray();
+        ExtendedBlockStorage[] snapshot = new ExtendedBlockStorage[live.length];
+        for (int subY = 0; subY < live.length; subY++) {
+            ExtendedBlockStorage section = live[subY];
+            snapshot[subY] = section == Chunk.NULL_BLOCK_STORAGE || section.isEmpty()
+                    ? Chunk.NULL_BLOCK_STORAGE : ChunkUtil.copyBlockStates(section);
+        }
+        Biome[] biomes = new Biome[256];
+        MutableBlockPos pos = TL_POS.get();
+        int baseX = chunk.x << 4;
+        int baseZ = chunk.z << 4;
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                biomes[(x << 4) | z] = world.getBiome(pos.setPos(baseX | x, 0, baseZ | z));
+            }
+        }
+        byte[] biomeIds = chunk.getBiomeArray().clone();
+        snapshotsInFlight++;
+        pool.submit(() -> {
+            try {
+                processChunkSnapshotOffThread(work, chunk, snapshot, biomes, biomeIds);
+            } catch (Throwable failure) {
+                MainRegistry.logger.error("Fallout calculation failed for chunk {}", cpLong, failure);
+                mainTasks.offer(() -> {
+                    snapshotsInFlight--;
+                    abort();
+                    setDead();
+                });
+            }
+        });
+    }
+
+    boolean snapshotStillCurrent(Chunk chunk, ExtendedBlockStorage[] snapshot, byte[] biomeIds) {
+        ExtendedBlockStorage[] live = chunk.getBlockStorageArray();
+        for (int subY = 0; subY < snapshot.length; subY++) {
+            ExtendedBlockStorage before = snapshot[subY];
+            ExtendedBlockStorage now = live[subY];
+            boolean beforeEmpty = before == Chunk.NULL_BLOCK_STORAGE || before.isEmpty();
+            boolean nowEmpty = now == Chunk.NULL_BLOCK_STORAGE || now.isEmpty();
+            if (beforeEmpty || nowEmpty) {
+                if (beforeEmpty != nowEmpty) return false;
+                continue;
+            }
+            if (!ChunkUtil.sameBlockStates(before, now)) return false;
+        }
+        return Arrays.equals(chunk.getBiomeArray(), biomeIds);
+    }
+
+    void processChunkSnapshotOffThread(ChunkWork work, Chunk capturedChunk, ExtendedBlockStorage[] ebs,
+                                       Biome[] biomes, byte[] biomeIds) {
+        long cpLong = work.chunkPos();
+        int scale = work.scale();
+        boolean clampToRadius = work.clampToRadius();
 
         int chunkX = Library.getChunkPosX(cpLong);
         int chunkZ = Library.getChunkPosZ(cpLong);
@@ -388,8 +467,16 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
         Long2IntOpenHashMap biomeChanges = s.biomeChanges;
         Long2ObjectOpenHashMap<IBlockState> spawnFalling = s.spawnFalling;
 
-        ThreadLocalRandom rand = ThreadLocalRandom.current();
+        Random rand = new Random(work.seed());
         double cx = posX, cz = posZ;
+        int topY = 0;
+        for (int subY = ebs.length - 1; subY >= 0; subY--) {
+            ExtendedBlockStorage section = ebs[subY];
+            if (section != Chunk.NULL_BLOCK_STORAGE && !section.isEmpty()) {
+                topY = (subY << 4) + 15;
+                break;
+            }
+        }
 
         for (int lx = 0; lx < 16; lx++) {
             int x = minX + lx;
@@ -400,69 +487,26 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
 
                 double percent = (double) scale <= 0 ? 100.0 : (distance * 100.0 / (double) scale);
 
-                Biome target = getBiomeChange(percent, scale, world.getBiome(TL_POS.get().setPos(x, 0, z)));
+                Biome target = getBiomeChange(percent, scale, biomes[(lx << 4) | lz]);
                 if (biomeChange && target != null) biomeChanges.put(ChunkPos.asLong(x, z), Biome.getIdForBiome(target));
 
-                stompColumnToUpdates(s, ebs, x, z, percent, updates, spawnFalling, rand);
+                stompColumnToUpdates(s, ebs, x, z, percent, updates, spawnFalling, rand, topY);
             }
         }
 
         if (updates.isEmpty() && biomeChanges.isEmpty() && spawnFalling.isEmpty()) {
-            if (U.getAndAddInt(this, OFF_PENDING_CHUNKS, -1) - 1 == 0) maybeFinish();
-            return;
-        }
-
-        if (!safeCommit) {
-            Chunk chunk = ChunkUtil.getLoadedChunk(mirror, cpLong);
-            if (chunk == null) {
-                long v = clampToRadius ? WAIT_OUTER : WAIT_INNER;
-                long prev = waitingRoom.putIfAbsent(cpLong, v);
-                if (prev <= 0) chunkLoadQueue.offer(cpLong);
-                return;
-            }
-
-            Long2ObjectOpenHashMap<IBlockState> changed = new Long2ObjectOpenHashMap<>();
-
-            Chunk old;
-            do {
-                old = chunk;
-                ChunkUtil.applyAndSwap(chunk, c -> updates, changed);
-                chunk = ChunkUtil.getLoadedChunk(mirror, cpLong);
-                if (chunk == null) {
-                    long v = clampToRadius ? WAIT_OUTER : WAIT_INNER;
-                    long prev = waitingRoom.putIfAbsent(cpLong, v);
-                    if (prev <= 0) chunkLoadQueue.offer(cpLong);
-                    return;
-                }
-            } while (old != chunk);
-
-            if (changed.isEmpty() && biomeChanges.isEmpty() && spawnFalling.isEmpty()) {
-                if (U.getAndAddInt(this, OFF_PENDING_CHUNKS, -1) - 1 == 0) maybeFinish();
-                return;
-            }
-
-            int mask = 0;
-            ObjectIterator<Long2ObjectMap.Entry<IBlockState>> it = changed.long2ObjectEntrySet().fastIterator();
-            while (it.hasNext()) {
-                Long2ObjectMap.Entry<IBlockState> e = it.next();
-                int y = Library.getBlockPosY(e.getLongKey());
-                mask |= 1 << (y >>> 4);
-            }
-
-            Long2IntOpenHashMap biomeCopy = biomeChanges.isEmpty() ? null : new Long2IntOpenHashMap(biomeChanges);
-            Long2ObjectOpenHashMap<IBlockState> fallingCopy = spawnFalling.isEmpty() ? null : new Long2ObjectOpenHashMap<>(spawnFalling);
-            int finalMask = mask;
-
-            U.getAndAddInt(this, OFF_PENDING_MAIN, 1);
             mainTasks.offer(() -> {
                 try {
-                    doNotifyOnMain(cpLong, changed, finalMask, biomeCopy, fallingCopy);
+                    if (((WorldServer) world).getChunkProvider().loadedChunks.get(cpLong) != capturedChunk
+                            || !snapshotStillCurrent(capturedChunk, ebs, biomeIds)) {
+                        captures.offer(work);
+                    } else if (U.getAndAddInt(this, OFF_PENDING_CHUNKS, -1) - 1 == 0) {
+                        maybeFinish();
+                    }
                 } finally {
-                    if (U.getAndAddInt(this, OFF_PENDING_MAIN, -1) - 1 == 0) maybeFinish();
+                    snapshotsInFlight--;
                 }
             });
-
-            if (U.getAndAddInt(this, OFF_PENDING_CHUNKS, -1) - 1 == 0) maybeFinish();
             return;
         }
 
@@ -479,7 +523,6 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
 
         SubUpdate[] tasks = null;
         int taskCount = 0;
-
         boolean hasSky = world.provider.hasSkyLight();
 
         for (int subY = 0; subY < 16; subY++) {
@@ -489,20 +532,36 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
             Int2ObjectOpenHashMap<IBlockState> bucket = new Int2ObjectOpenHashMap<>(bucketScratch.size());
             bucket.putAll(bucketScratch);
 
-            ExtendedBlockStorage expected = ebs[subY];
+            ExtendedBlockStorage source = ebs[subY];
+            Long2ObjectOpenHashMap<IBlockState> deferred = new Long2ObjectOpenHashMap<>();
+            Long2ObjectOpenHashMap<IBlockState> deferredOld = new Long2ObjectOpenHashMap<>();
+            ObjectIterator<Int2ObjectMap.Entry<IBlockState>> iterator = bucket.int2ObjectEntrySet().fastIterator();
+            while (iterator.hasNext()) {
+                Int2ObjectMap.Entry<IBlockState> entry = iterator.next();
+                int local = entry.getIntKey();
+                int x = (chunkX << 4) | Library.getLocalX(local);
+                int y = (subY << 4) | Library.getLocalY(local);
+                int z = (chunkZ << 4) | Library.getLocalZ(local);
+                IBlockState oldState = source == Chunk.NULL_BLOCK_STORAGE || source.isEmpty()
+                        ? Blocks.AIR.getDefaultState() : source.get(x & 15, y & 15, z & 15);
+                IBlockState replacement = entry.getValue();
+                if (oldState.getBlock().hasTileEntity(oldState) || replacement.getBlock().hasTileEntity(replacement)) {
+                    long position = Library.blockPosToLong(x, y, z);
+                    deferred.put(position, replacement);
+                    deferredOld.put(position, oldState);
+                    iterator.remove();
+                }
+            }
 
-            Long2ObjectOpenHashMap<IBlockState> oldSub = new Long2ObjectOpenHashMap<>();
-            Optional<ExtendedBlockStorage> mod = ChunkUtil.copyAndModify(chunkX, chunkZ, subY, hasSky, expected, bucket, oldSub);
+            Long2ObjectOpenHashMap<IBlockState> oldStates = new Long2ObjectOpenHashMap<>();
+            Optional<ExtendedBlockStorage> changed = ChunkUtil.copyAndModify(chunkX, chunkZ, subY, hasSky,
+                    source, bucket, oldStates);
             //noinspection OptionalAssignedToNull
-            if (mod == null) continue;
+            if (changed == null && deferred.isEmpty()) continue;
 
             if (tasks == null) tasks = new SubUpdate[16];
-            tasks[taskCount++] = new SubUpdate(subY, bucket, expected, mod.orElse(null), oldSub);
-        }
-
-        if (taskCount == 0 && biomeChanges.isEmpty() && spawnFalling.isEmpty()) {
-            if (U.getAndAddInt(this, OFF_PENDING_CHUNKS, -1) - 1 == 0) maybeFinish();
-            return;
+            tasks[taskCount++] = new SubUpdate(subY, changed != null,
+                    changed == null ? null : changed.orElse(null), oldStates, deferred, deferredOld);
         }
 
         Long2IntOpenHashMap biomeCopy = biomeChanges.isEmpty() ? null : new Long2IntOpenHashMap(biomeChanges);
@@ -513,16 +572,21 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
         U.getAndAddInt(this, OFF_PENDING_MAIN, 1);
         mainTasks.offer(() -> {
             try {
+                if (((WorldServer) world).getChunkProvider().loadedChunks.get(cpLong) != capturedChunk
+                        || !snapshotStillCurrent(capturedChunk, ebs, biomeIds)) {
+                    captures.offer(work);
+                    return;
+                }
                 int mask = applyPreparedOnMainInto(chunkX, chunkZ, finalTasks, finalTaskCount);
                 Long2ObjectOpenHashMap<IBlockState> oldStates = mainScratch.oldMerged.isEmpty() ? null : mainScratch.oldMerged;
                 doNotifyOnMain(cpLong, oldStates, mask, biomeCopy, fallingCopy);
+                if (U.getAndAddInt(this, OFF_PENDING_CHUNKS, -1) - 1 == 0) maybeFinish();
             } finally {
                 mainScratch.oldMerged.clear();
+                snapshotsInFlight--;
                 if (U.getAndAddInt(this, OFF_PENDING_MAIN, -1) - 1 == 0) maybeFinish();
             }
         });
-
-        if (U.getAndAddInt(this, OFF_PENDING_CHUNKS, -1) - 1 == 0) maybeFinish();
     }
 
     void doNotifyOnMain(long cpLong, Long2ObjectOpenHashMap<IBlockState> oldStates, int mask, Long2IntOpenHashMap biomeChanges,
@@ -549,8 +613,8 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
                     world.setBlockState(mutableBlockPos, oldState, 3);
                     continue;
                 }
-                if (oldState != newState) world.notifyBlockUpdate(mutableBlockPos, oldState, newState, 3);
-                ChunkUtil.flushTileEntity(loadedChunk, mutableBlockPos, oldState, newState);
+                if (oldState == newState) continue;
+                world.notifyBlockUpdate(mutableBlockPos, oldState, newState, 3);
                 world.notifyNeighborsOfStateChange(mutableBlockPos, newState.getBlock(), true);
                 if (CompatDynamicTrees.isTreePart(oldState.getBlock())) {
                     CompatDynamicTrees.destroyOrphanedNeighbors(world, mutableBlockPos.toImmutable());
@@ -577,6 +641,8 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
                 Long2ObjectMap.Entry<IBlockState> entry = iterator.next();
                 long pos = entry.getLongKey();
                 IBlockState state = entry.getValue();
+                Library.fromLong(mutableBlockPos, pos);
+                if (world.getBlockState(mutableBlockPos) != state) continue;
                 EntityFallingBlock falling = new EntityFallingBlock(world, Library.getBlockPosX(pos) + 0.5, Library.getBlockPosY(pos) + 0.5,
                         Library.getBlockPosZ(pos) + 0.5, state);
                 falling.shouldDropItem = false;
@@ -590,43 +656,43 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
     int applyPreparedOnMainInto(int chunkX, int chunkZ, SubUpdate[] tasks, int taskCount) {
         if (taskCount == 0 || tasks == null) return 0;
 
-        WorldServer ws = (WorldServer) world;
-        boolean hasSky = ws.provider.hasSkyLight();
-
         Chunk chunk = world.getChunk(chunkX, chunkZ);
         ExtendedBlockStorage[] storages = chunk.getBlockStorageArray();
 
         MainScratch ms = mainScratch;
         ms.oldMerged.clear();
+        ms.deferred.clear();
+        ms.deferredOld.clear();
 
         int mask = 0;
 
         for (int i = 0; i < taskCount; i++) {
             SubUpdate t = tasks[i];
-            if (t == null) continue;
-
             int subY = t.subY;
-            ExtendedBlockStorage cur = storages[subY];
-
-            if (cur == t.expected) {
-                if (cur != t.prepared) {
-                    storages[subY] = t.prepared;
-                    mask |= 1 << subY;
-                    if (t.oldStates != null && !t.oldStates.isEmpty()) ms.oldMerged.putAll(t.oldStates);
+            if (t.changed) {
+                ExtendedBlockStorage update = t.prepared;
+                ExtendedBlockStorage current = storages[subY];
+                if (update != null && current != Chunk.NULL_BLOCK_STORAGE && !current.isEmpty()) {
+                    update.blockLight = current.blockLight;
+                    update.skyLight = current.skyLight;
                 }
-            } else {
-                ms.oldSub.clear();
-                Optional<ExtendedBlockStorage> rebuilt = ChunkUtil.copyAndModify(chunkX, chunkZ, subY, hasSky, cur, t.toUpdate, ms.oldSub);
-                //noinspection OptionalAssignedToNull
-                if (rebuilt != null) {
-                    ExtendedBlockStorage upd = rebuilt.orElse(null);
-                    if (cur != upd) {
-                        storages[subY] = upd;
-                        mask |= 1 << subY;
-                        if (!ms.oldSub.isEmpty()) ms.oldMerged.putAll(ms.oldSub);
-                    }
-                }
+                storages[subY] = update;
+                mask |= 1 << subY;
+                ms.oldMerged.putAll(t.oldStates);
             }
+            ms.deferred.putAll(t.deferred);
+            ms.deferredOld.putAll(t.deferredOld);
+        }
+
+        MutableBlockPos pos = TL_POS.get();
+        ObjectIterator<Long2ObjectMap.Entry<IBlockState>> deferred = ms.deferred.long2ObjectEntrySet().fastIterator();
+        while (deferred.hasNext()) {
+            Long2ObjectMap.Entry<IBlockState> entry = deferred.next();
+            Library.fromLong(pos, entry.getLongKey());
+            if (world.getBlockState(pos) != ms.deferredOld.get(entry.getLongKey())) continue;
+            IBlockState replacement = entry.getValue();
+            if (replacement.getBlock() == ModBlocks.fallout && !ModBlocks.fallout.canPlaceBlockAt(world, pos)) continue;
+            if (ChunkUtil.replaceEmptied(world, pos, replacement, 3)) mask |= 1 << (pos.getY() >>> 4);
         }
 
         if (mask != 0) chunk.markDirty();
@@ -680,7 +746,7 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
 
     void stompColumnToUpdates(WorkerScratch scratch, ExtendedBlockStorage[] ebs, int x, int z, double distPercent,
                               Long2ObjectOpenHashMap<IBlockState> updates, Long2ObjectOpenHashMap<IBlockState> spawnFalling,
-                              ThreadLocalRandom rand) {
+                              Random rand, int topY) {
 
         int solidDepth = 0;
         boolean useOreDict = FalloutConfigJSON.hasOreDictMatchers();
@@ -689,7 +755,7 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
         MutableBlockPos pos = TL_POS.get();
         float stonebrickRes = Blocks.STONEBRICK.getExplosionResistance(null);
 
-        for (int y = 255; y >= 0; y--) {
+        for (int y = topY; y >= 0; y--) {
             if (solidDepth >= MAX_SOLID_DEPTH) return;
 
             int subY = y >>> 4;
@@ -910,8 +976,13 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
         outerChunksToProcess = out;
     }
 
-    record SubUpdate(int subY, Int2ObjectOpenHashMap<IBlockState> toUpdate, ExtendedBlockStorage expected, ExtendedBlockStorage prepared,
-                             Long2ObjectOpenHashMap<IBlockState> oldStates) {
+    record ChunkWork(long chunkPos, int scale, boolean clampToRadius, long seed) {
+    }
+
+    record SubUpdate(int subY, boolean changed, ExtendedBlockStorage prepared,
+                     Long2ObjectOpenHashMap<IBlockState> oldStates,
+                     Long2ObjectOpenHashMap<IBlockState> deferred,
+                     Long2ObjectOpenHashMap<IBlockState> deferredOld) {
     }
 
     static final class WorkerScratch {
@@ -1060,6 +1131,7 @@ public class EntityFalloutRain extends EntityExplosionChunkloading implements Bo
 
     static final class MainScratch {
         final Long2ObjectOpenHashMap<IBlockState> oldMerged = new Long2ObjectOpenHashMap<>(1024);
-        final Long2ObjectOpenHashMap<IBlockState> oldSub = new Long2ObjectOpenHashMap<>(256);
+        final Long2ObjectOpenHashMap<IBlockState> deferred = new Long2ObjectOpenHashMap<>(64);
+        final Long2ObjectOpenHashMap<IBlockState> deferredOld = new Long2ObjectOpenHashMap<>(64);
     }
 }

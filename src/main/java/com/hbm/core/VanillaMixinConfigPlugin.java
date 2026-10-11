@@ -37,10 +37,7 @@ public class VanillaMixinConfigPlugin implements IMixinConfigPlugin {
         String suffix = mixinClassName.substring(PACKAGE_PREFIX.length());
         int separator = suffix.indexOf('.');
         if (separator < 0) {
-            return switch (suffix) {
-                case "MixinRenderGlobal" -> VANILLA_TERRAIN_PATH;
-                default -> true;
-            };
+            return true;
         }
 
         String group = suffix.substring(0, separator);
@@ -48,17 +45,12 @@ public class VanillaMixinConfigPlugin implements IMixinConfigPlugin {
         return switch (group) {
             case "base" -> switch (simpleName) {
                 case "MixinBufferBuilder" -> BASE_BUFFER_BUILDER_PATH;
-                default -> true;
-            };
-            //Fuck you better foliage
-            case "betterfoliage" -> switch (simpleName) {
-                case "MixinRenderChunkBlockTrackBetterFoliage" -> BETTER_FOLIAGE;
-                case "MixinRenderChunkBlockTrackVanilla" -> !BETTER_FOLIAGE;
+                case "MixinRenderChunk" -> VANILLA_TERRAIN_PATH && !OPTIFINE;
                 default -> true;
             };
             case "optifine" -> switch (simpleName) {
                 case "MixinBufferBuilder" -> OPTIFINE_BUFFER_BUILDER_PATH;
-                case "MixinRenderGlobal" -> OPTIFINE && VANILLA_TERRAIN_PATH;
+                case "MixinRenderChunk" -> OPTIFINE && VANILLA_TERRAIN_PATH;
                 default -> true;
             };
             case "neonium" -> NEONIUM;
@@ -67,7 +59,6 @@ public class VanillaMixinConfigPlugin implements IMixinConfigPlugin {
                 case "MixinBufferBuilderOptifine" -> NOTHIRIUM_OPTIFINE_BUFFER_BUILDER_PATH && !NEONIUM;
                 default -> NOTHIRIUM;
             };
-            case "celeritas" -> CELERITAS;
             default -> true;
         };
     }

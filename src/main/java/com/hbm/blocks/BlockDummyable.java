@@ -20,6 +20,7 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -186,7 +187,7 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
     // the freshly-orphaned neighbors instead. Without this, destroying a long dummy
     // chain blows the JVM stack (each recursion level burns ~8 frames). idk why it isn't crashing in 1.7
     private void cascadeOrphans(World world, BlockPos start, IBlockState startState) {
-        if (startState.getBlock() != this || !isOrphan(world, start, startState)) return;
+        if (!isSameMultiblock(startState.getBlock()) || !isOrphan(world, start, startState)) return;
         safeRem = true;
         try {
             ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -194,7 +195,7 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
             while (!queue.isEmpty()) {
                 BlockPos p = queue.poll();
                 IBlockState s = world.getBlockState(p);
-                if (s.getBlock() != this) continue;
+                if (!isSameMultiblock(s.getBlock())) continue;
                 if (!isOrphan(world, p, s)) continue;
                 world.setBlockToAir(p);
                 for (ForgeDirection d : ForgeDirection.VALID_DIRECTIONS) {
@@ -376,6 +377,39 @@ public abstract class BlockDummyable extends BlockContainer implements ICustomBl
         InventoryHelper.dropInventoryItems(world, pos, world.getTileEntity(pos));
         super.breakBlock(world, pos, state);
     }
+
+	protected boolean isSchematicDummy(World world, BlockPos pos) {
+		if (!world.isRemote || world == Minecraft.getMinecraft().world) return false;
+		BlockPos core = findCore(world, pos);
+		return core == null || !pos.equals(getSchematicOrigin(world, core));
+	}
+
+	public BlockPos getSchematicOrigin(World world, BlockPos core) {
+		ForgeDirection dir = ForgeDirection.getOrientation(world.getBlockState(core).getValue(META) - offset);
+		int o = getOffset();
+		BlockPos origin = core.add(dir.offsetX * o, dir.offsetY * o - getHeightOffset(), dir.offsetZ * o);
+		return core.equals(findCore(world, origin)) ? origin : core;
+	}
+
+	public boolean isValidSchematicFacing(EntityPlayer player, BlockPos core, int coreMeta) {
+		int i = MathHelper.floor(player.rotationYaw * 4.0F / 360.0F + 0.5D) & 3;
+		ForgeDirection dir = getDirModified(ForgeDirection.getOrientation(switch (i) {
+			case 0 -> 2;
+			case 1 -> 5;
+			case 2 -> 3;
+			default -> 4;
+		}));
+		return getMetaForCore(player.world, core, player, dir.ordinal() + offset) == coreMeta;
+	}
+
+	public ItemStack getSchematicFinishItem(int schematicCoreMeta, int placedCoreMeta) {
+		return ItemStack.EMPTY;
+	}
+
+	@Override
+	public @NotNull ItemStack getItem(@NotNull World world, @NotNull BlockPos pos, @NotNull IBlockState state) {
+		return isSchematicDummy(world, pos) ? ItemStack.EMPTY : super.getItem(world, pos, state);
+	}
 
 	public boolean useDetailedHitbox() {
 		return !bounding.isEmpty();

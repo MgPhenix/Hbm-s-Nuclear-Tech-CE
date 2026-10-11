@@ -7,20 +7,15 @@
   "target": "@env(DEFAULT)",
   "client": [
     "base.MixinBufferBuilder",
-    "betterfoliage.MixinRenderChunkBlockTrackVanilla",
-    "betterfoliage.MixinRenderChunkBlockTrackBetterFoliage",
-    "MixinRenderGlobal",
-    "celeritas.MixinRenderGlobal",
     "neonium.MixinBufferBuilder",
     "neonium.MixinChunkRenderManager",
-    "neonium.MixinRenderGlobal",
     "neonium.MixinSodiumWorldRenderer",
     "nothirium.MixinBufferBuilder",
     "nothirium.MixinBufferBuilderOptifine",
-    "nothirium.MixinAbstractChunkRenderer",
-    "nothirium.MixinRenderGlobal",
     "optifine.MixinBufferBuilder",
-    "optifine.MixinRenderGlobal"
+    "base.MixinRenderChunk",
+    "nothirium.MixinBufferBuilderDrawing",
+    "optifine.MixinRenderChunk"
   ],
   "mixins": [],
   "server": [],

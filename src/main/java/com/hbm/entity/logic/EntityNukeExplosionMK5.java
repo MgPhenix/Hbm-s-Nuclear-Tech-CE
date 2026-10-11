@@ -123,7 +123,9 @@ public class EntityNukeExplosionMK5 extends EntityExplosionChunkloading {
         }
 
         //Calculating crater
-        if (!explosion.isComplete()) {
+        if (explosion.hasFailed()) {
+            this.setDead();
+        } else if (!explosion.isComplete()) {
             explosion.update(BombConfig.mk5);
         } else {
             if (GeneralConfig.enableExtendedLogging && explosionStart != 0)

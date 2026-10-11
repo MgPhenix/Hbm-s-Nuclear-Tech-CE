@@ -477,6 +477,12 @@ public class JEIConfig implements IModPlugin {
         blacklist.addIngredientToBlacklist(new ItemStack(ModItems.bobmazon_hidden));
         blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.zirnox_destroyed));
         blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.machine_furnace_brick_on));
+        blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.conveyor));
+        blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.conveyor_express));
+        blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.conveyor_double));
+        blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.conveyor_triple));
+        blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.conveyor_chute));
+        blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.conveyor_lift));
         blacklist.addIngredientToBlacklist(new ItemStack(ModItems.ammo_misc));
         if(!GeneralConfig.enableDebugMode) {
             blacklist.addIngredientToBlacklist(new ItemStack(ModBlocks.obj_tester));

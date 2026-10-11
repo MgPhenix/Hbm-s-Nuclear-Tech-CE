@@ -266,35 +266,6 @@ public abstract class AbstractWavefrontBakedModel extends AbstractBakedModel {
         return geometries;
     }
 
-    protected float[] computeGeometryBounds(Set<String> partNames, float roll, float pitch, float yaw,
-                                            boolean centerToBlock, float extraTx, float extraTy, float extraTz) {
-        List<FaceGeometry> geometries = buildGeometry(partNames, roll, pitch, yaw, false, centerToBlock, extraTx,
-                extraTy, extraTz);
-        if (geometries.isEmpty()) {
-            return null;
-        }
-
-        float minX = Float.POSITIVE_INFINITY;
-        float minY = Float.POSITIVE_INFINITY;
-        float minZ = Float.POSITIVE_INFINITY;
-        float maxX = Float.NEGATIVE_INFINITY;
-        float maxY = Float.NEGATIVE_INFINITY;
-        float maxZ = Float.NEGATIVE_INFINITY;
-
-        for (FaceGeometry geometry : geometries) {
-            for (int i = 0; i < 4; i++) {
-                minX = Math.min(minX, geometry.px[i]);
-                minY = Math.min(minY, geometry.py[i]);
-                minZ = Math.min(minZ, geometry.pz[i]);
-                maxX = Math.max(maxX, geometry.px[i]);
-                maxY = Math.max(maxY, geometry.py[i]);
-                maxZ = Math.max(maxZ, geometry.pz[i]);
-            }
-        }
-
-        return new float[]{minX, minY, minZ, maxX, maxY, maxZ};
-    }
-
     protected final class FaceGeometry {
         private static final long COLORS_BASE = UnsafeHolder.fieldOffset(FaceGeometry.class, "colors01");
         static {
@@ -330,12 +301,19 @@ public abstract class AbstractWavefrontBakedModel extends AbstractBakedModel {
         }
 
         public BakedQuad buildQuad(TextureAtlasSprite sprite, int tintIndex, float uScale, float vScale) {
+            return buildQuad(sprite, tintIndex, uScale, vScale, 0xFFFFFF);
+        }
+
+        public BakedQuad buildQuad(TextureAtlasSprite sprite, int tintIndex, float uScale, float vScale, int rgb) {
+            int r = (rgb >> 16) & 0xFF;
+            int g = (rgb >> 8) & 0xFF;
+            int b = rgb & 0xFF;
             int[] vertexData = new int[format.getIntegerSize() * 4];
             float[] scratch = new float[4];
             for (int i = 0; i < 4; i++) {
                 int c = U.getInt(this, COLORS_BASE + i * 4L);
                 GeometryBakeUtil.putVertex(format, vertexData, i, px[i], py[i], pz[i], uu[i] * uScale, vv[i] * vScale,
-                        c, c, c, vertexNormals[i], sprite, scratch);
+                        c * r / 255, c * g / 255, c * b / 255, vertexNormals[i], sprite, scratch);
             }
             return new HbmBakedQuad(vertexData, tintIndex, facing, sprite, format);
         }

@@ -3,6 +3,7 @@ package com.hbm.main.client;
 import com.hbm.Tags;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.lib.ObjectDoubleFunction;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.render.icon.PaddedSpriteUtil;
 import com.hbm.render.icon.PaddedSpriteUtil.TextureInfo;
 import com.hbm.render.loader.HFRWavefrontObject;
@@ -109,6 +110,10 @@ public final class StaticDecoBakedModels {
     }
 
     private static void bakeStatueModels(IRegistry<ModelResourceLocation, IBakedModel> registry, TextureMap atlas) {
+        SectionGeometry.candidate(ModBlocks.statue_elb);
+        SectionGeometry.candidate(ModBlocks.statue_elb_g);
+        SectionGeometry.candidate(ModBlocks.statue_elb_w);
+        SectionGeometry.candidate(ModBlocks.statue_elb_f);
         TextureInfo statueTexture = inspectTexture("models/misc/modelstatue");
         TextureInfo gunTexture = inspectTexture("models/modelgun");
         TextureInfo watchTexture = inspectTexture("items/watch");
@@ -162,6 +167,7 @@ public final class StaticDecoBakedModels {
 
     private static void bakeSatellite(IRegistry<ModelResourceLocation, IBakedModel> registry, TextureMap atlas, Block block, String modelName,
                                       ObjectDoubleFunction<EnumFacing> yawFunction) {
+        SectionGeometry.candidate(block);
         HFRWavefrontObject baseModel = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/sat_base.obj"));
         HFRWavefrontObject model = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/" + modelName + ".obj"));
         TextureInfo baseTexture = inspectTexture("models/sat/sat_base");
@@ -186,6 +192,7 @@ public final class StaticDecoBakedModels {
 
     private static void bakeWavefrontFacing(IRegistry<ModelResourceLocation, IBakedModel> registry, TextureMap atlas, Block block,
                                             String modelPath, String spritePath, Function<EnumFacing, Matrix4f> transformFactory) {
+        SectionGeometry.candidate(block);
         HFRWavefrontObject model = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, modelPath));
         TextureInfo texture = inspectTexture(spritePath);
         TextureAtlasSprite sprite = sprite(atlas, texture);
@@ -196,6 +203,7 @@ public final class StaticDecoBakedModels {
 
     private static void bakeLegacyFacingModel(IRegistry<ModelResourceLocation, IBakedModel> registry, TextureMap atlas, Block block, ModelBase model,
                                               String spritePath, Function<EnumFacing, Matrix4f> transformFactory) {
+        SectionGeometry.candidate(block);
         TextureInfo texture = inspectTexture(spritePath);
         TextureAtlasSprite sprite = sprite(atlas, texture);
         for (EnumFacing facing : HORIZONTALS) {

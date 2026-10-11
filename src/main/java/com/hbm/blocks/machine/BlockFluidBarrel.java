@@ -1,5 +1,6 @@
 package com.hbm.blocks.machine;
 
+import com.hbm.Tags;
 import com.hbm.blocks.ICustomBlockItem;
 import com.hbm.blocks.IPersistentInfoProvider;
 import com.hbm.blocks.ITooltipProvider;
@@ -8,11 +9,14 @@ import com.hbm.blocks.generic.BaseBarrel;
 import com.hbm.inventory.fluid.FluidType;
 import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
+import com.hbm.items.IDynamicModels;
 import com.hbm.items.block.ItemBlockBase;
 import com.hbm.items.machine.IItemFluidIdentifier;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.lib.Library;
 import com.hbm.main.MainRegistry;
+import com.hbm.render.loader.HFRWavefrontObject;
+import com.hbm.render.model.BarrelBakedModel;
 import com.hbm.tileentity.IPersistentNBT;
 import com.hbm.tileentity.machine.TileEntityBarrel;
 import com.hbm.util.I18nUtil;
@@ -23,9 +27,15 @@ import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.statemap.StateMapperBase;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -33,6 +43,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.Style;
@@ -41,13 +52,17 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
 
-public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider, IPersistentInfoProvider, ICustomBlockItem {
+public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider, IPersistentInfoProvider, ICustomBlockItem, IDynamicModels {
 
     public static final PropertyBool CONN_POS_X = PropertyBool.create("conn_pos_x");
     public static final PropertyBool CONN_NEG_X = PropertyBool.create("conn_neg_x");
@@ -56,12 +71,14 @@ public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider
 
     public static boolean keepInventory;
     private int capacity;
+    private final ResourceLocation textureLocation;
 
     public BlockFluidBarrel(Material materialIn, int cap, String s) {
         super(materialIn);
         this.setTranslationKey(s);
         this.setRegistryName(s);
         capacity = cap;
+        this.textureLocation = new ResourceLocation(Tags.MODID, "blocks/" + s);
         this.setDefaultState(this.blockState.getBaseState()
                 .withProperty(CONN_POS_X, false)
                 .withProperty(CONN_NEG_X, false)
@@ -69,6 +86,39 @@ public class BlockFluidBarrel extends BlockContainer implements ITooltipProvider
                 .withProperty(CONN_NEG_Z, false));
 
         ModBlocks.ALL_BLOCKS.add(this);
+        IDynamicModels.INSTANCES.add(this);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerSprite(TextureMap map) {
+        map.registerSprite(textureLocation);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void bakeModel(ModelBakeEvent event) {
+        HFRWavefrontObject wavefront = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/blocks/barrel.obj"));
+        TextureAtlasSprite sprite = Minecraft.getMinecraft().getTextureMapBlocks().getAtlasSprite(textureLocation.toString());
+        event.getModelRegistry().putObject(new ModelResourceLocation(getRegistryName(), "normal"), BarrelBakedModel.forBlock(wavefront, sprite));
+        event.getModelRegistry().putObject(new ModelResourceLocation(getRegistryName(), "inventory"), BarrelBakedModel.forItem(wavefront, sprite));
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public StateMapperBase getStateMapper(ResourceLocation loc) {
+        return new StateMapperBase() {
+            @Override
+            protected ModelResourceLocation getModelResourceLocation(IBlockState state) {
+                return new ModelResourceLocation(loc, "normal");
+            }
+        };
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerModel() {
+        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
     }
 
     @Override

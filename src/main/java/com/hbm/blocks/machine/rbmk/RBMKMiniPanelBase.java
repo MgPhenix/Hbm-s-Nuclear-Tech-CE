@@ -3,8 +3,13 @@ package com.hbm.blocks.machine.rbmk;
 import com.hbm.blocks.ITooltipProvider;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.items.IDynamicModels;
+import com.hbm.render.icon.PaddedSpriteUtil;
+import com.hbm.render.icon.PaddedSpriteUtil.TextureInfo;
+import com.hbm.render.loader.HFRWavefrontObject;
 import com.hbm.render.model.RBMKMiniPanelBakedModel;
+import com.hbm.render.model.RBMKMiniPanelItemBakedModel.Layer;
 import net.minecraft.block.BlockContainer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
@@ -35,7 +40,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.vecmath.Matrix4f;
 import java.util.List;
+import java.util.Set;
 
 public class RBMKMiniPanelBase extends BlockContainer implements IDynamicModels, ITooltipProvider {
 	@SideOnly(Side.CLIENT)
@@ -155,10 +162,22 @@ public class RBMKMiniPanelBase extends BlockContainer implements IDynamicModels,
 		ModelResourceLocation invLoc = new ModelResourceLocation(getRegistryName(), "inventory");
 
 		IBakedModel worldModel = new RBMKMiniPanelBakedModel(this.sprite, false);
-		IBakedModel itemModel = new RBMKMiniPanelBakedModel(this.sprite, true);
+		IBakedModel itemModel = createItemModel();
 
 		event.getModelRegistry().putObject(worldLoc, worldModel);
 		event.getModelRegistry().putObject(invLoc, itemModel);
+	}
+
+	@SideOnly(Side.CLIENT)
+	protected IBakedModel createItemModel() {
+		return new RBMKMiniPanelBakedModel(this.sprite, true);
+	}
+
+	@SideOnly(Side.CLIENT)
+	protected static Layer texturedLayer(HFRWavefrontObject model, @Nullable Set<String> parts, ResourceLocation texture, int color, @Nullable Matrix4f localTransform, float[][] offsets) {
+		TextureInfo info = PaddedSpriteUtil.inspectTexture(texture);
+		TextureAtlasSprite partSprite = PaddedSpriteUtil.sprite(Minecraft.getMinecraft().getTextureMapBlocks(), info);
+		return new Layer(model, parts, partSprite, info.uScale, info.vScale, color, localTransform, offsets);
 	}
 
 	@Override

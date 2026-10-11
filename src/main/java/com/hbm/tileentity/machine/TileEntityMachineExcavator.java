@@ -26,6 +26,7 @@ import com.hbm.items.special.ItemBedrockOreBase;
 import com.hbm.lib.DirPos;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.Library;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.tileentity.IConnectionAnchors;
 import com.hbm.tileentity.IFluidCopiable;
 import com.hbm.tileentity.IGUIProvider;
@@ -185,7 +186,7 @@ public class TileEntityMachineExcavator extends TileEntityMachineBase implements
 
             if (prevTargetDepth != targetDepth) {
                 prevTargetDepth = targetDepth;
-                world.markBlockRangeForRenderUpdate(pos, pos);
+                SectionGeometry.renderBoundsChanged(this);
             }
 
             if (this.drillExtension != this.targetDepth) {
@@ -194,7 +195,7 @@ public class TileEntityMachineExcavator extends TileEntityMachineBase implements
 
                 if (diff <= speed) {
                     this.drillExtension = this.targetDepth;
-                    world.markBlockRangeForRenderUpdate(pos, pos);
+                    SectionGeometry.renderBoundsChanged(this);
                 } else {
                     float sig = Math.signum(this.drillExtension - this.targetDepth);
                     this.drillExtension -= sig * speed;

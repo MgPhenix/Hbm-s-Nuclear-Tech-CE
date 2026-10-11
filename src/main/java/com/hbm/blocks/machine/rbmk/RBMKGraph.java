@@ -1,20 +1,26 @@
 package com.hbm.blocks.machine.rbmk;
 
+import com.hbm.Tags;
 import com.hbm.api.block.IToolable;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
-import org.lwjgl.opengl.GL11;
-
 import com.hbm.main.MainRegistry;
-import com.hbm.main.ResourceManager;
+import com.hbm.render.icon.PaddedSpriteUtil;
+import com.hbm.render.loader.HFRWavefrontObject;
+import com.hbm.render.model.RBMKMiniPanelItemBakedModel;
 import com.hbm.tileentity.machine.rbmk.TileEntityRBMKGraph;
 
-import net.minecraft.block.Block;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Collections;
 
 public class RBMKGraph extends RBMKMiniPanelBase implements IToolable {
 
@@ -34,23 +40,18 @@ public class RBMKGraph extends RBMKMiniPanelBase implements IToolable {
 		return true;
 	}
 
-	/*@Override
-	public void renderInventoryBlock(Block block, int meta, int modelId, Object renderBlocks) {
-		super.renderInventoryBlock(block, meta, modelId, renderBlocks);
-		
-		GL11.glPushMatrix();
-		GL11.glTranslated(0, -0.5, 0);
-		GL11.glRotated(-90, 0, 1, 0);
-		
-		for(int i = 0; i < 2; i++) {
-			
-			GL11.glPushMatrix();
-			GL11.glTranslated(0.25, i * -0.5 + 0.25, 0);
-			Minecraft.getMinecraft().getTextureManager().bindTexture(ResourceManager.rbmk_numitron_tex);
-			ResourceManager.rbmk_numitron.renderAll();
-			GL11.glPopMatrix();
-		}
-		
-		GL11.glPopMatrix();
-	}*/
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerSprite(TextureMap map) {
+		super.registerSprite(map);
+		PaddedSpriteUtil.register(map, PaddedSpriteUtil.inspectTexture(RBMKNumitron.PART_SPRITE));
+	}
+
+	@Override
+	@SideOnly(Side.CLIENT)
+	protected IBakedModel createItemModel() {
+		HFRWavefrontObject model = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/numitron.obj"));
+		return new RBMKMiniPanelItemBakedModel(this.sprite, Collections.singletonList(
+				texturedLayer(model, null, RBMKNumitron.PART_SPRITE, 0xFFFFFF, null, RBMKNumitron.ITEM_UNIT_OFFSETS)));
+	}
 }

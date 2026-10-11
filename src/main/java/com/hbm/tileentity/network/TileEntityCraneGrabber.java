@@ -1,5 +1,6 @@
 package com.hbm.tileentity.network;
 
+import com.hbm.api.conveyor.IConveyorBelt;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.entity.item.EntityMovingItem;
 import com.hbm.interfaces.AutoRegister;
@@ -17,11 +18,13 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -39,8 +42,7 @@ public class TileEntityCraneGrabber extends TileEntityCraneBase implements IGUIP
     public boolean isIndirectlyPowered;
     public boolean isWhitelist = false;
     public ModulePatternMatcher matcher;
-    private int tickCounter = 0;
-    private int delay = 20;
+    public long lastGrabbedTick = 0;
 
     public TileEntityCraneGrabber() {
         super(0);
@@ -78,75 +80,91 @@ public class TileEntityCraneGrabber extends TileEntityCraneBase implements IGUIP
     public void update() {
         super.update();
         if(!world.isRemote) {
-            tickCounter++;
 
-            if(tickCounter >= this.delay && !isIndirectlyPowered) {
-                tickCounter = 0;
+            int delay = 20;
+            Item ejector = inventory.getStackInSlot(10).getItem();
+            if(ejector == ModItems.upgrade_ejector_1) delay = 10;
+            else if(ejector == ModItems.upgrade_ejector_2) delay = 5;
+            else if(ejector == ModItems.upgrade_ejector_3) delay = 2;
+
+            if(world.getTotalWorldTime() >= lastGrabbedTick + delay && !isIndirectlyPowered) {
                 int amount = 1;
-                if(!inventory.getStackInSlot(9).isEmpty()){
-                    if(inventory.getStackInSlot(9).getItem() == ModItems.upgrade_stack_1) {
-                        amount = 4;
-                    } else if(inventory.getStackInSlot(9).getItem() == ModItems.upgrade_stack_2){
-                        amount = 16;
-                    } else if(inventory.getStackInSlot(9).getItem() == ModItems.upgrade_stack_3){
-                        amount = 64;
-                    }
-                }
-                this.delay = 20;
-                if(!inventory.getStackInSlot(10).isEmpty()){
-                    if(inventory.getStackInSlot(10).getItem() == ModItems.upgrade_ejector_1) {
-                        this.delay = 10;
-                    } else if(inventory.getStackInSlot(10).getItem() == ModItems.upgrade_ejector_2){
-                        this.delay = 5;
-                    } else if(inventory.getStackInSlot(10).getItem() == ModItems.upgrade_ejector_3){
-                        this.delay = 2;
-                    }
-                }
+                Item stackUpgrade = inventory.getStackInSlot(9).getItem();
+                if(stackUpgrade == ModItems.upgrade_stack_1) amount = 4;
+                else if(stackUpgrade == ModItems.upgrade_stack_2) amount = 16;
+                else if(stackUpgrade == ModItems.upgrade_stack_3) amount = 64;
 
                 EnumFacing inputSide = getInputSide();
+                EnumFacing outputSide = getOutputSide();
+                BlockPos outputPos = pos.offset(outputSide);
+                Block beltBlock = world.getBlockState(outputPos).getBlock();
+
                 double reach = 1D;
-                Block b = world.getBlockState(pos.offset(inputSide)).getBlock();
-                if(b == ModBlocks.conveyor_double) reach = 0.5D;
-                if(b == ModBlocks.conveyor_triple) reach = 0.33D;
-                double x = (pos.offset(inputSide).getX()-pos.getX()) * reach + pos.getX();
-                double y = (pos.offset(inputSide).getY()-pos.getY()) * reach + pos.getY();
-                double z = (pos.offset(inputSide).getZ()-pos.getZ()) * reach + pos.getZ();
+                if(inputSide.getAxis() != EnumFacing.Axis.Y) {
+                    Block b = world.getBlockState(pos.offset(inputSide)).getBlock();
+                    if(b == ModBlocks.conveyor_double) reach = 0.5D;
+                    if(b == ModBlocks.conveyor_triple) reach = 0.33D;
+                }
+
+                double x = pos.getX() + inputSide.getXOffset() * reach;
+                double y = pos.getY() + inputSide.getYOffset() * reach;
+                double z = pos.getZ() + inputSide.getZOffset() * reach;
                 List<EntityMovingItem> items = world.getEntitiesWithinAABB(EntityMovingItem.class, new AxisAlignedBB(x + 0.1875D, y + 0.1875D, z + 0.1875D, x + 0.8125D, y + 0.8125D, z + 0.8125D));
-                for(EntityMovingItem item : items){
-                    ItemStack stack = item.getItemStack().copy();
-                    boolean match = this.matchesFilter(stack);
-                    if(this.isWhitelist && !match || !this.isWhitelist && match){
-                        continue;
-                    }
-                    int count = stack.getCount();
-                    int toAdd = Math.min(count, amount);
-                    stack.setCount(toAdd);
-                    tryFillTe(stack);
-                    if(count - toAdd + stack.getCount() <= 0){
+
+                if(beltBlock instanceof IConveyorBelt belt) {
+                    for(EntityMovingItem item : items) {
+                        if(item.isDead) continue;
+                        ItemStack stack = item.getItemStack();
+                        boolean match = this.matchesFilter(stack);
+                        if(this.isWhitelist && !match || !this.isWhitelist && match) continue;
+
+                        lastGrabbedTick = world.getTotalWorldTime();
+
+                        Vec3d itemPos = new Vec3d(pos.getX() + 0.5 + outputSide.getXOffset() * 0.55, pos.getY() + 0.5 + outputSide.getYOffset() * 0.55, pos.getZ() + 0.5 + outputSide.getZOffset() * 0.55);
+                        Vec3d snap = belt.getClosestSnappingPosition(world, outputPos, itemPos);
+                        EntityMovingItem newItem = new EntityMovingItem(world);
+                        newItem.setItemStack(stack.copy());
+                        newItem.setPosition(snap.x, snap.y, snap.z);
                         item.setDead();
-                    } else {
-                        stack.setCount(count - toAdd + stack.getCount());
-                        item.setItemStack(stack);
+                        world.spawnEntity(newItem);
+                        break;
+                    }
+                } else {
+                    TileEntity te = world.getTileEntity(outputPos);
+                    if(te != null && te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputSide.getOpposite())) {
+                        IItemHandler cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, outputSide.getOpposite());
+
+                        for(EntityMovingItem item : items) {
+                            if(item.isDead) continue;
+                            ItemStack stack = item.getItemStack();
+                            boolean match = this.matchesFilter(stack);
+                            if(this.isWhitelist && !match || !this.isWhitelist && match) continue;
+
+                            lastGrabbedTick = world.getTotalWorldTime();
+
+                            int toAdd = Math.min(stack.getCount(), amount);
+                            ItemStack copy = stack.copy();
+                            copy.setCount(toAdd);
+                            tryInsertItemCap(cap, copy);
+                            int didAdd = toAdd - copy.getCount();
+
+                            if(stack.getCount() - didAdd <= 0) {
+                                item.setDead();
+                            } else if(didAdd > 0) {
+                                ItemStack remaining = stack.copy();
+                                remaining.shrink(didAdd);
+                                item.setItemStack(remaining);
+                            }
+
+                            amount -= didAdd;
+                            if(amount <= 0) break;
+                        }
                     }
                 }
             }
 
             networkPackNT(15);
         }
-    }
-
-    public boolean tryFillTe(ItemStack stack){
-        EnumFacing outputSide = getOutputSide();
-        EnumFacing accessSide = outputSide.getOpposite();
-        TileEntity te = world.getTileEntity(pos.offset(outputSide));
-        if (te != null) {
-            if (te.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, accessSide)) {
-                IItemHandler cap = te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, accessSide);
-
-                return tryInsertItemCap(cap, stack);
-            }
-        }
-        return false;
     }
 
     //Unloads output into chests. Capability version.
@@ -241,6 +259,7 @@ public class TileEntityCraneGrabber extends TileEntityCraneBase implements IGUIP
         super.readFromNBT(nbt);
         this.isWhitelist = nbt.getBoolean("isWhitelist");
         this.matcher.readFromNBT(nbt);
+        this.lastGrabbedTick = nbt.getLong("lastGrabbedTick");
     }
 
     @Override
@@ -248,6 +267,7 @@ public class TileEntityCraneGrabber extends TileEntityCraneBase implements IGUIP
         super.writeToNBT(nbt);
         nbt.setBoolean("isWhitelist", this.isWhitelist);
         this.matcher.writeToNBT(nbt);
+        nbt.setLong("lastGrabbedTick", lastGrabbedTick);
         return nbt;
     }
 

@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.chunk.VisGraph;
 import net.minecraft.util.EnumBlockRenderType;
 
 /** Stub for compilation only — provided at runtime by Neonium. */
-public abstract class ChunkRenderRebuildTask<T> {
+public abstract class ChunkRenderRebuildTask<T> extends ChunkRenderBuildTask<T> {
     public ChunkBuildResult<T> performBuild(ChunkRenderCacheLocal cache, ChunkBuildBuffers buffers, CancellationSource cancellationSource) {
         ChunkRenderData.Builder renderData = new ChunkRenderData.Builder();
         VisGraph occluder = new VisGraph();

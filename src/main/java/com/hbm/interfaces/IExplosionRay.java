@@ -28,6 +28,10 @@ public interface IExplosionRay {
      */
     boolean isComplete();
 
+    default boolean hasFailed() {
+        return false;
+    }
+
     /**
      * @return true if all rays stop within the maximum radius.
      */

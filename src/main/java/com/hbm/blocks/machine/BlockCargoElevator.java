@@ -31,6 +31,7 @@ import java.util.List;
 public class BlockCargoElevator extends BlockDummyable {
 
     private static final AxisAlignedBB DETAIL_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 0.999D, 1.0D);
+    private static int harvestedHeight = -1;
 
     public BlockCargoElevator(String registryName) {
         super(net.minecraft.block.material.Material.IRON, registryName);
@@ -187,21 +188,45 @@ public class BlockCargoElevator extends BlockDummyable {
     }
 
     @Override
-    public void getDrops(@NotNull NonNullList<ItemStack> drops, @NotNull IBlockAccess world, @NotNull BlockPos pos, @NotNull IBlockState state, int fortune) {
-        int[] core = world instanceof World ? this.findCore((World) world, pos.getX(), pos.getY(), pos.getZ()) : null;
-        TileEntity tile = core != null ? world.getTileEntity(new BlockPos(core[0], core[1], core[2])) : null;
+    public boolean removedByPlayer(@NotNull IBlockState state, @NotNull World world, @NotNull BlockPos pos, @NotNull EntityPlayer player, boolean willHarvest) {
+        harvestedHeight = -1;
+        if (!world.isRemote && willHarvest) {
+            TileEntityCargoElevator elevator = getElevator(world, pos);
+            if (elevator != null) harvestedHeight = elevator.height;
+        }
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
 
-        if (!(tile instanceof TileEntityCargoElevator elevator)) {
+    @Override
+    public void harvestBlock(@NotNull World world, @NotNull EntityPlayer player, @NotNull BlockPos pos, @NotNull IBlockState state, @Nullable TileEntity te, @NotNull ItemStack stack) {
+        super.harvestBlock(world, player, pos, state, te, stack);
+        harvestedHeight = -1;
+    }
+
+    @Override
+    public void getDrops(@NotNull NonNullList<ItemStack> drops, @NotNull IBlockAccess world, @NotNull BlockPos pos, @NotNull IBlockState state, int fortune) {
+        TileEntityCargoElevator elevator = world instanceof World w ? getElevator(w, pos) : null;
+        int height = elevator != null ? elevator.height : harvestedHeight;
+        harvestedHeight = -1;
+
+        if (height < 0) {
             super.getDrops(drops, world, pos, state, fortune);
             return;
         }
 
-        int toDrop = elevator.height + 1;
+        int toDrop = height + 1;
         while (toDrop > 0) {
             int perStack = Math.min(toDrop, 64);
             toDrop -= perStack;
             drops.add(new ItemStack(this, perStack));
         }
+    }
+
+    @Nullable
+    private TileEntityCargoElevator getElevator(World world, BlockPos pos) {
+        int[] core = this.findCore(world, pos.getX(), pos.getY(), pos.getZ());
+        if (core == null) return null;
+        return world.getTileEntity(new BlockPos(core[0], core[1], core[2])) instanceof TileEntityCargoElevator elevator ? elevator : null;
     }
 
     private AxisAlignedBB[] getAABBs(TileEntityCargoElevator elevator, BlockPos pos) {

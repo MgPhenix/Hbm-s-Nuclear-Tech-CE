@@ -280,8 +280,9 @@ public class InventoryUtil {
 
 		for(AnvilOutput out : stacks) {
 			if(out.chance == 1.0F || player.getRNG().nextFloat() < out.chance) {
-				if(!player.inventory.addItemStackToInventory(out.stack.copy())) {
-					player.dropItem(out.stack.copy(), false);
+				ItemStack stack = out.stack.copy();
+				if(!player.inventory.addItemStackToInventory(stack)) {
+					player.dropItem(stack, false);
 				}
 			}
 		}

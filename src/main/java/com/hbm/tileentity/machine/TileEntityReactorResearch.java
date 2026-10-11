@@ -116,8 +116,9 @@ public class TileEntityReactorResearch extends TileEntityMachineBase implements 
     @Override
     public boolean canExtractItem(int i, ItemStack stack, int j) {
         if(i < 12 && i >= 0)
-            if(fuelMap.containsValue(stack))
-                return true;
+            for(ItemStack waste : fuelMap.values())
+                if(waste.getItem() == stack.getItem())
+                    return true;
 
         return false;
 

@@ -1,19 +1,39 @@
 package com.hbm.blocks.machine.rbmk;
 
+import com.google.common.collect.ImmutableSet;
+import com.hbm.Tags;
 import com.hbm.api.block.IToolable;
 import com.hbm.main.MainRegistry;
+import com.hbm.render.icon.PaddedSpriteUtil;
+import com.hbm.render.loader.HFRWavefrontObject;
+import com.hbm.render.model.RBMKMiniPanelItemBakedModel;
 import com.hbm.tileentity.machine.rbmk.TileEntityRBMKKeyPad;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.block.model.IBakedModel;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.internal.FMLNetworkHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Arrays;
 
 public class RBMKKeyPad extends RBMKMiniPanelBase implements IToolable {
+
+	private static final ResourceLocation PART_SPRITE = new ResourceLocation(Tags.MODID, "models/network/keypad");
+	private static final float[][] ITEM_UNIT_OFFSETS = {
+			{-0.25F, 0.25F, 0.25F},
+			{0.25F, 0.25F, 0.25F},
+			{-0.25F, -0.25F, 0.25F},
+			{0.25F, -0.25F, 0.25F},
+	};
 
 	public RBMKKeyPad(String s) {
 		super(s);
@@ -57,26 +77,19 @@ public class RBMKKeyPad extends RBMKMiniPanelBase implements IToolable {
 		return true;
 	}
 
-	/*@SideOnly(Side.CLIENT)
-	public void renderInventoryBlock(Block block, int meta, int modelId) {
-		GlStateManager.pushMatrix();
-		GlStateManager.translate(0, -0.5, 0);
-		GlStateManager.rotate(-90, 0, 1, 0);
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerSprite(TextureMap map) {
+		super.registerSprite(map);
+		PaddedSpriteUtil.register(map, PaddedSpriteUtil.inspectTexture(PART_SPRITE));
+	}
 
-		for(int i = 0; i < 4; i++) {
-
-			GlStateManager.pushMatrix();
-			GlStateManager.translate(0.25, (i / 2) * -0.5 + 0.25, (i % 2) * -0.5 + 0.25);
-
-			GlStateManager.color(1F, 1F, 1F);
-			Minecraft.getMinecraft().getTextureManager().bindTexture(ResourceManager.rbmk_keypad_tex);
-			ResourceManager.rbmk_button.renderPart("Socket");
-			GlStateManager.color(0.65F, 0F, 0F);
-			ResourceManager.rbmk_button.renderPart("Button");
-			GlStateManager.popMatrix();
-		}
-
-		GlStateManager.color(1F, 1F, 1F);
-		GlStateManager.popMatrix();
-	}*/
+	@Override
+	@SideOnly(Side.CLIENT)
+	protected IBakedModel createItemModel() {
+		HFRWavefrontObject model = new HFRWavefrontObject(new ResourceLocation(Tags.MODID, "models/rbmk/button.obj"));
+		return new RBMKMiniPanelItemBakedModel(this.sprite, Arrays.asList(
+				texturedLayer(model, ImmutableSet.of("Socket"), PART_SPRITE, 0xFFFFFF, null, ITEM_UNIT_OFFSETS),
+				texturedLayer(model, ImmutableSet.of("Button"), PART_SPRITE, 0xA60000, null, ITEM_UNIT_OFFSETS)));
+	}
 }

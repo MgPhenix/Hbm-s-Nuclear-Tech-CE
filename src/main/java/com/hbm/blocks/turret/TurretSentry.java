@@ -3,7 +3,6 @@ package com.hbm.blocks.turret;
 import com.hbm.lib.InventoryHelper;
 import com.hbm.lib.NTMBlockContainer;
 import com.hbm.tileentity.turret.TileEntityTurretSentry;
-import java.util.Objects;
 import java.util.Random;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -77,20 +76,13 @@ public class TurretSentry extends NTMBlockContainer {
               toDrop = itemStack.getCount();
             }
 
-            itemStack.shrink(toDrop);
             EntityItem entityitem =
                 new EntityItem(
                     world,
                     pos.getX() + oX,
                     pos.getY() + oY,
                     pos.getZ() + oZ,
-                    new ItemStack(itemStack.getItem(), toDrop, itemStack.getItemDamage()));
-
-            if (itemStack.hasTagCompound()) {
-              entityitem
-                  .getItem()
-                  .setTagCompound(Objects.requireNonNull(itemStack.getTagCompound()).copy());
-            }
+                    itemStack.splitStack(toDrop));
 
             float jump = 0.05F;
             entityitem.motionX = (float) this.rand.nextGaussian() * jump;

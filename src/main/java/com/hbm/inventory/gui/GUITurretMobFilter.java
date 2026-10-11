@@ -3,10 +3,12 @@ package com.hbm.inventory.gui;
 import com.hbm.Tags;
 import com.hbm.handler.threading.PacketThreading;
 import com.hbm.inventory.gui.element.GUIScrollingList;
+import com.hbm.items.ModItems;
 import com.hbm.packet.PacketDispatcher;
 import com.hbm.packet.toserver.AuxButtonPacket;
 import com.hbm.packet.toserver.NBTControlPacket;
 import com.hbm.tileentity.turret.TileEntityTurretBaseNT;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,10 +16,15 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.common.util.Constants;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -83,6 +90,8 @@ public class GUITurretMobFilter extends GuiScreen {
         mobScrollList.drawScreen(mouseX, mouseY);
         filterScrollingList.drawScreen(mouseX, mouseY);
         mobSearchField.drawTextBox();
+
+        drawTooltips(mouseX, mouseY);
     }
 
     private String getMobName(String id) {
@@ -115,6 +124,16 @@ public class GUITurretMobFilter extends GuiScreen {
         }
 
         drawTexturedModalRect(guiLeft + 227, guiTop + 5, textureX, 124, 10, 12);
+    }
+
+    private void drawTooltips(int mouseX, int mouseY) {
+        if (checkMouseBoundary(guiLeft, guiTop, mouseX, mouseY, 199, 5, 12, 12)) {
+            drawHoveringText(I18n.format("desc.gui.turret_mob_filter.import"), mouseX, mouseY);
+        }
+
+        if (checkMouseBoundary(guiLeft, guiTop, mouseX, mouseY, 213, 5, 12, 12)) {
+            drawHoveringText(I18n.format("desc.gui.turret_mob_filter.export"), mouseX, mouseY);
+        }
     }
 
     private void updateMobList() {
@@ -160,23 +179,79 @@ public class GUITurretMobFilter extends GuiScreen {
         }
 
         // remove entity from filter
-        if (checkMouseBoundary(guiLeft, guiTop, mouseX, mouseY, 112, 52, 18, 18) || filterDoubleClick ) {
+        if (checkMouseBoundary(guiLeft, guiTop, mouseX, mouseY, 112, 52, 18, 18) || filterDoubleClick) {
             playClickSound();
 
             if (filterScrollingList.selectedSlot == -1) {
                 return;
             }
 
+            int turretMobFilterSize = turret.mobFilter.size();
+
             NBTTagCompound data = new NBTTagCompound();
             data.setString("removeMobFilter", turret.mobFilter.get(filterScrollingList.selectedSlot));
             PacketThreading.createSendToServerThreadedPacket(new NBTControlPacket(data, turretPos));
 
-            if (!turret.mobFilter.isEmpty()) {
+            turretMobFilterSize--;
+
+            if (turretMobFilterSize > 0) {
                 filterScrollingList.selectedSlot = 0;
             } else {
                 filterScrollingList.selectedSlot = -1;
             }
         }
+
+        // import mob list
+        if (checkMouseBoundary(guiLeft, guiTop, mouseX, mouseY, 199, 5, 12, 12)) {
+            playClickSound();
+
+            EntityPlayer player = Minecraft.getMinecraft().player;
+            ItemStack stack = player.getHeldItemMainhand();
+
+            if (stack.getItem() != ModItems.turret_mob_filter) {
+                return;
+            }
+
+            NBTTagCompound itemNbt = stack.getTagCompound();
+
+            if (itemNbt != null && itemNbt.hasKey("mobs", Constants.NBT.TAG_LIST)) {
+                NBTTagList mobs = itemNbt.getTagList("mobs", Constants.NBT.TAG_STRING);
+
+                NBTTagCompound data = new NBTTagCompound();
+                data.setTag("setMobFilter", mobs.copy());
+                PacketThreading.createSendToServerThreadedPacket(new NBTControlPacket(data, turretPos));
+            }
+        }
+
+        // export mob list
+        if (checkMouseBoundary(guiLeft, guiTop, mouseX, mouseY, 213, 5, 12, 12)) {
+            playClickSound();
+
+            EntityPlayer player = Minecraft.getMinecraft().player;
+            ItemStack stack = player.getHeldItemMainhand();
+
+            if (stack.getItem() != ModItems.turret_mob_filter) {
+                return;
+            }
+
+            NBTTagCompound itemNbt = stack.getTagCompound();
+
+            if (itemNbt == null) {
+                itemNbt = new NBTTagCompound();
+                stack.setTagCompound(itemNbt);
+            }
+
+            NBTTagList list = new NBTTagList();
+
+            for (String mob : turret.mobFilter) {
+                addMobToItem(itemNbt, list, mob);
+            }
+        }
+    }
+
+    public void addMobToItem(NBTTagCompound itemNbt, NBTTagList list, String value) {
+        list.appendTag(new NBTTagString(value));
+        itemNbt.setTag("mobs", list);
     }
 
     @Override

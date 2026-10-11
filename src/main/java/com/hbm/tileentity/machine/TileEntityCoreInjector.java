@@ -8,6 +8,7 @@ import com.hbm.inventory.fluid.Fluids;
 import com.hbm.inventory.fluid.tank.FluidTankNTM;
 import com.hbm.inventory.gui.GUICoreInjector;
 import com.hbm.lib.ForgeDirection;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
 import io.netty.buffer.ByteBuf;
@@ -155,7 +156,9 @@ public class TileEntityCoreInjector extends TileEntityMachineBase implements ITi
     public void deserialize(ByteBuf buf) {
         super.deserialize(buf);
 
+        int prevBeam = beam;
         this.beam = buf.readInt();
+        if (beam != prevBeam) SectionGeometry.renderBoundsChanged(this);
         tanks[0].deserialize(buf);
         tanks[1].deserialize(buf);
     }

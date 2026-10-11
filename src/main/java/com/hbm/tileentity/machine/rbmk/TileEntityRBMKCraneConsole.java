@@ -11,6 +11,7 @@ import com.hbm.inventory.control_panel.types.DataValue;
 import com.hbm.inventory.control_panel.types.DataValueFloat;
 import com.hbm.items.machine.ItemRBMKRod;
 import com.hbm.lib.ForgeDirection;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.tileentity.TileEntityMachineBase;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
@@ -369,9 +370,7 @@ public class TileEntityRBMKCraneConsole extends TileEntityMachineBase implements
             this.loadedEnrichment = buf.readDouble();
         }
         this.bb = null;
-        if (prevBB == null || !getRenderBoundingBox().equals(prevBB)) {
-            if (world != null) world.markBlockRangeForRenderUpdate(pos, pos);
-        }
+        if (prevBB == null || !getRenderBoundingBox().equals(prevBB)) SectionGeometry.renderBoundsChanged(this);
     }
 
     public void setTarget(int x, int y, int z) {

@@ -474,7 +474,7 @@ public class TileEntityWatz extends TileEntityMachineBase implements ITickable, 
 				this.locks = new ItemStack[inventory.getSlots()];
 			} else {
 				for(int i = 0; i < inventory.getSlots(); i++) {
-					this.locks[i] = inventory.getStackInSlot(i);
+					this.locks[i] = inventory.getStackInSlot(i).copy();
 				}
 			}
 

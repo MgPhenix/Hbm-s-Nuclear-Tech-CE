@@ -11,6 +11,7 @@ import com.hbm.inventory.fluid.tank.FluidTankNTM;
 import com.hbm.inventory.gui.GUICoreEmitter;
 import com.hbm.lib.ForgeDirection;
 import com.hbm.lib.ModDamageSource;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
 import io.netty.buffer.ByteBuf;
@@ -225,7 +226,9 @@ public class TileEntityCoreEmitter extends TileEntityMachineBase implements ITic
 		this.power = buf.readLong();
 		this.watts = buf.readInt();
 		this.prev = buf.readLong();
+		int prevBeam = beam;
 		this.beam = buf.readInt();
+		if (beam != prevBeam) SectionGeometry.renderBoundsChanged(this);
 		this.isOn = buf.readBoolean();
 		tank.deserialize(buf);
 	}

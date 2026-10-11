@@ -72,14 +72,14 @@ public class EntityBobmazon extends Entity {
 	
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound compound) {
-		if(payload != null)
-			compound.setTag("payload", payload.writeToNBT(new NBTTagCompound()));
+		if(compound.hasKey("payload"))
+			payload = new ItemStack(compound.getCompoundTag("payload"));
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound compound) {
-		if(compound.hasKey("payload"))
-			payload = new ItemStack(compound.getCompoundTag("payload"));
+		if(payload != null)
+			compound.setTag("payload", payload.writeToNBT(new NBTTagCompound()));
 	}
 
 }

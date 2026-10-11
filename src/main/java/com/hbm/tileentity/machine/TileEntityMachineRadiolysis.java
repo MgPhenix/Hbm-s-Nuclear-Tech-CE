@@ -74,7 +74,7 @@ public class TileEntityMachineRadiolysis extends TileEntityMachineBase implement
 
     @Override
     public boolean canExtractItem(int i, ItemStack itemStack, int j) {
-        return (i < 10 && ItemRTGPellet.pelletMap.containsValue(itemStack)) || i == 13;
+        return (i < 10 && !(itemStack.getItem() instanceof ItemRTGPellet)) || i == 13;
     }
 
     /* NBT Methods */

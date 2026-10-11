@@ -2,14 +2,13 @@ package com.hbm.main.client;
 
 import com.hbm.Tags;
 import com.hbm.blocks.ModBlocks;
-import com.hbm.render.chunk.IRenderExtentsOverride;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.render.icon.PaddedSpriteUtil;
 import com.hbm.render.icon.PaddedSpriteUtil.TextureInfo;
 import com.hbm.render.loader.HFRWavefrontObject;
 import com.hbm.render.model.*;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
@@ -17,7 +16,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.IRegistry;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -404,16 +402,13 @@ public final class StaticTesrBakedModels {
                     spec.translateZ,
                     spec.worldTranslateByMeta
             );
-            int[][] autoRenderExtents = worldModel.captureRenderExtentsByMeta();
             List<IBakedModel> extraWorldModels = new ArrayList<>(spec.extraWorldLayers.size());
             for (LayerSpec layer : spec.extraWorldLayers) {
-                StaticMetaWavefrontBakedModel layerModel = layer.createWorldModel(atlas, spec.yawsByMeta);
-                autoRenderExtents = unionAutoRenderExtents(autoRenderExtents, layerModel.captureRenderExtentsByMeta());
-                extraWorldModels.add(layerModel);
+                extraWorldModels.add(layer.createWorldModel(atlas, spec.yawsByMeta));
             }
             IBakedModel resolvedWorldModel = extraWorldModels.isEmpty() ? worldModel
                     : new CompositeBakedModel(worldModel, extraWorldModels.toArray(new IBakedModel[0]));
-            spec.setAutoRenderExtents(autoRenderExtents);
+            SectionGeometry.candidate(spec.block);
             for (ModelResourceLocation worldLocation : spec.getWorldModelLocations()) {
                 registry.putObject(worldLocation, resolvedWorldModel);
             }
@@ -537,6 +532,7 @@ public final class StaticTesrBakedModels {
                 0.5F, 1.5F, 0.5F,
                 0.0625F
         );
+        SectionGeometry.candidate(ModBlocks.radiobox);
         registry.putObject(new ModelResourceLocation(ModBlocks.radiobox.getRegistryName(), "facing=north,state=false"), radioboxModel);
         registry.putObject(new ModelResourceLocation(ModBlocks.radiobox.getRegistryName(), "facing=south,state=false"), radioboxModel);
         registry.putObject(new ModelResourceLocation(ModBlocks.radiobox.getRegistryName(), "facing=west,state=false"), radioboxModel);
@@ -557,6 +553,7 @@ public final class StaticTesrBakedModels {
         TextureAtlasSprite sprite = atlas.getAtlasSprite(textureInfo.spriteLocation.toString());
         IBakedModel model = new StaticModelRendererBakedModel(modelFactory, sprite, textureInfo.uScale, textureInfo.vScale, yaws, roll, pitch,
                 preTranslateX, preTranslateY, preTranslateZ, tx, ty, tz, 0.0625F);
+        SectionGeometry.candidate(block);
         registry.putObject(new ModelResourceLocation(block.getRegistryName(), "facing=north"), model);
         registry.putObject(new ModelResourceLocation(block.getRegistryName(), "facing=south"), model);
         registry.putObject(new ModelResourceLocation(block.getRegistryName(), "facing=west"), model);
@@ -577,47 +574,6 @@ public final class StaticTesrBakedModels {
             specsByBlock.put(spec.block, spec);
         }
         return specsByBlock;
-    }
-
-    public static int @Nullable [] getManagedRenderExtents(IBlockState state) {
-        Block block = state.getBlock();
-        Spec spec = SPECS_BY_BLOCK.get(block);
-        if (spec == null) return null;
-
-        if (block instanceof IRenderExtentsOverride override) {
-            int[] manual = override.getRenderExtentsOverride(state);
-            if (manual != null) return manual;
-        }
-
-        return spec.getAutoRenderExtents(state);
-    }
-
-    private static int[][] unionAutoRenderExtents(int[][] primary, int[][] secondary) {
-        int maxLength = Math.max(primary.length, secondary.length);
-        int[][] merged = new int[maxLength][];
-        for (int i = 0; i < maxLength; i++) {
-            int[] left = i < primary.length ? primary[i] : null;
-            int[] right = i < secondary.length ? secondary[i] : null;
-            merged[i] = unionRenderExtents(left, right);
-        }
-        return merged;
-    }
-
-    private static int[] unionRenderExtents(int[] left, int[] right) {
-        if (left == null) {
-            return right;
-        }
-        if (right == null) {
-            return left;
-        }
-        return new int[]{
-                Math.max(left[0], right[0]),
-                Math.max(left[1], right[1]),
-                Math.max(left[2], right[2]),
-                Math.max(left[3], right[3]),
-                Math.max(left[4], right[4]),
-                Math.max(left[5], right[5])
-        };
     }
 
     private static final class LayerSpec {
@@ -707,7 +663,6 @@ public final class StaticTesrBakedModels {
         private final List<LayerSpec> extraWorldLayers = new ArrayList<>();
         private boolean bakeInventory = true;
         private boolean doubleSided;
-        private int[][] autoRenderExtentsByMeta;
         private float worldRoll;
         private float worldPitch;
         private float preTranslateX;
@@ -843,22 +798,6 @@ public final class StaticTesrBakedModels {
 
         private ModelResourceLocation getInventoryModelLocation() {
             return new ModelResourceLocation(block.getRegistryName(), "inventory");
-        }
-
-        private void setAutoRenderExtents(int[][] autoRenderExtentsByMeta) {
-            this.autoRenderExtentsByMeta = autoRenderExtentsByMeta;
-        }
-
-        private int @Nullable [] getAutoRenderExtents(IBlockState state) {
-            if (autoRenderExtentsByMeta == null) {
-                return null;
-            }
-
-            int meta = block.getMetaFromState(state);
-            if (meta < 0 || meta >= autoRenderExtentsByMeta.length) {
-                return null;
-            }
-            return autoRenderExtentsByMeta[meta];
         }
     }
 }

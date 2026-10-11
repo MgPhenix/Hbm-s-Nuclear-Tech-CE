@@ -51,6 +51,11 @@ public class BlockTallPlant extends BlockPlantEnumMeta<EnumTallPlantType> implem
         }
     }
 
+    @Override
+    protected boolean isBiomeTinted(EnumTallPlantType type) {
+        return type == HEMP_LOWER || type == HEMP_UPPER;
+    }
+
     public static void initPlacables() {
         PLANTABLE_BLOCKS.add(ModBlocks.dirt_dead);
         PLANTABLE_BLOCKS.add(ModBlocks.dirt_oily);

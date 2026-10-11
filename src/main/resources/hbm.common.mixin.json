@@ -6,11 +6,17 @@
   "target": "@env(DEFAULT)",
   "client": [
     "MixinCompiledChunk",
-    "MixinSetVisibility",
     "MixinRenderChunk",
     "MixinRenderGlobal",
     "MixinTileEntity",
-    "MixinRenderPlayerManly"
+    "MixinRenderPlayerManly",
+    "MixinChunk",
+    "MixinChunkCompileTaskGenerator",
+    "MixinChunkProviderClient",
+    "MixinModelManager",
+    "MixinNetHandlerPlayClient",
+    "MixinStateImplementation",
+    "MixinTileEntitySpecialRenderer"
   ],
   "mixins": [
     "MixinFMLProxyPacket",

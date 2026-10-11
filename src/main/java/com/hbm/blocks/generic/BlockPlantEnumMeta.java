@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.hbm.blocks.BlockEnumMeta;
 import com.hbm.blocks.ModBlocks;
 import com.hbm.render.block.BlockBakeFrame;
+import com.hbm.util.EnumUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -12,6 +13,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.model.ModelRotation;
+import net.minecraft.client.renderer.color.IBlockColor;
+import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -21,7 +24,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.ColorizerFoliage;
+import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.model.IModel;
 import net.minecraftforge.client.model.ModelLoader;
@@ -48,10 +54,30 @@ public abstract class BlockPlantEnumMeta<E extends Enum<E>> extends BlockEnumMet
     protected BlockBakeFrame[] generateBlockFrames(String registryName) {
         return Arrays.stream(blockEnum)
                 .sorted(Comparator.comparing(Enum::ordinal))
-                .map(Enum::name)
-                .map(name -> registryName + "_" + name.toLowerCase(Locale.US))
-                .map(BlockBakeFrame::cross)
+                .map(type -> {
+                    String texture = registryName + "_" + type.name().toLowerCase(Locale.US);
+                    return isBiomeTinted(type) ? BlockBakeFrame.tintedCross(texture) : BlockBakeFrame.cross(texture);
+                })
                 .toArray(BlockBakeFrame[]::new);
+    }
+
+    protected boolean isBiomeTinted(E type) {
+        return false;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public IBlockColor getBlockColorHandler() {
+        return (state, world, pos, tintIndex) -> {
+            if (tintIndex != 0 || !isBiomeTinted(getEnumFromState(state))) return 0xFFFFFF;
+            return world != null && pos != null ? BiomeColorHelper.getFoliageColorAtPos(world, pos) : ColorizerFoliage.getFoliageColorBasic();
+        };
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public IItemColor getItemColorHandler() {
+        return (stack, tintIndex) -> tintIndex == 0 && isBiomeTinted(EnumUtil.grabEnumSafely(blockEnum, stack.getMetadata())) ? ColorizerGrass.getGrassColor(0.5D, 1.0D) : 0xFFFFFF;
     }
 
     /**

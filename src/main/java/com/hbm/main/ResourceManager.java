@@ -663,7 +663,8 @@ public class ResourceManager {
     public static final ResourceLocation pylon_medium_steel_tex = new ResourceLocation(Tags.MODID, "textures/models/network/pylon_medium_steel.png");
     public static final ResourceLocation spider_tex = new ResourceLocation(Tags.MODID, "textures/entity/blockspider.png");
     public static final ResourceLocation plasticbag_tex = new ResourceLocation(Tags.MODID, "textures/entity/plasticbag.png");
-    public static final ResourceLocation pylon_steel_tex = new ResourceLocation(Tags.MODID, "textures/models/network/pylon_steel.png");
+    public static final ResourceLocation pylon_tex = new ResourceLocation(Tags.MODID, "textures/models/network/pylon.png");
+    public static final ResourceLocation pylon_steel_tex =new ResourceLocation(Tags.MODID, "textures/models/network/pylon_steel.png");
     public static final ResourceLocation connector_tex = new ResourceLocation(Tags.MODID, "textures/models/network/connector.png");
     public static final ResourceLocation connector_super_tex = new ResourceLocation(Tags.MODID, "textures/models/network/connector_super.png");
     //Turbofan

@@ -85,7 +85,7 @@ public class ItemBobmazonPacket implements IMessage {
 						bob.posX = p.posX + rand.nextGaussian() * 10;
 						bob.posY = 300;
 						bob.posZ = p.posZ + rand.nextGaussian() * 10;
-						bob.payload = stack;
+						bob.payload = stack.copy();
 						
 						world.spawnEntity(bob);
 					} else {

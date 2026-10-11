@@ -86,9 +86,10 @@ public class TileEntityFurnaceBrick extends TileEntityMachineBase implements IGU
                         markDirty = true;
 
                         if(!this.inventory.getStackInSlot(1).isEmpty()) {
+                            ItemEnums.EnumAshType type = TileEntityFireboxBase.getAshFromFuel(inventory.getStackInSlot(1));
+                            ItemStack container = inventory.getStackInSlot(1).getItem().getContainerItem(inventory.getStackInSlot(1));
                             this.inventory.getStackInSlot(1).shrink(1);
 
-                            ItemEnums.EnumAshType type = TileEntityFireboxBase.getAshFromFuel(inventory.getStackInSlot(1));
                             if(type == ItemEnums.EnumAshType.WOOD) ashLevelWood += burnTime;
                             if(type == ItemEnums.EnumAshType.COAL) ashLevelCoal += burnTime;
                             if(type == ItemEnums.EnumAshType.MISC) ashLevelMisc += burnTime;
@@ -97,8 +98,8 @@ public class TileEntityFurnaceBrick extends TileEntityMachineBase implements IGU
                             if(processAsh(ashLevelCoal, ItemEnums.EnumAshType.COAL, threshold)) ashLevelCoal -= threshold;
                             if(processAsh(ashLevelMisc, ItemEnums.EnumAshType.MISC, threshold)) ashLevelMisc -= threshold;
 
-                            if(this.inventory.getStackInSlot(1).getCount() == 0) {
-                                this.inventory.setStackInSlot(1, inventory.getStackInSlot(1).getItem().getContainerItem(inventory.getStackInSlot(1)));
+                            if(this.inventory.getStackInSlot(1).isEmpty()) {
+                                this.inventory.setStackInSlot(1, container);
                             }
                         }
                     }

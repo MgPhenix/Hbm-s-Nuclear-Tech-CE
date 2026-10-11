@@ -36,6 +36,7 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.SimpleComponent;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.item.EntityMinecart;
@@ -82,6 +83,8 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 
     @Override
     public void receiveControl(EntityPlayerMP player, NBTTagCompound data) {
+        boolean changed = false;
+
         if (data.hasKey("del")) {
             this.removeName(data.getInteger("del"));
 
@@ -92,12 +95,31 @@ public abstract class TileEntityTurretBaseNT extends TileEntityMachineBase imple
 
             if (!mobFilter.contains(id)) {
                 mobFilter.add(id);
+                changed = true;
             }
 
         } else if (data.hasKey("removeMobFilter")) {
             String id = data.getString("removeMobFilter");
 
-            mobFilter.remove(id);
+            changed = mobFilter.remove(id);
+        } else if (data.hasKey("setMobFilter")) {
+            NBTTagList list = data.getTagList("setMobFilter", Constants.NBT.TAG_STRING);
+            mobFilter.clear();
+
+            for (int i = 0; i < list.tagCount(); i++) {
+                mobFilter.add(list.getStringTagAt(i));
+            }
+
+            changed = true;
+        }
+
+        if (changed) {
+            markDirty();
+
+            if (world != null) {
+                IBlockState state = world.getBlockState(pos);
+                world.notifyBlockUpdate(pos, state, state, 3);
+            }
         }
     }
 

@@ -10,12 +10,12 @@ import com.hbm.inventory.gui.GUIForceField;
 import com.hbm.items.ModItems;
 import com.hbm.lib.HBMSoundHandler;
 import com.hbm.lib.Library;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.util.Vec3NT;
 import com.hbm.tileentity.IConfigurableMachine;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityLoadedBase;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -155,11 +155,7 @@ public class TileEntityForceField extends TileEntityLoadedBase implements ITicka
         radius = buf.readFloat();
         isOn = buf.readBoolean();
         color = buf.readInt();
-
-        // markBlockRangeForRenderUpdate mutates client chunk-render state; defer to client thread.
-        if (prevRadius != radius) {
-            Minecraft.getMinecraft().addScheduledTask(() -> Minecraft.getMinecraft().world.markBlockRangeForRenderUpdate(pos, pos));
-        }
+        if (prevRadius != radius) SectionGeometry.renderBoundsChanged(this);
     }
 
     public int getHealthScaled(int i) {

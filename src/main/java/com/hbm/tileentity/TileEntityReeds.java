@@ -2,6 +2,7 @@ package com.hbm.tileentity;
 
 import com.hbm.config.ClientConfig;
 import com.hbm.interfaces.AutoRegister;
+import com.hbm.render.chunk.SectionGeometry;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -54,6 +55,7 @@ public class TileEntityReeds extends TileEntity {
         if (newDepth != depth) {
             depth = newDepth;
             invalidateRenderBB();
+            SectionGeometry.renderBoundsChanged(this);
         }
     }
 

@@ -189,7 +189,7 @@ public class TileEntityMachineOreSlopper extends TileEntityMachineBase implement
                         }
                     for (int i = 3; i <= 8; i++)
                         if (inventory.getStackInSlot(i).isEmpty()) {
-                            inventory.setStackInSlot(i, output);
+                            inventory.setStackInSlot(i, output.copy());
                             ores[type.ordinal()] -= 1F;
                             continue outer;
                         }

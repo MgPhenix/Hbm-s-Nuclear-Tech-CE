@@ -21,7 +21,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityLockableLoot;
 import net.minecraft.util.BitArray;
 import net.minecraft.util.IntIdentityHashBiMap;
 import net.minecraft.util.math.BlockPos;
@@ -145,6 +147,18 @@ public final class ChunkUtil {
     private static final ThreadLocal<Long2ObjectOpenHashMap<IBlockState>> TL_SCRATCH = ThreadLocal.withInitial(Long2ObjectOpenHashMap::new);
     private static final ThreadLocal<IBlockState[]> TL_OVERRIDES = ThreadLocal.withInitial(() -> new IBlockState[4096]);
     private static final IBlockState AIR_DEFAULT_STATE = Blocks.AIR.getDefaultState();
+    /** Clear stored contents before replacing a tile entity's block through vanilla's lifecycle. */
+    @ServerThread
+    public static boolean replaceEmptied(World world, BlockPos pos, IBlockState replacement, int flags) {
+        IBlockState old = world.getBlockState(pos);
+        if (old == replacement) return false;
+        if (old.getBlock().hasTileEntity(old)) {
+            TileEntity tile = world.getTileEntity(pos);
+            if (tile instanceof TileEntityLockableLoot loot) loot.setLootTable(null, 0);
+            if (tile instanceof IInventory inventory) inventory.clear();
+        }
+        return world.setBlockState(pos, replacement, flags);
+    }
 
     /**
      * Dimension → active task count (used to decide when to build/tear down the mirror map).
@@ -452,39 +466,59 @@ public final class ChunkUtil {
      *
      * <p>Only local indices in range [0,4095] are considered; others are ignored.</p>
      *
-     * @return a copied {@link ExtendedBlockStorage} with carved positions set to air, or {@code null} if the source is empty.
+     * Tile-entity cells are left in the section for the server-thread block replacement.
+     * @return a copied section with ordinary carved cells set to air, or {@code null} if no ordinary cell changed.
      */
     @ThreadSafeMethod
-    @Contract(mutates = "param7") // edgeOut
+    @Contract(mutates = "param7,param8,param9")
     public static @Nullable ExtendedBlockStorage copyAndCarveLocal(WorldServer world, int chunkX, int chunkZ, int subY,
                                                                    @Nullable ExtendedBlockStorage @NotNull [] srcs, BitMask localMask,
-                                                                   LongCollection edgeOut) {
+                                                                   LongCollection edgeOut,
+                                                                   Long2ObjectMap<IBlockState> modifiedOut,
+                                                                   Long2ObjectMap<IBlockState> blockEntitiesOut) {
         ExtendedBlockStorage src = getEbsVolatile(srcs, subY);
         if (src == null || src.isEmpty()) return null;
         int height = world.getHeight();
-        ExtendedBlockStorage dst = copyOf(src);
-        NeighborCache nc = new NeighborCache();
-        var loaded = chunkMap.get(world.provider.getDimension());
+        ExtendedBlockStorage dst = null;
+        int airId = -1;
+        NeighborCache neighbors = new NeighborCache();
+        NonBlockingHashMapLong<Chunk> loaded = chunkMap.get(world.provider.getDimension());
         int xBase = chunkX << 4, yBase = subY << 4, zBase = chunkZ << 4;
         for (int idx = localMask.nextSetBit(0); idx >= 0 && idx < 4096; idx = localMask.nextSetBit(idx + 1)) {
             int xLocal = Library.getLocalX(idx);
             int yLocal = Library.getLocalY(idx);
             int zLocal = Library.getLocalZ(idx);
 
-            IBlockState old = dst.get(xLocal, yLocal, zLocal);
+            IBlockState old = src.get(xLocal, yLocal, zLocal);
             if (old.getMaterial() != Material.AIR) {
-                if (checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, nc, xLocal - 1, yLocal, zLocal, localMask) ||
-                        checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, nc, xLocal + 1, yLocal, zLocal, localMask) ||
-                        checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, nc, xLocal, yLocal - 1, zLocal, localMask) ||
-                        checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, nc, xLocal, yLocal + 1, zLocal, localMask) ||
-                        checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, nc, xLocal, yLocal, zLocal - 1, localMask) ||
-                        checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, nc, xLocal, yLocal, zLocal + 1, localMask)) {
-                    int xGlobal = xBase | xLocal;
-                    int yGlobal = yBase | yLocal;
-                    int zGlobal = zBase | zLocal;
-                    edgeOut.add(Library.blockPosToLong(xGlobal, yGlobal, zGlobal));
+                int xGlobal = xBase | xLocal;
+                int yGlobal = yBase | yLocal;
+                int zGlobal = zBase | zLocal;
+                long position = Library.blockPosToLong(xGlobal, yGlobal, zGlobal);
+                if (old.getBlock().hasTileEntity(old)) {
+                    blockEntitiesOut.put(position, old);
+                    continue;
                 }
-                dst.set(xLocal, yLocal, zLocal, AIR_DEFAULT_STATE);
+                if (checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, neighbors, xLocal - 1, yLocal, zLocal, localMask)
+                        || checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, neighbors, xLocal + 1, yLocal, zLocal, localMask)
+                        || checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, neighbors, xLocal, yLocal - 1, zLocal, localMask)
+                        || checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, neighbors, xLocal, yLocal + 1, zLocal, localMask)
+                        || checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, neighbors, xLocal, yLocal, zLocal - 1, localMask)
+                        || checkNeighbor(loaded, chunkX, chunkZ, subY, height, srcs, neighbors, xLocal, yLocal, zLocal + 1, localMask)) {
+                    edgeOut.add(position);
+                }
+                if (dst == null) {
+                    dst = copyOf(src);
+                    airId = dst.data.palette.idFor(AIR_DEFAULT_STATE);
+                }
+                dst.data.storage.setAt(idx, airId);
+                dst.blockRefCount--;
+                if (old.getBlock().getTickRandomly()) dst.tickRefCount--;
+                Block oldBlock = old.getBlock();
+                // These blocks inherit Block.breakBlock, whose only work is tile-entity removal.
+                if (oldBlock != Blocks.STONE && oldBlock != Blocks.DIRT && oldBlock != Blocks.GRASS) {
+                    modifiedOut.put(position, old);
+                }
             }
         }
         return dst;
@@ -562,6 +596,29 @@ public final class ChunkUtil {
         dst.blockRefCount = src.blockRefCount;
         dst.tickRefCount = src.tickRefCount;
         return dst;
+    }
+
+    public static ExtendedBlockStorage copyBlockStates(ExtendedBlockStorage src) {
+        ExtendedBlockStorage dst = UnsafeHolder.allocateInstance(ExtendedBlockStorage.class);
+        dst.yBase = src.yBase;
+        dst.data = copyOf(src.getData());
+        dst.blockRefCount = src.blockRefCount;
+        dst.tickRefCount = src.tickRefCount;
+        return dst;
+    }
+
+    public static boolean sameBlockStates(ExtendedBlockStorage before, ExtendedBlockStorage now) {
+        if (before.blockRefCount != now.blockRefCount || before.tickRefCount != now.tickRefCount) return false;
+        BlockStateContainer left = before.getData();
+        BlockStateContainer right = now.getData();
+        if (left.bits != right.bits || !Arrays.equals(left.storage.getBackingLongArray(), right.storage.getBackingLongArray())) {
+            return false;
+        }
+        if (left.palette == right.palette) return true;
+        for (int id = 0, count = 1 << left.bits; id < count; id++) {
+            if (left.palette.getBlockState(id) != right.palette.getBlockState(id)) return false;
+        }
+        return true;
     }
 
     /**
@@ -749,7 +806,7 @@ public final class ChunkUtil {
      * @param chunkZ       chunk Z coordinate
      * @param subY         sub-chunk Y index (0..15)
      * @param hasSky       whether the world has skylight
-     * @param src          source sub-chunk; may be {@code null} or empty
+     * @param src          source sub-chunk; may be {@code null}, empty, or a block-state-only worker snapshot
      * @param toUpdate     map of <em>packed local</em> index ({@code x | (z << 4) | (y << 8)}) → new state
      * @param oldStatesOut optional sink of pre-change states keyed by <em>global packed</em> positions
      * @return {@code null} for no-op, {@code Optional.empty()} for became empty,
@@ -784,7 +841,7 @@ public final class ChunkUtil {
 
             if (dst == null) {
                 if (src != null && !src.isEmpty()) {
-                    dst = copyOf(src);
+                    dst = src.blockLight == null ? copyBlockStates(src) : copyOf(src);
                 } else {
                     if (newState.getBlock() == Blocks.AIR) continue;
                     dst = new ExtendedBlockStorage(yBase, hasSky);

@@ -11,6 +11,7 @@ import com.hbm.inventory.gui.GUICoreStabilizer;
 import com.hbm.items.ModItems;
 import com.hbm.items.machine.ItemLens;
 import com.hbm.lib.ForgeDirection;
+import com.hbm.render.chunk.SectionGeometry;
 import com.hbm.tileentity.IGUIProvider;
 import com.hbm.tileentity.TileEntityMachineBase;
 import io.netty.buffer.ByteBuf;
@@ -133,7 +134,9 @@ public class TileEntityCoreStabilizer extends TileEntityMachineBase implements I
 
         this.power = buf.readLong();
         this.watts = buf.readInt();
+        int prevBeam = beam;
         this.beam = buf.readInt();
+        if (beam != prevBeam) SectionGeometry.renderBoundsChanged(this);
     }
 
 
